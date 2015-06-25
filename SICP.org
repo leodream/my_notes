@@ -1,0 +1,1440 @@
+* 构造过程抽象
+
+现存的许多威力强大的程序设计技术，都依赖于填平在“被动的"数据和”主动的
+“过程之间的传统划分。
+
+** 程序设计的基本元素
+一个强有力的程序设计语言，不仅是一种指挥计算机执行任务的方式，它还应该
+成为一种框架，使我们能够在其中组织自己有关计算过程的思想。这样，当我们
+描述一个语言时，就需要将注意力特别放在这一语言所提供的，能够将简单的认
+识组合起来形成更复杂认识的方法方面。
+
+每种强有力的语言都为此提供了三种机制：
+- 基本表达形式 :: 用于表示语言所关心的最简单的个体
+- 组合的方法 :: 通过它们可以从较简单的东西出发构造出复合的元素
+- 抽象的方法 :: 通过它们可以为复合对象命名，并将它们当作单元去操作
+
+数据是一种我们希望去操作的东西，而过程就是有关操作这些数据的规则的描述。
+上述三机制的针对对象就是数据和过程。
+
+*** 表达式
+
+组合式形成一个表，用于表示一个过程应用。
+
+*** 命名和环境
+程序设计语言需要提供一种通过名字去使用计算对象的方式。我们将名字标记符
+称为/变量/，它的/值/也就是它所对应的那个对象。为事物命名是一种最简单的
+抽象方法。
+
+构造一个复杂的程序，也就是为了去一步步地创建出越来越复杂的计算性对象。
+
+而为了保持这种关联性，解释器必须维护某种存储能力，这种存储被称为/环境/。
+
+*** 组合式求值
+1) 求值该组合式的各个子表达式
+2) 将作为最左子表达式(运算符)的值的那个过程应用于相应的实际参数。
+
+一般而言，我们应该把递归看做一种处理层次性结构的极强有力的技术。事实
+上，”值向上穿行“形式的求值形式是一类更一般的计算过程的一个例子，这种计
+算过程称为/树形积累/。
+
+第一个步骤的反复应用总可以把我们带到某处的基本表达式。
+- 数的值就是它们把表示的数值
+- 内部去处符的值就是能完成相应操作的机器序列。
+
+环境所扮演的角色就是用于确定表达式中的各个符号的意义，为求值过程提供上
+下文。
+
+(define x 3) 并不是一个组合式，因为对其求值并不是把deine应用于它的两个
+实际参数。这种例外称做/特殊形式/。每个特形式都有其自身的求值规则，各种
+不同种类的表达式组成了程序语言的语法形式。
+
+对各种表达式的求值规则可以描述为一个简单的通用规则和一组针对不多的特殊
+形式的专门规则。
+
+*** 复合过程
+/过程定义/即为复合操作提供名字，从而将这样的操作作为一个单元使用。
+
+=(define (<name> <formal parameters>) <body>)=
+
+*** 过程应用的代换模型
+将复合过程应用于实际参数，就是将过程体中的每个形参用相应的实参取代后，
+对这一过程体求值。
+
+解释器的实际工作方式并不是用值去代换形式参数，而是使用提供局部环境的方
+式。
+
+- 正则序求值 :: 完全展开而后归约。先直接替换而不求值，等到真正使用到该
+     值的时候再计算. 如果该值出现多次，则会造成重复计算。
+
+- 应用序求值 :: 先求值参数而后应用
+
+对于可以通过替换去模拟并能产生出合法值的过程应用，正则序和应用序求值将
+产生同样的值。
+
+使用应用序求值可以避免一些求表达式的重复求值。
+
+*** 条件表达式和谓词
+
+#+BEGIN_SRC emacs-lisp
+  (cond (<p1> <e1>)
+        (<p2> <e2>)
+        ...
+        (<pn> <en>)
+        (else <e>))
+
+  (if <predicate> <consequent> <alternative>)
+
+  (and <e1> ... <en>)
+
+  (or <e1> ... <en>)
+
+  (not <e>)
+#+END_SRC
+每个表达式<p>是一个/谓词/，即其值会被解释为真或假。
+
+条件表达式的求值为一直对谓词求值，直至某谓词为真，此时返回子句中/序列
+表达式<e>/的值，作为整个条件表达式的值。如果没有真，则cond的值就没有定
+义。
+
+谓词是指返回真或假的过程，或是能求出真或假的表达式。
+
+and 和 or 都是特殊形式，因为它们的子表达式不一定都求值。
+
+而 not 则是普通过程。
+
+if 的子句都只能是单个表达式，而 cond 的<e>部分可以是一个表达式的序列，
+如果对应的<p>确定为真，<e>中的表达式就会顺序求值，并将最后一个表达式的
+值作为整个cond的值返回。
+
+*** 函数与过程
+数学的函数与过程之间的一个重要差异是， *过程必须是有效可行的* 。函数与
+过程之间的矛盾，不过是在描述一件事情的特征，与描述如何去做这件事之间的
+普遍性差异的一个具体反映，即说明性描述与行动性描述。
+
+
+#+BEGIN_SRC scheme
+  (define (sqrt-iter guess x)
+    (if (good-enough? guess x )
+        guess
+        (sqrt-iter (improve guess x )
+                   x)))
+
+  (define (improve guess x)
+    (average guess (/ x guess)))
+
+  (define (good-enough? guess x)
+    (< (abs (- (square guess) x)) 0.0001))
+
+  (define (square x)
+    (* x x))
+
+  (define (average x y)
+    (/ (+ x y) 2))
+
+  (define (sqrt x)
+    (sqrt-iter 1.0 x))
+
+  (sqrt 0.00001)
+
+
+
+  (define (sqrt-iter2 guess x)
+      (if (good-enough2? guess (improve guess x))
+          (improve guess x)
+          (sqrt-iter2 (improve guess x)
+                     x)))
+
+  (define (good-enough2? old-guess new-guess)
+      (> 0.01
+         (/ (abs (- new-guess old-guess))
+            old-guess)))
+
+
+  (define (sqrt2 x)
+    (sqrt-iter2 1.0 x))
+
+  (sqrt2 0.0001)
+
+
+  (define (improve y x)
+    (/ (+ (/ x
+             (* y y))
+          (* 2 y))
+       3))
+
+  (sqrt2 27)
+#+END_SRC
+
+*** 过程作为黑箱抽象
+即过程抽象，一个过程的定义应该能隐藏起一些细节，从而调用者不必去关心实
+现，只须作为一个黑箱而接受它。
+
+**** 过程参数
+形参与实参的分离确保了，调用者的变量与被调用者的相分离，黑箱的性质。
+
+一个变量的具体名字是什么完全无关于过程的作用，则称为 *约束变量* ，否则，
+它就是 *自由* 的。
+例如， good-enough? 中，guess x 都是约束变量，而abs, square, <, - 都是
+自由变量。
+
+**** 块结构
+词法作用域
+例如，可以把good-enough？过程放进sqrt的过程定义当中，这样，其他过程也
+可以定义它们自己的good-enough?过程。这样做的另一个好处是，由于x在sqrt
+的定义当中是受约束的，good-enough?等子过程圴在x的定义域中，则x可以作为
+内部定义的自由变量，子过程不再需要传递x。
+
+
+** 过程与它们所产生的计算
+学习一门新的语言，光学会其语法，就像是学象棋，知道了里面各种棋子的走法，
+却不知道典型的开局，战术和策略，缺少有关各种棋步的价值（值得定义哪些过
+程）的知识，缺少对所走棋步的各种后果（执行一个过程的效果）做出预期的经
+验。
+
+*** 线性递归和迭代
+注意 *递归过程* 与 *递归计算过程* 有所区别，如下面的例子中，都是递归过程，但其中一
+个为线性递归计算过程，另一个为线性迭代计算过程。
+
+#+BEGIN_SRC scheme
+  ; 计算阶乘
+  (define (factorial n)
+    (if (= n 1)
+        1
+        (* n (factorial (- n 1)))))
+
+
+
+  (define (factorial-iter index n result)
+    (if (> index n)
+        result
+        (factorial-iter (+ 1 index)
+                        n
+                        (* result index))))
+
+
+  (define (factorial2 n)
+    (factorial-iter 1 n 1))
+#+END_SRC
+前者的代换模型是一种先逐步展开而后收缩的形状，在展开的阶段里，这个过程
+构造起一个 *推迟计算的操作* 所形成的链条;收缩阶段则表现为这些去处的实
+际执行。这种类型的计算过程由一个推迟执行的去处链条刻画，称为一个 *递归
+计算过程* 。其乘法链条的长度随着n值线性增长，因此是 *线性递归过程*.
+
+而像后者那样，在计算过程中的每一步所需要保存的轨迹里，都是固定的
+index,n,result的当前值，这种其状态可以用固定数目的 *状态变量* 描述的过
+程称为 *迭代计算过程* 。
+
+在C,Pascal之类的语言中，递归的过程所消耗的存储量总是与过程调用的数目成
+正比，即使它们所描述的计算过程原理上看是迭代的。这些语言需要通过for,
+while 等“循环结构”来描述这些迭代过程，而scheme中则没有这一 *缺陷* 。
+
+能够在常量空间中执行由递归过程所描述的迭代计算过程--具有这种我的实称为
+*尾递归* 的。
+
+
+*** 树形递归
+以Fibonacci为例，
+
+#+BEGIN_SRC scheme
+(define (fib n)
+  (cond ((= n 0) 0)
+        ((= n 1) 1)
+        (else (+ (fib (- n 2))
+                 (fib (- n 1))))))
+
+
+  (define (fib2 n)
+    (fib-iter 0 n 0))
+
+  (define (fib-iter index n sum)
+    (if (> index n)
+        sum
+        (fib-iter (+ index 1)
+                  n
+                  (+ sum index))))
+#+END_SRC
+
+虽然在上述的例子中，树形递归计算过程消耗很大，但它在应用于层次结构性的
+数据上时，这种过程是一种自然的威力强大的工具。即使是对于数的计算，它也
+可能帮助我们理解和设计程序（上述例子基本上就是把序列的定义直接翻译为了
+Lisp语言）。
+
+- 给了半美元，四分之一美元，10美分，5美分和1美分的硬币，将1美元换成零
+  钱，一共有几种方式
+
+  #+BEGIN_SRC scheme
+  (define (count-change amount)
+    (cc amount 5))
+
+  (define (cc amount kinds-of-coins)
+    (cond ((= amount 0) 1)  ; count as 1 if amount is 0
+          ((or (< amount 0) (= kinds-of-coins 0)) 0)
+          (else (+ (cc amount ; ; 任何使用 kinds-of-coins 种硬币的换法数量
+                       (- kinds-of-coins 1)) ; 都等于不使用第一种硬币的换法
+                   (cc (- amount
+                          (first-denomination kinds-of-coins)) ; 及使用第一种硬币的换法的和
+                       kinds-of-coins)))))
+
+  (define (first-denomination kinds-of-coins)
+    (cond ((= kinds-of-coins 1) 1)
+          ((= kinds-of-coins 2) 5)
+          ((= kinds-of-coins 3) 10)
+          ((= kinds-of-coins 4) 25)
+          ((= kinds-of-coins 5) 50)))
+
+
+  (count-change 100)
+  #+END_SRC
+
+*** 增长的阶
+*** 求幂
+
+#+BEGIN_SRC scheme
+  (define (expt b n)
+    (if (= 0 n)
+        1
+        (* b (expt b (- n 1)))))
+
+
+  (define (expt2 b n)
+  ;  (expt-iter b n 0 1)
+    (expt-iter2 b n 1)
+    )
+
+  (define (expt-iter b n cur sum)
+    (if (= n cur)
+        sum
+        (expt-iter b
+                   n
+                   (+ cur 1)
+                   (* sum b))))
+
+
+  (define (expt-iter2 b n result)
+    (if (= 0 n)
+        result
+        (expt-iter2 b (- n 1) (* result b))))
+
+
+  (expt 3 3)
+  (expt2 3 3)
+#+END_SRC
+
+*** 最大公约数
+
+#+BEGIN_SRC scheme
+  (define (gcd a b)
+    (if (= b 0) a
+        (gcd b (remainder a b))))
+#+END_SRC
+
+*** 素数检测
+两种方法，第一种最简单就是从2开始一个个判断直至根号n，此方法具有根号n
+的增长阶，
+另一种则是，利用费马小定理：
+ *如果n是一个素数，则对于任意小于n的正整数a有，a的n次方与a模n同余*
+
+     #+BEGIN_SRC scheme
+       (define (smallest-divisor n)
+         (find-divisor n 2))
+
+       (define (find-divisor n test-divisor)
+         (cond ((> (* test-divisor test-divisor) n) n)
+               ((divides? test-divisor n) test-divisor)
+               (else (find-divisor n (+ test-divisor 1)))))
+
+       (define (divides? a b)
+         (= (remainder b a) 0))
+
+       (define (prime? n)
+         (= n (smallest-divisor n)))
+
+       (define (expmod base exp m)
+         (cond ((= exp 0) 1)
+               ((even? exp)
+                (remainder (square (expmod base (/ exp 2) m))
+                           m))
+               (else
+                (remainder (* base (expmod base (- exp 1) m))
+                           m))))
+
+       (define (fermat-test n)
+         (define (try-it a)
+           (= (expmod a n n) a))
+         (try-it (+ 1 (random (- n 1)))))
+
+       (define (fast-prime? n times)
+         (cond ((= times 0) true)
+               ((fermat-test n) (fast-prime? n (- times 1)))
+               (else false)))
+
+
+       (prime? 19)
+       (prime? 199)
+       (prime? 1999)
+       (prime? 19999)
+
+       (fast-prime? 1234567 10)
+     #+END_SRC
+
+** 用高阶函数做抽象
+*高阶过程* 即能操作过程的过程，可以增强我们建立抽象的能力
+
+*** 过程作为参数
+[[*习题][1.29]]
+1.30
+
+*** 用lambda构造过程
+#(lambda (<formal-parameters>) <body>)#
+
+这样得到的过程，除了不为有关过程提供名字之外，与define创建的过程完全一
+样，即仅仅是该过程没有与环境中的任何名字相关联。
+
+  (define (plus4 x) (+ x 4)  <==> (define plus4 (lambda (x) (+ x 4)))
+
+**** 用let创建局部变量
+
+#+BEGIN_SRC scheme
+  (let ((<var1> <exp1>)
+        (<var2> <exp2>)
+        ;...
+        (<varn> <expn>))
+    <body>)
+#+END_SRC
+
+其语义是，将上同部分的名字约束为局部变量的情况下，对body求值作为let的返回值。
+故上述表达式等价于
+
+#+BEGIN_SRC scheme
+  ((lambda (<var1> ... <varn>)
+     <body>)
+   <exp1>
+   ;...
+   <expn>)
+#+END_SRC
+
+这样， *解释器就不需要为let局部变量增加任何新的机制，let表达式只是
+lambda表达式的语法外衣而已*
+
+- let可以建立局部变量的约束，即限制作用域
+- 变量的值是在let之外计算的！
+
+仅在定义内部过程时使用define
+
+*** 过程作为一般性的方法
+
+**** 通过区间折半寻找方程的根
+#+BEGIN_SRC scheme
+  (define (close-enough? a b)
+    (< (abs (- b a)) 0.001))
+
+  (define (search f a b)
+    (if (> (* (f a) (f b)) 0)
+        (error "wrong range " a b)
+        (let ((mid (/ (+ a b) 2.0)))
+          (if (close-enough? a b)
+              mid
+              (if (> (* (f mid) (f a)) 0)
+                  (search f mid b)
+                  (search f a mid))))))
+
+  (search sin 2.0 4.0)
+  (search sin 2.0 3.0)
+#+END_SRC
+
+**** 找出函数的不动点
+#+BEGIN_SRC scheme
+  (define tolerance 0.00001)
+
+  (define (average a b) (/ (+ a b) 2))
+
+  (define (fixed-point f first-guess)
+    (define (close-enough? v1 v2)
+      (< (abs (- v1 v2)) tolerance))
+    (define (try guess)
+      (let ((next (f guess)))
+        (if (close-enough? guess next)
+            next
+            (try next))))
+    (try first-guess))
+
+  (define (sqrt x)
+    (fixed-point (lambda (y) (average y (/ x y)))
+                 1.0))
+
+  (sqrt 4)
+  (fixed-point (lambda (y) (+ (sin y) (cos y)))
+               0.1)
+#+END_SRC
+
+*** 过程作为返回值
+平均阻尼
+#+BEGIN_SRC scheme
+  (define (average-damp f)
+    (lambda (x) (average x (f x))))
+#+END_SRC
+
+该过程接受一个过程输入，输出另一个过程
+
+将一个计算过程形式化为一个过程，一般来说存在很多种方式，有经验的程序员
+知道如何选择过程的形式，使其特别地清晰且容易理解，使该计算过程中有用的
+元素能表现为一些相互分离的个体，并可以重新用于其他的应用。
+
+**** 牛顿法
+#+BEGIN_SRC scheme
+  (define dx 0.00001)
+  (define tolerance 0.00001)
+
+  (define (deriv g)
+    (lambda (x) (/ (- (g (+ x dx)) (g x))
+                   dx)))
+
+  (define (fixed-point f first-guess)
+    (define (close-enough? v1 v2)
+      (< (abs (- v1 v2)) tolerance))
+    (define (try guess)
+      (let ((next (f guess)))
+        (if (close-enough? guess next)
+            next
+            (try next))))
+    (try first-guess))
+
+  (define (newton-transform g)
+    (lambda (x)
+      (- x (/ (g x) ((deriv g) x)))))
+
+  (define (newton-method g guess)
+    (fixed-point (newton-transform g) guess))
+
+  (define (sqrt x)
+    (newton-method (lambda (y) (- (square y) x))
+                   1.0))
+
+  (sqrt 16)
+#+END_SRC
+
+**** 抽象和第一级过程
+我们可以进一步抽象出找不动点的过程，其可以接受变换过程g作为输入，
+#+BEGIN_SRC scheme
+  (define (fixed-point-of-transform f g guess)
+    (fixed-point (g f) guess))
+
+  (define (sqrt x)
+    (fixed-point-of-transform (lambda (y) (/ x y))
+                              average-damp
+                              1.0))
+
+  (define (sqrt2 x)
+    (fixed-point-of-transform (lambda (y) (- (square y) x))
+                              newton-transform
+                              1.0))
+#+END_SRC
+
+*作为编程者，我们应该对这类可能性保持高度敏感，设法从中识别出程序里的*
+*基本抽象，基于它们去进一步构造，并推广它们以创建威力更加强大的抽象*
+
+并不是说要尽可能抽象地去写程序，而是根据工作中的情况，去选择合适的抽象
+层次，但这种基于抽象去思考确实是最重要的。
+
+一般而言，语言总会对计算元素的使用方式加上某些限制，而带有最少限制的元素被称为
+*第一级状态*.
+- 可以用变量命名
+- 可以提供给过程作为参数
+- 可以由过程作为结果返回
+- 可以包含在数据结构中
+
+Lisp 的过程是完全的第一状态，这给有效实现提出了挑战，但由此所获得的描述能力却是极其惊人的.
+
+** 习题
+- 1.3 :: 计算三个数中，较大的两个数的平方和
+
+     #+BEGIN_SRC scheme
+       (define (max-square-sum a b c)
+         (if (and (<= a b) (<= a c))
+             (return (+ (* b b) (* c c)))
+           (max-square-sum b c a))
+         )
+
+     #+END_SRC
+
+- 1.6 :: 为什么if是一种特殊形式，如果用conf实现一个new-if，其与if本身
+     有什么区别？
+     #+BEGIN_SRC scheme
+       (define (new-if predicate then-clause else-clause)
+         (cond (predicate then-clause)
+               (else-clause)))
+     #+END_SRC
+
+     区别在于，if作为一种特殊形式，其then-clause和else-clause只有一个
+     会被求值。而new-if作为一个普通过程，由于解释器进行应用序求值，其
+     两个子过程都会被求值。
+
+     例如，下面的例子不是尾递归，因为sqrt-iter的返回值还要作为new-if的
+     参数，
+
+     #+BEGIN_SRC scheme
+       (define (sqrt-iter guess x )
+         (new-if (good-enough? guess x )
+                 guess
+                 (sqrt-iter (improve guess x ) ; 无论good-enough结果如何，这个函数调用总会被一直执行
+                            x)))
+
+
+       (new-if (display "good") (display "bad"))
+       ; 上述调用将会输出 badgood
+     #+END_SRC
+
+- 1.10 :: 给出以下过程
+
+     #+BEGIN_SRC scheme
+       (define (A x y)
+         (cond ((= y 0) 0)
+               ((= x 0) (* 2 y))
+               ((= y 1) 2)
+               (else (A (- x 1)
+                        (A x (- y 1))))))
+
+
+       (A 1 10) ; 2^10
+
+       (A 2 4)  ; 64436
+
+       (A 3 3)  ; 65536
+     #+END_SRC
+       求 (A 1 10) (A 2 4) (A 3 3)
+     及以下过程的数学意义
+     (define (f n) (A 0 n))
+     (define (f n) (A 1 n))
+     (define (f n) (A 2 n))
+
+     2n
+     2^n
+     (((...(2^2)^2)^2)...) n-1个
+
+- 1.11 :: f(x) 有以下定义,
+     如果n<3,那么f(n)=n,
+     如果n>=3, f(n)=f(n-1)+2f(n-2)+3f(n-3)
+
+     请写出递归计算过程及迭代两种过程.
+
+     #+BEGIN_SRC scheme
+  (define (f n)
+    (if (< n 3)
+        n
+        (+ (f (- n 1))
+           (* 2 (f (- n 2)))
+           (* 3 (f (- n 3))))))
+
+
+
+  (define (f1 n)
+    (if (< n 3)
+        n
+        (f1-iter 1 2 4 3 n)
+        ))
+
+  (define (f1-iter n3 n2 n1 n max)
+
+    (if (= n max)
+        n1
+        (f1-iter n2
+                 n1
+                 (+ (* 3 n3) (* 2 n2) n1)
+                 (+ n 1)
+                 max)))
+
+
+  (f1 1)
+  (f1 2)
+  (f1 3)
+  (f1 4)
+  (f1 5)
+#+END_SRC
+
+- 1.12 :: 计算出帕斯卡三角形
+     1
+     1 2 1
+     1 3 3 1
+     1 4 6 4 1
+     ...
+
+     #+BEGIN_SRC scheme
+       (define (tri x y)
+         (cond ((or (= x y) (= x 1)) 1)
+               ((> x y) (error "unvalid input"))
+               (else (+ (tri (- x 1) (- y 1))
+                        (tri x (- y 1))))
+               ))
+
+
+       (tri 1 1)
+       (tri 1 2)(tri 3 5)
+     #+END_SRC
+
+- 1.13 :: 证明Fib(n)是最接近
+
+- 1.14 :: 画出有关的树,表示count-change在11美分换成硬币时的计算过程
+     且在金额增加时,这一过程的空间和步数是如何增长
+
+     n 为金额, m为币种,则树的最大深度由m取1时的子树决定,(n,1)子树位于m层,并有(1,1)子树位于n+m层,
+     空间增长为O(n+m)
+
+     (n,1)的子树的结点数线性递增,而(n,m)的树可以分解为x(n,m-1)个的子树,当币值远小于n时,可把x视作n,
+     时间(节点数)增长为O(n^m)
+
+- 1.15 :: 有以下计算sin(x)的过程, 求计算12.15时,p调用了几次,
+     过程的时间及空间增长阶是什么
+     #+BEGIN_SRC scheme
+       (define (cube x) (* x x x))
+
+       (define (p x) (- (* 3 x) (* 4 (cube x))))
+
+       (define (sine angle)
+           (if (not (> (abs angle) 0.1))
+               angle
+               (p (sine (/ angle 3.0)))))
+     #+END_SRC
+
+     由于应用序求值, 5次
+     空间时间都是O(log n)
+
+- 1.16 :: 使用以下方法计算乘幂,并使用迭代过程
+     b^n = (b^2)^(n/2)
+     #+BEGIN_SRC scheme
+       (define (fast-expt b n)
+         (cond ((= n 0) 1)
+               ((isDouble? n) (fast-expt-iter n b))
+               (else (* b (fast-expt-iter (- n 1) b)))))
+
+       (define (isDouble? n)
+         (= (remainder n 2) 0))
+
+       (define (fast-expt-iter n result)
+         (if (= n 1)
+             result
+             (fast-expt-iter (/ n 2) (* result result))))
+
+
+       (fast-expt 1 0)
+       (fast-expt 2 2)
+       (fast-expt 2 3)
+       (fast-expt 3 3)
+
+
+       (define (fast-expt2 b n)
+         (fast-expt-iter2 b n 1))
+
+       (define (fast-expt-iter2 b n a)
+         (cond ((= n 0) a)
+
+               ((isDouble? n)
+                (fast-expt-iter2
+                 (* b b)
+                 (/ n 2)
+                 a))
+
+               (else
+                (fast-expt-iter2
+                 b
+                 (- n 1)
+                 (* a b)))))
+     #+END_SRC
+
+- 1.17 :: 假设没有乘法,只有doulbe 可用于求某整数的两倍,halve用于求一半,使
+     用类似以上的方法求出乘积
+
+     #+BEGIN_SRC scheme
+       (define (double a)
+         (+ a a))
+
+       (define (halve a)
+         (/ a 2))
+
+       (define (even? n)
+         (= (remainder n 2) 0))
+
+
+       (define (* a b)
+         (iter a b 0))
+
+       (define (iter a b n)
+         (cond ((= b 0) n)
+               ((even? b) (iter (double a) (halve b) n))
+               (else (iter a (- b 1) (+ n a)))))
+
+
+       (* 1 0)
+       (* 1 1)
+       (* 0 1)
+       (* 2 1)
+       (* 2 4)
+       (* 3 3)
+       (* 3 4)
+     #+END_SRC
+
+- 1.19 :: 斐波那契数列的对数计算过程
+
+- 1.20 :: 在应用序及正则序下，（GCD 206 40)求最大公约数分别调用几次
+     remainder
+
+     应用序4次,第一次算,但是gcd( 2 0)不算,if判断后就直接返回a,下面不会
+     执行;
+     正则序18次,
+     正则代换后,则第n层的a b两个参数对应的remainder的次数分别为a(n),
+     b(n),
+     则: a(n) = b(n-1);b(n)=a(n-1)+b(n-1)+1;a(0)=0,b(0)=0
+     总共5层,由于每层的if判断进行了计算,再加上最后一层的a是计算了的,所
+     以最后的结果是:b(0)+b(1)+b(2)+b(3)+b(4)+a(4)=18
+
+- 1.21 :: smallest-divisor 测试19, 199, 1999
+
+- 1.22 :: 利用下面过程写一个search-for-prime过程来检查给定范围内各个奇
+     数的素性。注意每个素数检查所需要的时间，
+  1. 10 000 范围内的耗时真的是1 000 的根号10倍吗
+  2. 100 000 与 1 000 000 呢？
+  3. 时间真的正比于计算所需要的步数吗？
+     #+BEGIN_SRC scheme
+       (define (smallest-divisor n)
+         (find-divisor n 2))
+
+       (define (find-divisor n test-divisor)
+         (cond ((> (* test-divisor test-divisor) n) n)
+               ((divides? test-divisor n) test-divisor)
+               (else (find-divisor n (+ test-divisor 1)))))
+
+       (define (divides? a b)
+         (= (remainder b a) 0))
+
+       (define (prime? n)
+         (= n (smallest-divisor n)))
+
+
+       (define (search-for-primes n)
+           (let ((start-time (real-time-clock)))
+               (continue-primes n 3)
+               (- (real-time-clock) start-time)))
+
+       (define (continue-primes n count)
+           (cond ((= count 0)
+                   (display "are primes."))
+                 ((prime? n)
+                   (display n)
+                   (newline)
+                   (continue-primes (next-odd n) (- count 1)))
+                 (else
+                   (continue-primes (next-odd n) count))))
+
+       (define (next-odd n)
+           (if (odd? n)
+               (+ 2 n)
+               (+ 1 n)))
+
+       (search-for-primes 10000) ; 3
+       (search-for-primes 100000); 6
+       (search-for-primes 1000000); 10
+   #+END_SRC
+   倍数不等
+
+- 1.23 :: 改善test-divisor为2,3,5,7,9 看看耗时是不是真的减半
+    耗时相比 3->1, 6->2, 10->10
+
+- 1.24 :: 使用费马检测，速度有何变化，log(n) ?
+     2, 3, 3
+
+- 1.25 :: 能否把费马检测中expmod的实现改为直接用下面方法
+
+     #+BEGIN_SRC scheme
+       (define (expmod base exp m)
+         (remainder (fast-expt base exp) m))
+     #+END_SRC
+
+     这个方法理论上一样，但实际上在处理大数字时会溢出，而且速度慢
+
+- 1.26 :: 注意 (square x) 和 (* x x) 并不一定等价。当x是个表达式时，该
+     表达式会求值两次。
+
+- 1.27 :: 找出费马检测不出的非素数。
+
+- 1.28 :: 不会被欺骗的费马检查
+
+- 1.29 :: 利用辛普森规则计算积分
+     #+BEGIN_SRC scheme
+       (define (cube x) (* x x x))
+
+       (define (sum term a next b)
+         (if (> a b)
+             0
+             (+ (term a)
+                (sum term (next a) next b))))
+
+       (define (inc n) (+ n 1))
+
+       (define (sum-cubes a b)
+         (sum cube a inc b))
+
+
+
+       (define (simpson-integration f n a b)
+         (define (simpson-iter k)
+           (* (if (or (= 0 k)
+                      (= n k))
+                  1
+                  (+ 2
+                     (* 2 (remainder k 2))))
+              (f (+ a (* k (/ (- b a) n))))))
+
+         (* (/ (/ (- b a) n) 3)
+            (sum simpson-iter 0 inc n)))
+
+       (simpson-integration cube 100 0 1)
+
+     #+END_SRC
+
+- 1.30 :: 把上述过程中的SUM转换为迭代过程
+
+     #+BEGIN_SRC scheme
+       (define (sum term a next b)
+         (define (iter k result)
+           (if (> k b)
+               result
+               (iter (next k) (+ result (term k)))))
+         (iter a 0))
+     #+END_SRC
+
+- 1.31 :: 写出返回给定范围中各点的某个函数值的乘积（Product）过程，并
+     使用它计算下面的phi的近似值。
+     phi/4=(2*4*4*6*6*8..../3*3*5*5*7...)
+     再写出迭代或递归的版本。
+
+     #+BEGIN_SRC scheme
+       (define (product f next a b)
+         (define (product-iter result n)
+           (if (> n b)
+               result
+               (product-iter (* result (f n)) (next n))))
+         (product-iter 1 a))
+
+
+       (define (test a) a)
+
+       (define (inc-1 a) (+ a 1))
+
+       (product test inc-1 1 5)
+
+
+       (define (an n)
+         (if (= 0 (remainder n 2))
+             (/ n (+ n 1))
+             (/ (+ n 1) n)))
+
+       (define (factorial n)
+         (* 2 (product an inc-1 1 n)))
+
+       (factorial 10000)
+
+     #+END_SRC
+
+- 1.32 :: 抽象product和sum过程的公共部分，建立过程
+
+     #+BEGIN_SRC scheme
+       (define (accumulate combiner null-value term a next b)
+         (define (accumulate-iter n result)
+           (if (> n b)
+               result
+               (accumulate-iter (next n)
+                                (combiner result
+                                          (term n)))))
+         (accumulate-iter a null-value))
+
+
+
+       (define (sum term a next b)
+         (accumulate + 0 term a next b))
+
+
+       (define (product1 term a next b)
+         (accumulate * 1 term a next b))
+     #+END_SRC
+
+- 1.33 :: 构造更一般的filtered-accumulate,计算
+     a到b中所有素数之和
+     小于n的所有互素的正整数之乘积
+
+     #+BEGIN_SRC scheme
+       (define (filtered-accumulate filter combiner null-value term a next b)
+         (define (filtered-iter result n)
+           (if (> n b)
+               result
+               (filtered-iter (if (filter (term n))
+                                  (combiner result (term n))
+                                  result)
+                              (next n))))
+         (filtered-iter null-value a))
+     #+END_SRC
+
+- 1.35 :: 证明黄金分割率是 x-> 1+1/x的不动点，并计算其值
+     #+BEGIN_SRC scheme
+       (define golden-ratio
+         (fixed-point (lambda (x) (+ 1(/ 1 x)))
+                      1.0))
+     #+END_SRC
+
+- 1.36 :: 修改fixed-point过程，使其输出计算中产生的近似值序列 (newline) (display)
+     然后通过找出x->log(1000)/log(x)的不动点，确定x^2=1000的一个根。并
+     比较使用平均阻尼时的计算步数。
+     #+BEGIN_SRC scheme
+       (define formula
+           (lambda (x)
+               (/ (log 1000)
+                  (log x))))
+
+       (define (average-damp f)
+           (lambda (x)
+               (average x
+                        (f x))))
+
+
+       (define tolerance 0.000001)
+
+       (define (fixed-point f first-guess)
+
+           (define (close-enough? v1 v2)
+               (< (abs (- v1 v2)) tolerance))
+
+           (define (try guess step)
+               (display-info guess step)                       ; 每次进入测试时打印一次猜测
+               (let ((next (f guess)))
+                   (if (close-enough? next guess)
+                       (begin                                  ; 如果猜测完成
+                           (display-info next (+ 1 step))      ; 记得算上最后一次计算 next 的猜测
+                           next)
+                       (try next (+ 1 step)))))
+
+           (try first-guess 1))
+
+       (define (display-info guess step)
+           (display "Step: ")
+           (display step)
+           (display " ")
+
+           (display "Guess: ")
+           (display guess)
+           (newline))
+     #+END_SRC
+
+- 1.40 :: x^3+ax^2+bx+c的零点。
+     #+BEGIN_SRC scheme
+       (define dx 0.00001)
+       (define tolerance 0.00001)
+
+       (define (deriv g)
+         (lambda (x) (/ (- (g (+ x dx)) (g x))
+                        dx)))
+
+       (define (fixed-point f first-guess)
+         (define (close-enough? v1 v2)
+           (< (abs (- v1 v2)) tolerance))
+         (define (try guess)
+           (let ((next (f guess)))
+             (if (close-enough? guess next)
+                 next
+                 (try next))))
+         (try first-guess))
+
+       (define (newton-transform g)
+         (lambda (x)
+           (- x (/ (g x) ((deriv g) x)))))
+
+       (define (newton-method g guess)
+         (fixed-point (newton-transform g) guess))
+
+       (define (sqrt x)
+         (newton-method (lambda (y) (- (square y) x))
+                        1.0))
+
+       (define (cube x) (* x x x))
+
+       (define (cubic a b c)
+         (newton-method (lambda (x) (+ (cube x) (* a (square x)) (* b x) c))
+                        1.0))
+       (cubic 3 2 1)
+     #+END_SRC
+
+- 1.41 :: 定义double对输入的过程f应用两次，
+     (((double (double double)) inc) 5) 返回什么
+
+     #+BEGIN_SRC scheme
+       (define (double f)
+         (lambda (x) (f(f x))))
+
+       (((double (double double)) 1+) 5)
+
+       ; 是21啊！！， 反复应用f 是平方，而不是简单乘2
+     #+END_SRC
+
+- 1.43 :: 定义 repeat 过程，对输入的数值过程f调用n次
+     #+BEGIN_SRC scheme
+       (define (repeat1 f n)
+         (define (iter g k)
+           (if (= k n)
+               g
+               (iter (lambda (x) (f (g x)))
+                     (+ k 1))))
+         (iter f 1))
+
+
+       (define (repeat2 f n)
+         (if (= 1 n)
+             f
+             (lambda (x)
+               (f ((repeat2 f (- n 1)) x)))))
+
+
+
+       ((repeat1 square 2) 5)
+     #+END_SRC
+
+- 1.46 :: 迭代改进，写一个iterative-improve 以两个过程为参数，返回一个
+     以某一猜测为输入，通过不断改进，直到得到的猜测足够好为至
+     #+BEGIN_SRC scheme
+       (define (iterative-improve close-enough? improve)
+         (lambda (first-guess)
+           (define (try guess)
+             (let ((next (improve guess)))
+               (if (close-enough? guess next)
+                   next
+                   (try next))))
+           (try first-guess)))
+
+
+       (define tolerance 0.00001)
+
+
+       (define (fixed-point f first-guess)
+         ((iterative-improve (lambda (x y) (< (abs (- x y)) tolerance))
+                             f) first-guess))
+
+       (fixed-point cos 1.0)
+     #+END_SRC
+
+     
+
+
+
+     
+
+* 构造数据抽象
+现在到了数学抽象中最关键的一步：让我们忘记这些符号所表示的对象，（数学
+家）不应在这里停步，有许多操作可以应用于这些符号，而根本不必考虑它们到
+底代表着什么东西。
+
+本章讨论语言所提供的把数据对象组合起来，形成 *复合数据* 的方式。
+
+复合数据可以提升我们在设计程序时所位于的概念层次，提高设计的模块性，增
+强语言的表达能力。
+
+将程序中处理数据对象的表示的部分，与处理数据对象的使用的部分相互隔离的
+技术非常具有一般性，形成了一种称为 *数据抽象* 的强有力的设计方法学。
+
+** 数据抽象导引
+我们的程序在使用数据时，除了完成当前工作所必要的东西之处，不对所用数据
+作任何多余的假设。与此同时，一种“具体”数据表示的定义，也应该与过程中的
+数据使用方式无关。在我们的系统里，这两部分之间的界面将是一组过程，称为
+*选择函数* 和 *构造函数* 。
+
+*** 实例：有理数的算术运算
+#+BEGIN_SRC scheme
+  (define (add-rat x y)
+    (make-rat (+ (* (numer x) (denom y))
+                 (* (numer y) (denom x)))
+              (* (denom x) (denom y))))
+
+  (define (sub-rat x y)
+    (make-rat (- (* (numer x) (denom y))
+                 (* (numer y) (denom x)))
+              (* (denom x) (denom y))))
+
+  (define (mul-rat x y)
+    (make-rat (* (numer x) (numer y))
+              (* (denom x) (denom y))))
+
+  (define (div-rat x y)
+    (make-rat (* (numer x) (denom y))
+              (* (denom x) (numer y))))
+
+  (define (equal-rat? x y)
+    (= (* (numer x) (numer y))
+       (* (denom x) (denom y))))
+
+
+  (define (print-rat x)
+    (newline)
+    (display (numer x))
+    (display "/")
+    (display (denom x)))
+#+END_SRC
+
+这样就有了定义在选择和构造过程 numer,denom 和make-rat 基础上的有理数运算.
+
+**** 序对
+序对 是通过过程cons,car,cdr实现的最基本的复合数据.从序对构造起来的数据
+对象称为 *表结构* .
+
+#+BEGIN_SRC scheme
+  (define (make-rat x y) (cons x y))
+
+  (define (numer x) (car x))
+
+  (define (denom x) (cdr x))
+
+  ;; 使用以下方式会使效率更高,但也会造成调试不便 
+  (define mark-rat cons)
+  (define numer car)
+  (define denom cdr)
+
+
+  ;; 可利用之前定义的公大公约数过程化简
+  (define (mark-rat x y)
+    (let ((g (gcd x y)))
+      (cons (/ x g)
+            (/ y g))))
+#+END_SRC
+
+*** 抽象屏障
+一般而言，数据抽象的基本思想就是为每一类数据对象标识出一组操作，使得对
+这类数据对象的所有操作都可以基于它们表述，而且在操作这些数据对象时也只
+使用它们。
+
+*即隔离调用与实现，限制依赖* ，从而可以忽略低层实现直接根据接口设计高层，
+当低层的实现变化时，高层也不需要修改。
+
+*** 数据意味着什么
+并不是任意的构造函数及选择函数就可以构成数据抽象，它还必须具有一组
+*特定条件* 使得这些过程成为一套合法的表示。
+
+数据事实上可以 *通过过程来表示* ，如
+#+BEGIN_SRC scheme
+  (define (cons1 x y)
+    (lambda (p)
+      (cond ((= p 0) x)
+            ((= p 1) y)
+            (else (error "Wrong argument. Not 0 or 1.")))))
+
+  (define (car1 p) (p 0))
+  (define (cdr1 p) (p 1))
+
+  (car (cons 2 3))
+#+END_SRC
+
+*** 扩展练习：区间算术
+TODO
+
+** 层次性数据和闭包性质
+一般来说，如果通过某种组合数据对象的操作组合起数据对象得到的结果本身还
+可以通过同样的操作再进行组合，我们称这种操作满足 *闭包性质* 
+
+支持闭包性质可以提升组合功能的威力使我们建立起层次性的结构。然而很多语
+言并不提供一性质又或是难以应用，例如C里，虽然结构的元素可以也是结构，
+但却要显式得操作指针，而限制性的要求结构的每个域都只能包含预先定义好形
+式的元素。
+
+过程本身也满足这性质－－组合式成员本身也可以是组合式
+
+*** 序列的表示
+*序列* 一批数据对象的一种有序汇集。
+
+*表* 是最直接的序列实现，每个cons的cdr指向下一个cons（结束处放nil），
+而car里则放元素。scheme为方便构造表有提供基本操作list
+=(list <a1> <a2> ... <an>)=
+等价于
+=(cons <a1> (cons <a2> (cons ... (cons <an> nil) ...)))=
+
+此时，car可以看作是取表的第一项的操作，cdr则是选取表中的剩余项形成的子
+表的操作。嵌套可以使用caddar之类的过程，其中的a和d分别表示car和cdr操作,但
+要注意是倒序并且最多只能有四个
+
+**** 表操作
+- list-ref :: 向下cdr，参数为一个表及一个数，返回这个表中的第n个项
+     #+BEGIN_SRC scheme
+       (define (list-ref1 list n)
+         (if (= 0 n)
+             (car list)
+             (list-ref1 (cdr list) (- n 1))))
+     #+END_SRC
+
+- length :: 利用null?基本操作判断长度
+     #+BEGIN_SRC scheme
+       (define (length1 list)
+         (define (iter list count)
+           (if (null? (cdr list))
+               count
+               (iter (cdr list) (+ count 1))))
+         (iter list 0))
+     #+END_SRC
+
+- append :: 向上cons，以两个表为参数，返回组合成的一个新表
+     #+BEGIN_SRC scheme
+       (define (append1 list1 list2)
+         (if (null? list1)
+             list2
+             (cons (car list1) (append (cdr list1) list2))))
+     #+END_SRC
+
+**** 对表的映射
+*map* ，具有一个过程参数和一个表参数的高阶过程，返回将这一过程应用于表中
+各个元素得到的结果形成的表
+
+实际上，如果scheme中的map的第一个参数过程接受n个输入，则map也可以接受n
+个表的输入。
+
+#+BEGIN_SRC scheme
+  (define (map1 f lit)
+    (if (null? lit)
+        lit
+        (cons (f (car lit))
+              (map f (cdr lit)))))
+
+
+  (define (map2 f lit)
+    (define (iter new remain)
+      (if (null? remain)
+          new
+          (iter (cons (f (car remain)) new)
+                (cdr remain))))
+    (iter () lit))
+
+  (define (inc a) (+ a 1))
+
+  (map1 inc ())
+#+END_SRC
+
+map是一种重要的过程，不仅因为它代表了一种公共模式，还因为它建立了一种
+处理表的高层抽象（抽象屏障），可以使使用者把注意力集中到表变换的实现上，
+隐藏递归结构提取元素的细节。
+
+*** 层次性结构
+((1 2) 3 4) 可以看作是一种树，(1 2)是子树， 3和4是根结点的子结点
+
+递归是处理树结构的一种很自然的工具，因为我们常常可以将对于树的操作归结
+为对它们的分支的操作，再将这种操作应用于分支的分支。
+
+#+BEGIN_SRC scheme
+  (define (count-leaves x)
+    (cond ((null? x) 0)
+          ((not (pair? x)) 1)
+          (else (+ (count-leaves (car x))
+                   (count-leaves (cdr x))))))
+
+  (count-leaves (cons 2 (cons 3 (cons 2 3))))
+#+END_SRC
+
+
+** 符号数据
+
+** 抽象数据的多重表示
+
+** 带有通用型操作的系统
+
+** 习题
+- 2.1 :: 写出更好的make-rat过程,使其可以正确处理正负数,负负应显示为正,
+     仅一个正时,应显示在分子上.
+     [[file:sicp_scms/2.1.scm::(gcd%20b%20(remainder%20a%20b))))][2.1.scm]]
+
+- 2.2 :: 定义坐标，线段，以及返回线段中点的过程。
+     [[file:sicp_scms/2.2.scm::(define%20seg%20(make-segment%20start%20end))][2.2.scm]]
+
+- 2.3 :: 定义平面矩形，及周长，面积的过程，对于不同的表示都可以正常计算
+     [[file:sicp_scms/2.3.scm][file:~/Dropbox/notes/sicp_scms/2.3.scm]]
+
+- 2.5 :: 把序对表示为2^a*3^b,写出cons，car，cdr
+     [[file:sicp_scms/2.5.scm::(cdr2%20(cons2%203%20-5))][2.5.scm]]
+
+- 2.6 :: 邱奇数
+
+- 2.17 :: 请定义出过程last-pair,返回给定非空表里最后一个元素的表
+   [[file:sicp_scms/2.17.scm::(last-pair%20(list%2023%2072%20149%2034))][2.17.scm]]
+
+- 2.18 :: 定义过程reverse
+     [[file:sicp_scms/2.18.scm::(reverse1%20(list%201%202%203%204%205))][2.18.scm]]
+
+- 2.19 :: 把之前的换零钱的例子改成使用表
+     (define us-cons (list 50 25 10 5 1))
+     [[file:sicp_scms/2.19.scm][file:~/Dropbox/notes/sicp_scms/2.19.scm]]
+
+- 2.20 :: 过程＋，×和list都可以接受任意个参数，这种过程的定义方法是采
+     用一种 *带点尾部标记法* 的形式的define，如
+     =(define (f x y . z) <body>)=
+     则(f 1 2 3 4 5)时，x是1,y是2,z则是表(3 4 5)
+
+     使用这种形式，定义过程same-parity，以一个或多个整数为参数，返回所
+     有与第一个参数有同样奇偶性的参数形成的表
+     [[file:sicp_scms/2.20.scm::(same-parity%202%202%203%204%205%206%207)][2.20.scm]]
+
+- 2.22 :: 迭代的map实现是倒序的，为什么？即使交换cons中的参数还是不行，
+     为什么？
+
+     递归时，cons总是推迟执行，所以是从最后一个开始组合，与迭代是相反
+     的。如果交换cons参数，则表的各个元素的指针不对。
+
+- 2.23 :: 过程for-each与map类似，它有一个过程和表参数，但返回的是将这
+     一过程从左到右应用于各个元素，并将值都丢掉。用于执行动作的过程，
+     如打印。请给出定义
+     [[file:sicp_scms/2.23.scm][file:~/Dropbox/notes/sicp_scms/2.23.scm]]
+
+- 2.24 :: 给出下面表的树定义，盒子图
+     (list 1 (list 2 (list 3 4)))
+
+- 2.25 :: 给出能够取出7的car和cdr组合
+     (1 3 (5 7) 9)
+     ((7))
+     (1 (2 (3 (4 (5 (6 7))))))
+
+     (car (cdr (car (cdr (cdr items)))))
+     (car (cdaddr items))
+     
+     (car (car items))
+
+     (cadadr (cadadr (cadadr items)))
+
+- 2.26 :: 猜测下面过程的结果
+     (define x (list 1 2 3))
+     (define y (list 4 5 6))
+     (append x y)
+     (cons x y)
+     (list x y)
+
+     (1 2 3 4 5 6)
+     ((1 2 3) 4 5 6)
+     ((1 2 3) (4 5 6))
+
+- 2.27 :: 定义deep-reverse过程，把表中的元素反转，其子树也反转。
+    [[file:sicp_scms/2.27.scm::(iter%20(cons%20(if%20(pair?%20(car%20remain))][2.27.scm]]
+
+- 2.28 :: 实现fringe过程，以一个树为参数，返回一个表，表中的元素是这棵
+     树的所有叶子，按照从左到右的顺序，如
+     (define x (list (list 1 2) (list 3 4)))
+     (fringe x) ==> (1 2 3 4)
+     (fringe (list x x) ==> (1 2 3 4 1 2 3 4)
+     [[file:sicp_scms/2.28.scm][file:~/Dropbox/notes/sicp_scms/2.28.scm]]
+
+- 2.29 :: 二叉活动体必有一个左分支，一个右分支。每个分支是一个具有确定长
+     度的杆，上面吊着一个重量或一个子活动体。
+     (define (make-mobile left right)
+        (list left right))
+
+     (define (make-branch length structure)
+        (list length structure))
+
+  1) 定义left-branch 和 right-branch，分别返回活动体的两个分支
+  2) 定义branch-length和branch-structure返回一个分支上的成分
+  3) 在之前的基础上定义total-weight，返回活动体的总重量
+  4) 计算力矩，判断是否平衡
+  5) 如果改用下面的定义，你的程序需要修改多少？
+     (define (make-mobile left right) (cons left right))
+     (define (make-branch length tree) (cons length tree))
+     
+
+* Modularity, Objects, and State
+* Metalinguistic Abstraction
+* Computing with Register Machines

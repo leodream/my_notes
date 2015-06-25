@@ -1,0 +1,733 @@
+* Basic Concept
+** Ojbectives
+Why Git exists and why we use it
+** Contents
+*** evoltion history
+- Local VCS :: Cannot callborate and hard to us
+- Centralized VCS :: All task are left to the center server. If it broke down, no data, no save, no develop.
+- Distributed VCS :: checkout the entire project. Can support multiple repositories and hierarchical models.
+*** AIMs
+- Speed
+- Simple design
+- Strong support for non-linear development( parallel branches)
+- full Distributed
+- Ability to handle large projects licke the Linux kernel efficiently (speed and data size)
+*** Git Basic
+Git thinks of its data more like a set of Snapshotss of a mini *filesystem*.
+Nearly every operation is local and incrediblly fast.
+Associate a SHA-1 value to every stored file (database). No need to worry about file corruption.
+Every action you make to git is adding data to its database. It's hard to make it erase data.
+
+**** Three Main States
+- committed :: data is safely store in local database.
+- modified :: have changed but have not committed it ot database yet.
+- staged :: you have marked a modified file in its current version to go into your next commit snapshot.
+
+- Git directory :: stores the metadata. What is copied when clone.
+- working directory :: a single checkout of one version of the project.
+- staging area :: a simple file sthat stores information about what will go into your next commit. Sometimes refer as index.
+
+*** Git setup
+information stored /etc/gitconfig  ~/.gitconfig $GIT_HOME/config
+*git config* to customise your git.
+
+#+BEGIN_SRC
+git config --global user.name "..."
+git config --global user.email "..."
+
+core.editor
+merge.tool
+
+git config --list  // check setting
+
+git help <verb>
+#+END_SRC
+--global will apply for all projects
+
+* Basic Usage
+Cover every basic command. configure and initialize a repository, begin and stop tracking files, stage and commit changes.
+** Gitting a Git Repository
+*** Initializing a Repository in an Existing Direcotry
+#+BEGIN_SRC
+$ git init   # This command create ".git" sub directory -- a Git repository skeleton.
+$ git add *.c
+$ git add README
+$ git commit -m 'initial project version'
+#+END_SRC
+
+*** Cloning an Existing Repository
+#+BEGIN_SRC
+  $ git clone git://xxxx.git mygit
+#+END_SRC
+http(0):// or user@server:/path.git use SSH.
+
+** Recording changes to the Repository
+Only staged files will be commited. All the temp files will no be commited with mistake.
+
+*** Stage
+#+BEGIN_SRC
+  $ git status    # display branch, modified files, and so on.
+  
+  $ git add [filename]/[dirname]  # add a new file to git or toggle a file as staged.
+#+END_SRC
+
+Git stages a file exactly as it is when you run the git add command. If you modified the file after staged, this modifition won't be commited.
+
+*** Ignore
+If you do want git to display the untracked fiels, go seting up a *ignoring files*.
+Remember that this is *not* the regex pattern.
+#+BEGIN_SRC
+  $ cat .gitignore
+  *.[oa]
+  *~
+  # a comment - this is ignored
+  *.a       # no.a files
+  !lib.a    # but do track lib.a, even though you're ignoring.a files above
+  /TODO     # only ignore the root TODO file, not subdir/TODO
+  build/    # ignore all files in the build/ directory
+  doc/*.txt # ignore doc/notes.txt, but not doc/server/arch.txt
+#+END_SRC
+
+*** Diff
+To exactly display what you changed -- *git diff*.
+#+BEGIN_SRC
+  $ git diff                      # what you've changed but not yet staged.
+  $ git diff --staged ( --cache)  # what you've staged that will go into your next commit.
+#+END_SRC
+
+*** Commit
+To commit your modifition -- *git commit*.
+This command will open an editor defined by env variable $EDITOR which can be overrided by *git config --gloable core.editor*.
+Then you can type your commit comment.
+- git commit -v :: will give you a more specific modifition comment.
+- git commit -m :: allow you to write your comment inline.
+- git commit -a :: git will stage all modified files automatically.
+
+*** Remove file
+If you want to remove a modified file, add *-f* options.
+#+BEGIN_SRC
+#Simply remove a file from working dir will match as Changed but not updated
+  $ rm filename
+
+#git rm filename* is the right way the remove it from tracked files. This removing will commit.
+  $ git rm filename
+
+# If you want to remove a modified file, add *-f* options.
+  $ git rm filename -f
+
+# Just simple remove it from tracking and want to keep it on disk.
+  $ git rm --cached filename
+
+# Pay attendtion to the '\'. This is because git do its own filename expansion
+  $ git rm log/\*.log
+  $ git rm \*~
+#+END_SRC
+
+*** Moveing file
+If you rename a file, no metadata is stored in Git that tells it your
+renamed the file. But usually,Git is smart about figuring that out.
+
+Here is the command to rename a file in Git
+#+BEGIN_SRC
+  $ git mv file_from file_to
+
+# command is equivalent. Git figures out that it's a rename implilcitly.
+  $ mv README.txt README
+  $ git rm README.txt
+  $ git add README  
+#+END_SRC
+
+** Viewing the Commit History
+#+BEGIN_SRC
+  $ git log -p  # show the diff introduced in each commit.
+  $ git log -2  # display last 2 entries.
+
+  $ git log --stat  #option prints below each commit entry a list of modified files, how many files were changed, and how many lines in those files were added and removed. It also puts a summary of the information at the end.
+
+  $ git log --pretty=xx # this option allow you to sepcify the output format
+  $ git log --prety=oneline  # good for display tones of messages.
+  $ git log --prety=format:"%h - %an, %ar : %s"  # user define format
+#+END_SRC
+*formatting options for the git log pretty*
+|--------+------------------------------------------------|
+| Option | Description of Ouput                           |
+|--------+------------------------------------------------|
+| %H     | Commit hash                                    |
+| %h     | Abbreviated commit hash                        |
+| %T     | Tree hash                                      |
+| %t     | Abbreviated tree hash                          |
+| %P     | Parent hashes                                  |
+| %p     | Abbreviated Parent hash                        |
+| %an    | Author name                                    |
+| %ae    | Author email                                   |
+| %ad    | Author date (format respects the -date=option) |
+| %ar    | Author date relative                           |
+| %cn    | Committer name                                 |
+| %ce    | committer email                                |
+| %cd    | Committer date                                 |
+| %cr    | Committer date relative                        |
+| %s     | Subject                                        |
+|--------+------------------------------------------------|
+The /author/ is the person who originally wrote the work, whereas the /committer/ is the person who last applied the work.
+
+*Common git log Output Formatting Options*
+|-----------------+-----------------------------------------------------------------------------------------------------------|
+| Option          | Description                                                                                               |
+|-----------------+-----------------------------------------------------------------------------------------------------------|
+| -p              | Show the patch introduced with each commit                                                                |
+| --stat          | Show statistics for files modified in each commit                                                         |
+| --shortstat     | Display only the changed/insertions/deletions line from the --stat command                                |
+| --name-only     | Show the list of files modified after the commit information                                              |
+| --name-status   | Show the list of files affected with added/modified/deleted information as well.                          |
+| --abbrev-commit | Show only the first few charachters of the SHA-1 checksum instead of all 40.                              |
+| --relative-date | Display the date in a relative format (for example, "2 weeks ago") instead of using the full date format. |
+| --graph         | Display an ASCII graph of the branch and merge history beside the log output.                             |
+| --pretty        | Show commits in an alternate format. Include /oneline/, /short/,/full/,/fuller/ and /format/.             |
+|-----------------+-----------------------------------------------------------------------------------------------------------|
+
+*Common git log Filtering Options*
+|-------------------+-----------------------------------------------------------------------------|
+| Option            | Description                                                                 |
+|-------------------+-----------------------------------------------------------------------------|
+| -(n)              | SHow only the last n commits.                                               |
+| --since, --after  | Limit the commits to those made after the specified date.                   |
+| --until, --before |                                                                             |
+| --grep            | Search for keywords in the commmit messages.                                |
+| --author          | Only show commits in which the author entry matches the specified string.   |
+| --committer       | Only show commits in which the commiter entry matches the specified string. |
+|-------------------+-----------------------------------------------------------------------------|
+
+This command works with lots of formats. "2008-1-15", "2 years 1 day 3minutes ago".
+You need to add *--all-match* for specify multiple conditions.
+
+GUI -- gitk , SourceTree
+
+*** Show branch tree
+[[http://stackoverflow.com/questions/2421011/output-of-git-branch-in-tree-like-fashion][stack_over_flow_link]]
+1. =git log --graph --simplify-by-decoration --pretty=format:'%d' --all=
+2. =git log --graph --oneline --decorate --all=
+3. =git log --graph --pretty=oneline --abbrev-commit=
+
+git config --global alias.lgb "log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset%n' --abbrev-commit --date=relative --branches"
+git lgb
+
+I use it by including these aliases in my ~/.gitconfig file:
+
+[alias]
+    l = log --graph --oneline --decorate
+    ll = log --graph --oneline --decorate --branches --tags
+    lll = log --graph --oneline --decorate --all
+
+
+** Undoing things
+*** Changing Your Last Commit
+=$ git commit --amend=
+This command takes your staging area and uses it for the commit. When you forget to add some files, or mess up your commit message, then you want to commit again.
+
+*** Unstaging a Staged File
+#+BEGIN_SRC
+  $ git reset HEAD <file>                 # to unstage files
+
+  # command below are dangous as they will override working dir.
+  
+  $ git checkout <file>                   # to discard the changes you've made
+  $ git checkout [commit_hash] [file]     # retrieve particular revision file
+#+END_SRC
+Remember, anything that is committed in Git can almost always be recovered. Even commits that were on branches that were deleted or commits that were overwritten with an --amend commit can be recovered.
+However, anything you lose that was never committed is likely never to be seen again.
+
+** Working with Remotes
+/Remote repositories/ are versions of your project that are hosted on the Internet or network somewhere.
+
+#+BEGIN_SRC
+# will list the shortnames of each remote handle you've specified. Adding "-v" to display the URL instead on only the shortname.  
+  $ git remote -v  
+  $ git remote add [shortname] [url]    # Then you can use the name to reference the URL
+  $ git remote show [remote-name]
+  $ git remote rename xx xx
+  $ git remote rm [remote-name]      
+
+  $ git fetch [remote-name]
+
+  $ git pull                            # to auto matically fetch and then merge a remote branch into your current branch.
+
+  $ git push [remote-name] [branch-local-name:][branch-name] # Need  write access and nobody has pushed in the meantime. Otherwise, you need to pull first.
+  
+#+END_SRC
+
+** Tagging
+#+BEGIN_SRC
+  $ git tag                             # List teh available tags
+  $ git tag -l v1.4.2.*                 # List only the 1.4.2 series.
+#+END_SRC
+- Lightweight tag :: is very much like a branch that doesn't change.
+- Annotated tag :: Stored as full objects in the Git database. They're check-summed; contain the tagger name, e-mail, and date;have a tagging message and can be signed and verified with GNU Privacy Guard.
+
+#+BEGIN_SRC
+  $ git tag -a v1.4 -m "tagging message"
+  $ git tag -a v1.4 [checksum]          # tagging later
+  $ git show v1.4
+
+  $ git tag v1.4-lw
+
+  $ git push origin v1.5                # sharing Tags
+#+END_SRC
+
+** Tips and Tricks
+#+BEGIN_SRC
+  $ source ~/.git-completion.bash       # auto-Completion. Or copy it into /etc/bash_completion.d/
+
+  $ git config --global alias.co checkout
+  $ git config --global alias.unsstage 'reset HEAD --'
+  $ git config --global alias.visual "!gitk"  # to use external command.
+
+#+END_SRC
+* Branching Model
+** What a Branch Is
+When you commit, Git stores a commit object that comtains apointer to the snapshot of the content you staged, the author and message metadata, and zero or more pointerss to the commit or commits that were the direct parents of this commit.
+
+- branch :: is simply a lightweight movable pointer to one of these commits. only store the 40 charachters of the commit it points to. It's cheap to craete and destory. Also fast.
+
+- HEAD :: is a pointer to the Branch on which you currently working.
+
+When committing, Git checksums each subdirectory and stores those three objects in the Git repository. Then create a commit object that has the metadata and a pointer to the root project tree. One /blob/ for the  contents of each of your files and tree object for specifying which file names are stored as awhich blobs.
+
+** Branch Management
+#+BEGIN_SRC
+  $ git branch testing              # Create a new pointer at the same commit you're currently on.
+  $ git checkout testing            # switch to testing branch.
+
+  # the commands above is equivalent to below.
+  $ git checkout -b testing
+
+  $ git checkout master
+  $ git merge hotfix                # merge hotfix branch the current branch. But this command do nothing to hotfix branch.
+
+  $ git branch                      # list all branches. "*" prefix indicates the current branch you're in
+  $ git brance -v                   # list all branches as well as their last commit.
+  $ git branch --merged             # figure out what state your branches are in
+  $ git branch -d testing           # delete branch testing. Fail if there are work not merged yet.
+  $ git branch -D testing           # Force delete.
+
+#+END_SRC
+merge hotfix branch to master. If master is ancester of hotfix, Git will execute /fast forward/. Else, Git does a three-way merge, using the two snapshots pointed to by the branch tips and the common ancestor of the two. Git will detect the closest ancestor smartly, which makes the merging smoothly. This will create merge commit that has more than one parent.
+
+If there are conflicts, merging will pause. Use git status to find out the conflict files. Resolve them and add them to staging area. Then commit will create the merge commit. In the mean time, you can write some merge message.
+
+** Branching Workflows
+*** Long-Running Branches
+Big complex projects.
+
+You can have several branches that are always open and that you use for different stages of your development cycle; you can merge regularly from some of them into others.
+
+It's generally easier to think about them as work silos, where sets of commits graduate to a more stable silo when they're fully tested
+
+*** Topic Branches
+Useful in projects of any size.
+
+A /topic branch/ is a short-lived branch that you create and use for a single particular feature or related work.
+
+This technique allows you to context-switch quickly and completely���������������������������because your work is separated into silos where all the changes in that branch have to do with that topic, it's easier to see what has happened during code review and such.
+
+When you're branching and merging, everything is being done only in your Git repository���������������������������no server communication is happening.
+
+** Remote Branches
+Remote branches act as bookmarks to remind you where the branches on your remote repositories were the last time you connected to them.
+
+*** Pushing
+When you want to share a branch with the world, you need to push it up to a remote that you have write access to explicitly.
+
+#+BEGIN_SRC
+  $ git push origin serverfix[:aliasName]
+
+  $ git push origin  :serverfix                    # delete the serverfix branch from the server. Empty local-branch indicates to delete.
+
+#+END_SRC
+
+It's important to note that when you do a fetch that brings down new remote branches, you don't automatically have local, editable copies of them. In other words, in this case, you don't have a new serverfix branch���you only have an origin/serverfix pointer that you can't modify.
+
+*** Tracking Branches
+Checking out a local branch from a remote branch automatically creates what is called a *tracking brach*. 
+If you're on a tracking branch, Git automatically know which server and branch to push to or fetches all the remote references and then automatically merges in the corresponding remote branch, when typing git push/pull.
+
+When you clone a repository, it generally automatically creates a /master/ branch that tracks origin/master.
+
+#+BEGIN_SRC sh
+    git checkout -b [newname] serverfix origin/serverfix  # This command gives you a local branch that you can work on that starts where orgin/serverfix is.
+    git checkout --track origin/serverfix                 # equals to the command above
+  
+    #Git 1.8
+    git branch -u upstream/foo
+    git branch -u upstream/foo foo                        # If foo is not the current branch
+  
+    #Git 1.7
+    git branch --set-upstream foo upstream/foo
+#+END_SRC
+
+** Rebasing
+Different from the three-way merge commit, rebaseing takes the patch
+of the change that since the common ancester and reapply it on the top
+of the current commit.
+
+At this point, master branch is ancestor of rebasing branch. You can
+execute the fast-forward merge to master branch.
+
+The snapshot is exactly the same as the one that created by merging.
+
+However, rebase gives you a cleaner history. The log looks like a
+linear history.
+
+For those projects that you're trying to contribute but that you don't
+maintain. The maintainer doesn't have to do any integration work --
+just a fast-forward or a clean apply.
+
+Rebase will omit the same textual changes commits automatically.
+
+
+- Example a:
+
+          A---B---C topic
+         /
+    D---E---F---G master
+
+    From this point, the result of either of the following commands:
+    #+BEGIN_SRC sh
+      #simplly rebase commits that only on the current branch to master branch
+      git rebase master
+
+      git rebase master topic
+
+      # command above equals to following:
+      git checkout topic
+      git rebase master
+    #+END_SRC
+    would be:
+
+                  A'--B'--C' topic
+                 /
+    D---E---F---G master
+
+
+
+- Example B:
+                            H---I---J topicB
+                           /
+                  E---F---G  topicA
+                 /
+    A---B---C---D  master
+
+    then the command
+
+      =git rebase --onto master topicA topicB=
+
+    would result in:
+
+                 H'--I'--J'  topicB
+                /
+                | E---F---G  topicA
+                |/
+    A---B---C---D  master
+
+    This is useful when topicB does not depend on topicA.
+
+- Exampl C:
+  A range of commits could also be removed with rebase. If we have the
+  following situation:
+
+    E---F---G---H---I---J  topicA
+
+  then the command
+
+    =git rebase --onto topicA~5 topicA~3 topicA=
+  would result in the removal of commits F and G:
+
+    E---H'---I'---J'  topicA
+
+
+#+BEGIN_SRC sh
+  # after resolve the conflicts
+
+  git add resolved_file
+
+  git rebase --skip
+  git rebase --continue
+  git rebase --abort
+#+END_SRC
+
+Do not rebase commits that you have pushed to a public repository.
+
+When rebasing stuff, Git abandoning existing commits and creating new
+ones. If you do follow the guidline, your collaborbators wil have to
+re-merge their work also have a massive history.
+
+* Git on the Server
+Pulling and pushing changes from individuals' repositories could be confused. Instead, a public repository that everybody have access is more reasonable as it is online all the time and more managable.
+
+A remote repository is generally a bare repository���a Git repository that has no working directory.
+
+** Local Protocol
+In this protocol, the remote repository is in another directory on disk. This is often used if everyone on your team has acces to a share filesystem such as an NFS mount.
+
+#+BEGIN_SRC
+  $ git clone /opt/git/project.git
+  $ git clone file:///opt/git/project.git                    # less efficient
+#+END_SRC
+The main reason to specify the file:// prefix is if you want a clean copy of the repository with extraneous references or objects left out���generally after an import from another version-control system or something similar
+
+** SSH Protocol
+most common.
+
+SSH is also the only network-based protocol that you can easily read from and write to. The other two network protocols (HTTP and Git) are generally *read-only*, so even if you have them available for the unwashed masses, you still need SSH for your own write commands.
+
+#+BEGIN_SRC
+$ git clone ssh: //user@ server:project.git
+$ git clone user@server:project.git.    #it is OK to not specify the protocol
+#+END_SRC
+
+all data transfer is encrypted and authenticated. efficient, easy setup, commonly use.
+
+however, it doesn't support anonymous read only access.
+
+** the Git Protocol
+This is a special daemon that comes packaged with Git; it listens on a dedicated port (9418) that provides a service similar to the SSH protocol, but with absolutely no authentication.
+
+only with git-export-daemon-ok file will the daemon serve a repository.
+
+fastest but no encrypt.
+
+* Distributed Git
+** Distributed Workflows
+
+** Contributing to a Project
+** Maintaining a Project
+* Advanced Git Commands
+** Delete commit that isn't the last one
+1 	2c6a45b 	(HEAD) Adding public method to access protected method 	Tom
+2 	ae45fab 	Updates to database interface 	Contractor 1
+3 	77b9b82 	Improving database interface 	Contractor 2
+4 	3c9093c 	Merged develop branch into master 	Tom
+5 	b3d92c5 	Adding new Event CMS Module 	Paul
+6 	7feddbb 	Adding CMS class and files 	Tom
+7 	a809379 	Adding project to Git 	Tom
+- Using Rebase
+  Using the git log above we want to remove the following commits; 2 & 3 (ae45fab & 77b9b82). As they are consecutive commits we can use rebase.
+  =git rebase --onto repair~3 repair~1 repair=
+  =git rebase --onto <branch name>~<first commit number to remove> <branch name>~<first commit to be kept> <branch name>=
+** Change commit isn't the most recent one
+1. If you want to fix several flawed commits, pass the parent of the oldest one of them.
+
+   #+BEGIN_SRC sh
+     git rebase --interactive $parent_of_flawed_commit
+   #+END_SRC
+
+2. An editor will come up, with a list of all commits since the one you gave.
+   - Change =pick= to =reword= (or on old versions of Git, to =edit=)
+     in front of any commits you want to fix.
+
+   - Once you save, Git will replay the listed commits.
+
+3. For each commit you want to /reword/, Git will drop you back into
+   your editor. For those marked with /edit/, Git will drops you into
+   the shell. If you're in the shell:
+
+   - Change the commit in any way you like.
+   - git commit --amend
+   - git rebase --continue
+
+Incidentally, =$parent_of_flawed_commit= is equivalent to =$flawed_commit^=
+
+* Custom Git Environment
+- core.excludesfile ::
+- core.paper ::
+- core.autocrlf ::
+- core.whitespace ::
+
+* Deals with Git and other VCSs
+** Git and SVN
+*git svn* allow you to use Git as a valid client to a Subversion server, so you can use all the local features of Git.
+
+Although you can easily do local branching and merging, it's generally best to keep your history as linear as possible by rebasing your work and avoiding doing things like simultaneously interacting with a Git remote repository.
+
+*** Getting Started
+#+BEGIN_SRC
+  $ git svn clone file:///tmp/test-svn -T trunk -b branches -t tags  # Import svn Repository
+  $ git svn clone file:///tmp/test-svn -s                            # equivalent command
+
+  # this runs the equivalent of two commands
+  $ git svn init
+  $ git svn fetch URL
+#+END_SRC
+
+/git svn/ assumes that you won'thave multiple remotes and aves all its references to points on the remote server with no namespacing.
+
+Tags are added as remote branches, not as real Git tags. Your Subversion import looks liake it has a remote named tags with branches under it.
+
+*** Committing Back to Subversion
+If you edit one of the files and commit it, you have a commit that exists in Git locally that doesn't exist on the Subversion server.
+You need to push your changes upstream.
+
+#+BEGIN_SRC
+  $ git svn dcommit        # If any other push conflict, your commit will be rejected until you merge in their work.
+#+END_SRC
+/dcommit/ takes all the commits you've made on top of the Subversion server code, does a Subversion commit for each, and rewrites your local git commit to include a unique identifier.
+ 
+As the checksums will change, it's not a good idea to use git and subversion server concurrently. If so, commit subversion first.
+
+It's important to remember that unlike Git, which requires you to merge upstream work you don't yet have locally before you can push, git svn makes you do that only if the changes conflict.
+
+*** Pulling in New Changes
+#+BEGIN_SRC
+  $ git svn rebase         # now that all your work is on top of what is on the Subversion server
+#+END_SRC
+Running git svn rebase every once in a while makes sure your code is always up to date. You need to be sure your working directory is clean when you run this, though. If you have local changes, you must either stash your work or temporarily commit it before running git svn rebase���otherwise, the command will stop if it sees that the rebase will result in a merge conflict.
+
+*** Git-SVN Branching
+The reason to prefer rebasing is that *Subversion has a linear history* and doesn't deal with merges like Git does, so git svn follows only the first parent when converting the snapshots into Subversion commits.
+
+#+BEGIN_SRC
+  $ git svn branch opera                  # create new branch
+  $ svn copy trunk branches/opera         # equivalent
+
+  $ git branch opera remotes/opera
+
+
+  $ git svn log                           # works even offline. But no localy commited messages.
+  $ git svn blame                         # equals to svn annotate
+#+END_SRC
+If you want to work on more than one branch simultaneously, you can set up local branches to dcommit to specific Subversion branches by starting them at the imported Subversion commit for that branch. If you want an opera branch that you can work on separately, you can run
+
+*** Ignoring What SVN ignores
+If you clone a Subversion repository that has svn:ignore properties set anywhere, you'll likely want to set corresponding .gitignore files so you don't accidentally commit files that you shouldn't. git svn has two commands to help with this issue. The first is =git svn create-ignore=, which automatically creates corresponding .git ignore files for you so your next commit can include them.
+
+The second command is =git svn show-ignore=, which prints to stdout the lines you need to put in a .gitignore file so you can redirect the output into your project exclude file:
+* Git Internals
+
+* Question
+ - how git pull work
+
+ - difference between fetch and pull
+
+ - when there are multiple remote branches and they are different from each other
+
+What's below means ?
+
+- This is important to remember, because the outcome is a project state that didn't exist on either of your computers when you pushed. If the changes are incompatible but don't conflict, you may get issues that are difficult to diagnose. This is different than using a Git server���in Git, you can fully test the state on your client system before publishing it, whereas in SVN, you can't ever be certain that the states immediately before commit and after commit are identical.
+
+ - how git merge svn branch to another?  Not really clear about the background
+
+
+ - how to commit svn as there are user name and password
+
+ - If there is any way can setup ignore files without committing it ?
+
+* Troubleshooting
+- Insufficient permission when pulling or push or fetch
+
+  #+BEGIN_SRC org
+      error: insufficient permission for adding an object to repository database .git/objects
+      fatal: failed to write object
+      fatal: unpack-objects failed
+  #+END_SRC
+
+  May have mistakenly used sudo at some point in the past and given ownership to root rather than to yourself.
+  
+  [[http://stackoverflow.com/questions/18779442/error-while-pull-from-git-insufficient-permission-for-adding-an-object-to-repo][link]] 
+  
+  Solution:
+
+  #+BEGIN_SRC shell
+    sudo chown -R $USER:$USER "$(git rev-parse --show-toplevel)/.git"
+  #+END_SRC
+
+
+
+
+* Best Practice
+** Clean history
+ Balancing the need to clean up after mistakes (aka "rewriting
+ history") using tools like 'git rebase', but then not doing it so
+ much that you actually rewrite other peoples commits or lose all
+ sight of the important history (like the fact that you tested one
+ particular test, and if you then rewrite the history, all your
+ testing is now dubious).
+
+** Merging too much vs too little
+So merging too much results in a very messy history, where you
+can't see what the actual different "topics" were. And it results
+in a tree where upstream (that is - me) can't review and pull the
+features one by one.
+
+** When use rebase
+People can (and probably should) rebase their private trees (their own
+work). That's a cleanup. But never other peoples code. That's a
+"destroy history"
+
+** How to maintain a clean history
+*** Rules
+1) You must never EVER destory other peoplese history. You must not
+   rebase commits other people did.
+
+   Notice that this really is about other peoples history, not about
+   other peoples code. If they sent stuff to you as an emailed patch,
+   and you applied it with "git am -s", then it's their code, but it's
+   your history.
+
+   So you can go wild on the "git rebase" thing on it, even though you
+   didn't write the code, as long as the commit itself is your private
+   one.
+
+2) Minor clarification to the rule: once you've published your history
+   in some public site, other people may be using it, and so now it's
+   clearlly not you private history any more.
+
+3) Keep your own history readable.
+
+4) Don't expose your crap.
+   This means: if you're still in the "git rebase" phase, you don't
+   push it out. If it's not ready, you send patches around, or use
+   private git trees (just as a "patch series replacement") that you
+   don't tell the public at large about.
+
+*** Then how to pull
+And this is where it starts getting subtle: since you most not rebase
+other peoples work, that means that you must never pull into a branch
+that isn't already in good shape. Because after you've done a merge,
+you can no longer rebase you commits.
+
+1) Don't merge upstream code at random points.
+   You should /never/ pull my tree at random points (this was my
+   biggest issue with early git users - many developers would just
+   pull my current random tree-of-the-day into their development
+   trees). It makes your tree just a random mess of random
+   development. Don't do it!
+   
+   If you want to sync up with major releases, do a
+
+   #+BEGIN_SRC sh
+     git pull linus-repo v2.6.29
+   #+END_SRC
+   
+   A "merge v.x.xxx into devel branch" make complete sense. But not
+   "Merge branch 'linux'".
+
+2) Don't merge /downstream/ code at random points either.
+   Here the "random points" comment is a dual thing. You should not
+   mege random points as far as downstream is concerned (they should
+   tell you what to merge, and why), but also not random points as far
+   as your tree is concerned.
+   
+   Simple version: "Don't merge unrelated downstream stuff into your
+   own topic branches."
+   
+   Slightly more complex version: "Always have a reason for merging
+   downstream stuff". That reason might be: "This branch is the
+   release branch, and is not the 'random development' branch, and I
+   want to merge that ready feature into my release branch because
+   it's going to be part of my next release".
+
+
+
+
+
+
+

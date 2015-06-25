@@ -1,0 +1,239 @@
+* Spring 笔记
+** Spring简介
+** IOC容器
+1.可以实例化具体的bean
+2.动态装配bean
+*** xml标记
+**** 注入类型
+***** 1.接口注入（可以忘记）
+***** 2.构造注入（留印象）
+例如想要在 service 中注入 dao，则可以在该 service 中生成一个使用 dao 作参数的构造方法。然后在 xml 中把 property 改为使用 constructor-arg .
+<bean ……>
+   <constructor-arg ref bean="xxxx"/>
+   <constructor-arg>
+       <bean class="x.x.Bar"/>
+   </constructor-arg>
+</bean>
+其下使用 ref 的话是引用了另外的一个对象，如果是使用 bean class=XX 则是新构造一个实例.
+
+<bean ……>
+   <constructor-arg index="0" value="6111"/>
+   <constructor-arg index="1" value="52"/>
+   <constructor-arg type="int" value="1"/>
+   <constructor-arg type="java.lang.String" value="2"/>
+</bean>
+index 用于指定构造方法中的参数。当构造方法中有参数使用同样的类型的时候，可以使用这种方法来指定。
+也可以根据参数的类型来区别。
+***** 3.setter注入（最常用）
+调用了set方法来注入
+
+**** Id vs Name
+     基本一样，但Name可以写特殊字符
+**** 简单属性注入
+可以直接注入，spring自动转换类型
+<bean ……>
+    <property name="xxx" value="1"/>
+    <property name="xxx" value="2"/>
+</bean>
+**** bean Scope
+***** session,request,application
+      对应 web 的 Scope。用于Spring MVC，Struts2 自己已经有了，所以通常不用。
+***** singleton（默认值)
+      单例，总是拿到同一个对象
+***** prototype
+      原型，拿的不一样
+**** 生命周期
+***** lazy-init
+      bean不随着容器初始化而进行实例化，只有在用到的时候才初始化。可以在beans里设置defaut-lazy-init="true",来设默认值。
+      当你的程序启动特别慢的时候，有用。
+***** init method, destory method（不要和prototype一起使用）
+      指定bean在实例化时和在销毁之前要执行的方法。如果使用了 prototype，并生成两次，则会有两个init，但不会有destory,因为spring不会去监控这种对象的死亡。
+**** 集合注入
+四种，Properties,set,list,map.它们的元素本身又可以是set,list,map等等。
+<bean id="moreComplexObject" class="example.ComplexObject">
+<!-- results in a setAdminEmails(java.util.Properties) call -->
+<property name="adminEmails">
+  <props>
+      <prop key="administrator">administrator@example.org</prop>
+      <prop key="support">support@example.org</prop>
+      <prop key="development">development@example.org</prop>
+  </props>
+</property>
+<!-- results in a setSomeList(java.util.List) call -->
+<property name="someList">
+  <list>
+      <value>a list element followed by a reference</value>
+      <ref bean="myDataSource" />
+  </list>
+</property>
+<!-- results in a setSomeMap(java.util.Map) call -->
+<property name="someMap">
+  <map>
+      <entry key="an entry" value="just some string"/>
+      <entry key ="a ref" value-ref="myDataSource"/>
+  </map>
+</property>
+<!-- results in a setSomeSet(java.util.Set) call -->
+<property name="someSet">
+  <set>
+      <value>just some string</value>
+      <ref bean="myDataSource" />
+  </set>
+</property>
+</bean>
+**** autowire (自动装配) 
+***** defualt
+可以在beans里设置default-autowire="xxx",然后，特定bean中就可以通过default来指定
+***** by name
+当bean里的某个属性与现有的某个bean同名，则会自动装入
+***** by type
+当bean的属性的类型与现有的某个bean同类型，则会自动装入，前提是只有一个同类型的bean,否则报异常
+***** no （默认值）
+不启用，手动装入
+
+*** 注解写法
+**** @Required
+     写在setter方法上。被注解的属性必须在配置的阶段被填充，否则容器会抛出异常
+**** @Autowired
+（JSR 330中的@Inject 注解具有与该注解相同的功能）
+所在包位置 org.springframework.beans.factory.annotation 
+@Autowired 总是先匹配类型的。
+***** 注解位置
+可以写在setter方法上，也可以写在使用任意参数的方法上，也可以写在构造方法和属性上（不建议）。
+***** 描述序列容器
+写在描述数组的地方，则会把ApplicationContext中所有同类型的实例填充进去。
+***** 描述k-v对
+写在Map类型的地方，则会把所有同类型的实例作为value，bean Name作为key填充。
+***** 参数required
+默认时，相当于@Autowired(required=true),不能注入时则会异常。比@Required 注解更好。
+可以改为required=false，即不能注入时忽略。
+***** 使用@Qualifier筛选
+由于@Autowired可能会有多个候选值，可以使用Qualifier来把bean绑定一个特定值，来选择。
+但，注意， Qualifier 和 bean 的名字不是一回事！
+  @Autowired
+  public void prepare(@Qualifier("main") MovieCatalog movieCatalog,
+                      CustomerPreferenceDao customerPreferenceDao) {
+      this.movieCatalog = movieCatalog;
+      this.customerPreferenceDao = customerPreferenceDao;
+  }
+
+此时，在bean中要定义Qualifier。
+
+  <bean class="example.SimpleMovieCatalog">
+      <qualifier value="action"/>
+  </bean>
+为了fallback 匹配，默认地，bean 的name会被当作Qualifier
+***** 每个类只能有一个构造方法被Autowired注解
+**** @Resource
+属于JSR-250，所在包为，javax.annotation.Resource;
+没有默认属性
+***** name参数
+spring通过该名字找到对应的bean进行注入。默认按名称找，找不到则按类型。
+如果为空，则会把注解的字段名，或是方法名作为参数。
+没有默认的属性，必须手动带上属性。即 @Resource("xxx") 是错误的。只能写为 @Resource(name="xxx")
+***** 注解位置
+注意，与 @Autowired 不一样， @Resource 不能注解在构造方法之上
+**** @PostConstruct
+属于JSR-250，所在包为，javax.annotation.PostConstruct;
+**** @PreDestroy
+属于JSR-250，所在包为，javax.annotation.PreDestroy;
+**** @Component
+所在包为 org.springframework.stereotype.Component;
+默认属性为name
+     这个是 @Service @Repository @Controller 的通用类型。使用以上三种,显得比较合理，并能为AOP提供合理的切点。
+
+需要在bean.xml中写上
+<context:component-scan base-package="org.example"/>
+其中，base-package是需要扫描的类的路径。
+
+当使用了 component-scan ,则会自动隐含了AutowiredAnnotationBeanPostProcessor，以及 CommonAnnotationBeanPostProcessor。把 annotation-config 标记为 false 将可以手动取消。
+***** 使用过滤器
+
+| Filter Type | Example Expression         | Description                                                                             |
+|-------------+----------------------------+-----------------------------------------------------------------------------------------|
+| annotation  | org.example.SomeAnnotation | An annotation to be present at the type level in target components.                     |
+| assignable  | org.example.SomeClass      | A class (or interface) that the target components are assignable to (extend/implement). |
+| aspectj     | org.example..*Service+     | An Aspectj type expression to be matched by the target components.                      |
+| regex       | org\.example\.Default.*    | A regex expression to be mathced by the target components class names.                  |
+| custom      | org.example.MyTypeFilter   | A custom implementation of the org.springframework.core.type.TypeFilter interfacs.      |
+例子：
+<beans>
+
+   <context:component-scan base-package="org.example">
+      <context:include-filter type="regex" expression=".*Stub.*Repository"/>
+      <context:exclude-filter type="annotation"
+                              expression="org.springframework.stereotype.Repository"/>
+   </context:component-scan>
+
+</beans>
+
+***** @Bean
+在 @Component 中使用 @Bean 可以分离类的定义及bean的定义。因此， @Component 和 @Bean 做是不同的两件事。
+而且，在Component中使用Bean时，实际上，外面是不能引用该bean的。
+**** @Value
+     使用#{beanname.propername} 格式。参考spring Expression language
+**** @Scope
+**** JSR330 标准注解
+     spring3.0 支持JSR330的标准注解，其依赖如下：
+     Maven repository (http://repo1.maven.org/maven2/javax/inject/javax.inject/1/)
+     Maven dependency
+     <dependency>
+       <groupId>javax.inject</groupId>
+       <artifactId>javax.inject</artifactId>
+       <version>1</version>
+     </dependency>
+
+     | Spring              | javax.inject.* | javax.inject 限制及特性                                                |
+     |---------------------+----------------+------------------------------------------------------------------------|
+     | @Autowired          | @Inject        | @Inject 没有'required'属性                                             |
+     | @Component          | @Named         | --                                                                     |
+     | @Scope("singleton") | @Singleton     | JSR-330 默认的scope为 prototype.但在spring 中为保持一致，仍为singleton |
+     | @Qualifier          | @Named         | --                                                                     |
+     | @Value              | --             | 没有类似                                                               |
+     | @Required           | --             | 没有类似                                                                |
+     | @Lazy               | --             | 没有类似                                                                |
+     ----
+**** 注意事项
+@Autowired, @Inject, @Resource, and @Value 都是由Spring中的BeanPostProcessor来实现处理。
+** AOP支持
+Spring 使用 AspectJ 来实现AOP编程，使用CGLib实现动态代理（当被切的对象没有接口时会使用到，否则是使用JDK的代理机制）。
+*** xml配置   
+*** 注解配置
+    注解所在的包为：org.aspectj.lang.annotation.*;
+要在xml中先加入
+xmlns:aop="http://www.springframework.org/schema/aop" 找到schema的位置，可以在dist下找到。
+<aop:aspectj-autoproxy/>
+
+**** @Aspect
+同时必须是 @Component ,即必须被 Spring管理。
+**** @PointCut
+可以定义在一个void方法上来重用。如：
+@PointCut
+public void point(){};
+
+@Before("point()")
+public void setxxx(){
+...
+};
+    @Pointcut("execution(public * *(..))")
+    private void anyPublicOperation() {}
+    
+    @Pointcut("within(com.xyz.someapp.trading..*)")
+    private void inTrading() {}
+    
+    @Pointcut("anyPublicOperation() && inTrading()")
+    private void tradingOperation() {}
+**** @Before    
+
+**** @Afterreturning
+
+**** @Afterthrowing
+
+**** @Around
+     使用Around，必须带上参数 ProceedingJoinPoint pjp ，并抛出 Throwable 。然后在方法中调用 pjp.proceed();
+*** 织入点语法
+    execution(public * com.leo.ioc..*.*(..))——表示在所有 com.leo.ioc包及其子包下的所有public 方法执行时。
+    另外还有，within(...),this(...),target(...)等形式，这些是Spring自己定义的语法。
+** 其他杂项
+*** XML
+xml的头可以使用schema 来指定该xml可以使用的元素，根据key查找到location，然后得到该xml的语法

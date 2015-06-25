@@ -1,0 +1,1570 @@
+#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+* Shell
+** Random select item from list
+
+#+BEGIN_SRC sh
+  a=(Python Java C++ QBasic); echo ${a[((RANDOM % ${#a[*]}))]}
+#+END_SRC
+
+** how to debug shell
+https://www.ibm.com/developerworks/cn/linux/l-cn-shell-debug/
+http://coolshell.cn/articles/1379.html
+
+*** è¾åºè°è¯ä¿¡æ¯
+1. ä½¿ç¨ =trap= å½ä»¤
+
+  =trap 'command' singal=
+   - command :: æ¯ææå°ä¿¡å·ä¹åè¦æ§è¡çå½ä»¤
+   - singal :: ä½¿ç¨ =kill -l= å¯ä»¥ååºå¨é¨å¯ç¨çä¿¡å·åã
+
+  æ§è¡shellæ¶ï¼ä¼äº§çä¸ä¸ªä¼ªä¿¡å·ï¼ä½¿ç¨trapææå®ä»¬æå©äºè°è¯
+
+   - EXIT :: ä»ä¸ä¸ªå½æ°ä¸­éåºææ´ä¸ªèæ¬æ§è¡å®æ¯ï¼ä¹å¯ä»¥ç¨0ä»£æ¿ã
+
+   - ERR  :: å½ä¸æ¡å½ä»¤è¿åéé¶ç¶ææ¶
+
+   - DEBUG :: èæ¬ä¸­æ¯ä¸æ¡å½ä»¤æ§è¡ä¹å
+
+   $LINENO æ¯ä¸ä¸ªåç½®åéï¼è¡¨ç¤ºå½åè¡å·
+
+   Example:
+
+   #+BEGIN_SRC sh
+   #!/bin/bash
+   trap 'echo âbefore execute line:$LINENO, a=$a,b=$b,c=$câ' DEBUG
+   a=1
+   if [ "$a" -eq 1 ]
+   then
+   b=2
+   else
+   b=1
+   fi
+   c=3
+   echo "end"
+   #+END_SRC
+
+2. ä½¿ç¨ =tee= å½ä»¤
+   ç¨äºè°è¯ç®¡éç»åçå½ä»¤ãteeä¼ä»æ åè¾å¥è¯»åæ°æ®ï¼å°åå®¹è¾åºå°æ åè¾
+   åºå¹¶ä¸æåå®¹ä¿å­ææä»¶ã
+
+3. è°è¯é©å­
+
+   #+BEGIN_SRC sh
+     DEBUG()
+     {
+         if [ "$DEBUG" = "true" ]; then
+             $@ãã
+         fi
+     }
+
+     a=1
+     DEBUG echo "a=$a"
+
+     if [ "$a" -eq 1 ]
+     then
+         b=2
+     else
+         b=1
+     fi
+
+     DEBUG echo "b=$b"
+     c=3
+     DEBUG echo "c=$c"
+   #+END_SRC
+
+4. ä½¿ç¨shellæ§è¡éé¡¹
+   - -n :: åªæ£æ¥è¯­æ³ï¼èä¸æ§è¡
+
+   - -x :: è¿å¥è·è¸ªæ¨¡å¼ï¼æ¾ç¤ºææ§è¡çæ¯ä¸æ¡å½ä»¤ï¼åé¢ä¼å¸¦ä¸ä¸ª+å·ï¼ãé
+           åtrap debugåå¯ä»¥æ¾ç¤ºï¼æ§è¡çæ¯ä¸ªå½ä»¤åå®¹ä»¥åæ§è¡ä¹åçç¶
+           æã
+
+   - -c :: ä¸´æ¶æ§è¡èæ¬èä¸å¿å»ºç«shæä»¶
+
+*** å¯¹ +x çå¢å¼º
+- $LINENO :: å½åè¡å·
+
+- $FUNCNAME :: å½æ°åæ°ç»åéï¼åå«æ´ä¸ªè°ç¨é¾ä¸ææçå½æ°çåå­ãä¾
+               å¦ï¼${FUNCNAME[0]} è¡¨ç¤ºå½åæ­£å¨æ§è¡çå½æ°çåå­ï¼è1
+               è¡¨ç¤ºè°ç¨äºæ­¤å½æ°çå½æ°åå­ã
+
+- $BASH_SOURCE :: æä»¶åï¼
+
+- $PS4 :: ç¨äº-xè¾åºæ¶çæç¤ºç¬¦ãä¾å¦å¯ä»¥
+          export SP4='+{$LINENO:${FUNCNAME[0]}}'
+          ç¶ååç¨-xè°è¯ã
+
+*** æ¥å¿è¾åº
+
+#+BEGIN_SRC sh
+  _log() {
+      if [ "$_DEBUG" == "true" ]; then
+          echo 1>&2 "$@"
+      fi
+  }
+
+DEBUG=true ./example_script.sh
+#+END_SRC
+
+** Array
+1. Defining
+
+   #+BEGIN_SRC sh
+     a=(1 2 3 4 5)
+     echo $a
+     #1
+
+     NAME[0]="Zara"
+     NAME[1]="Qadir"
+     NAME[2]="Mahnaz"
+
+     declare -a Unix=('Debian' 'Red hat' 'Red hat' 'Suse' 'Fedora');
+   #+END_SRC
+
+2. Accessing
+
+   #+BEGIN_SRC sh
+     array_name[0]="abc"
+     ${array_name[index]}
+
+     # All items
+     ${array_name[*]}
+     ${array_name[@]}
+
+
+     ${#array_name[@]}       # length of elements in the array
+     ${#array_name}          # length of characters in the first element
+
+     ${array_name[@]:3:2}    # retrieve 2 element begin from index 3
+     ${array_name[2]:0:4}    # retrieve first 4 characters in 2 element
+   #+END_SRC
+
+3. Manipulate
+   #+BEGIN_SRC sh
+     # Replace all "replace" with "to" in each element in array.
+     # temparaly effect
+     ${array_name[@]/replace/to}     # just like the string variable
+
+
+     # add element
+     Unix=('Debian' 'Red hat' 'Ubuntu' 'Suse' 'Fedora' 'UTS' 'OpenLinux');
+     Unix=("${Unix[@]}" "AIX" "HP-UX")
+
+     # delete element
+     Unix=('Debian' 'Red hat' 'Ubuntu' 'Suse' 'Fedora' 'UTS' 'OpenLinux');
+
+     unset Unix[3]           # still have "null" in the 3 element
+     echo ${Unix[3]}
+
+     unset array # å é¤æ´ä¸ªæ°ç»
+
+     pos=3                   # complete delete 3 element
+     Unix=(${Unix[@]:0:$pos} ${Unix[@]:$(($pos + 1))})
+
+
+     # delete elements match "Red*"
+     declare -a Unix=('Debian' 'Red hat' 'Ubuntu' 'Suse' 'Fedora');
+     declare -a patter=( ${Unix[@]/Red*/} )
+     echo ${patter[@]}
+
+     # truncate two array
+     Unix=('Debian' 'Red hat' 'Ubuntu' 'Suse' 'Fedora' 'UTS' 'OpenLinux');
+     Shell=('bash' 'csh' 'jsh' 'rsh' 'ksh' 'rc' 'tcsh');
+
+     UnixShell=("${Unix[@]}" "${Shell[@]}")
+   #+END_SRC
+
+** [[ (( {} ))
+ä¸ä¸²å½ä»¤æ§è¡ ()å{}ï¼
+    äºèé½ç¨äºæ§è¡ä¸ä¸²å½ä»¤ï¼æä»¤ä¹é´ç¨ï¼åå¼ï¼æ³¨æï¼æ¬å·åçæ°æ®éå¯¼ååªå½±åæ¬å·åé¨çæä»¤è¾å¥è¾åºï¼ä¸å½±åæ¬å·å¤é¨çæä»¤
+    ä¸åä¹å¤å¦ä¸ï¼
+    è¿è¡æ¹å¼ï¼
+
+1ï¼ï¼ï¼éæ°å¼å¯ä¸ä¸ªshellè¿è¡å½ä»¤ï¼ï½ï½å¨å½åshellè¿è¡
+    è¯­æ³ï¼
+1ï¼ï¼ï¼æåä¸æ¡æä»¤ä¸éè¦; , {}æåä¸æ¡æä»¤éè¦;
+2)  ï½ï½ç¬¬ä¸ä¸ªæä»¤åå·¦æ¬å·éè¦æç©ºæ ¼ï¼ï¼ï¼ä¸éè¦
+
+$((expr))ç¨äºæ§è¡æ°å­¦è¿ç®
+ ${var: } ,${var%}ç¨äºåéçæ¿æ¢åå¹éæ¿æ¢ç»æ
+
+ #+BEGIN_SRC sh
+   echo $((3+2))
+   5
+   echo $((3>2))
+   1
+   echo $((25<3 ? 2:3))
+   3
+   echo $var
+
+   echo $((var=2+3))
+   5
+   echo $var
+   5
+   echo $((var++))
+   5
+   echo $var
+   6
+
+   (var=notest; echo $var) ###åévarå¼ä¸ºnotestï¼æ­¤æ¯å¨å­shellä¸­ææ
+   notest
+   echo $var ###ç¶shellä¸­å¼ä»ä¸ºtest
+   test
+   { var=notest; echo $var;} ###æ³¨æå·¦æ¬å·åvarä¹é´è¦æä¸ä¸ªç©ºæ ¼
+   notest
+   echo $var ###ç¶shellä¸­çvaråéçå¼åä¸ºäºnotest
+   notest
+   { var1=test1;var2=test2;echo $var1>a;echo $var2;} ###è¾åºtest1è¢«éå®åå°æä»¶aä¸­ï¼
+   test2 ###ètest2è¾åºåä»è¾åºå°æ åè¾åºä¸­ã
+   cat a
+   test1
+   { var1=test1;var2=test2;echo $var1;echo $var2;}>a ###æ¬å·åå½ä»¤çæ åè¾åºå¨é¨è¢«éå®åå°æä»¶aä¸­
+   cat a
+   test1
+   test2
+ #+END_SRC
+
+*** [
+[ ] ä¸¤ä¸ªç¬¦å·å·¦å³é½è¦æç©ºæ ¼åé
+åé¨æä½ç¬¦ä¸æä½åéä¹é´è¦æç©ºæ ¼ï¼å¦  [  âaâ  =  âbâ  ]
+å­ç¬¦ä¸²æ¯è¾ä¸­ï¼> < éè¦åæ\> \< è¿è¡è½¬ä¹
+[ ] ä¸­å­ç¬¦ä¸²æè${}åéå°½éä½¿ç¨"" åå¼å·æ©ä½ï¼é¿åå¼æªå®ä¹å¼ç¨èåºéçå¥½åæ³
+[ ] ä¸­å¯ä»¥ä½¿ç¨ âa âo è¿è¡é»è¾è¿ç®
+[ ] æ¯bash åç½®å½ä»¤ï¼[ is a shell builtin
+
+*** [[
+[ [ ]] ä¸¤ä¸ªç¬¦å·å·¦å³é½è¦æç©ºæ ¼åé
+åé¨æä½ç¬¦ä¸æä½åéä¹é´è¦æç©ºæ ¼ï¼å¦  [[  âaâ =  âbâ  ]
+å­ç¬¦ä¸²æ¯è¾ä¸­ï¼å¯ä»¥ç´æ¥ä½¿ç¨ > < æ éè½¬ä¹
+[[ ] ä¸­å­ç¬¦ä¸²æè${}åéå°½éå¦æªä½¿ç¨"" åå¼å·æ©ä½çè¯ï¼ä¼è¿è¡æ¨¡å¼ååå­ç¬¦å¹é
+[root@localhostkuohao]# [[ "ab"=a* ] && echo "ok"
+  ok
+[[] ] åé¨å¯ä»¥ä½¿ç¨ &&  || è¿è¡é»è¾è¿ç®
+[[ ]æ¯bash  keywordï¼[[ is a shell keyword
+[[ ] å¶ä»ç¨æ³é½å[ ] ä¸æ ·
+
+ [[ ]å [ ] é½å¯ä»¥å ! éåä½¿ç¨
+
+ä¼åçº§ !  >  && > ||
+é»è¾è¿ç®ç¬¦  < å³ç³»è¿ç®ç¬¦
+é»è¾è¿ç®ç¬¦  ï¼ !  &&  || -a  -o
+å³ç³»è¿ç®ç¬¦  ï¼ <  >  \> \<  ==  = !=  â eq âne  -gt -ge  âlt  -le
+
+** declare
+*declare [+/-][arfix]*
+
+This is a builtin command. Also can write as =typeset=.
+
+=-= for setting the property of variables, =+= for erase the property.
+
+- a :: define as array. =
+       #+BEGIN_SRC sh
+         declare -a cd='([0]="a" [1]="b" [2]="c")'
+         echo ${cd[@]}
+       #+END_SRC
+
+- f :: display definition of function. If no function is given,
+       display all self-define functions.
+
+- i :: define as integer. Can be calculated directly. Assigned to any
+       non-integer value will become 0. If assigned to a double, bash
+       will throw error.
+
+       #+BEGIN_SRC sh
+         declare -i x
+         x=6/3
+         echo $x
+       #+END_SRC
+
+- r :: define as read-only. Same as =readonly xxx=. Cannot unset,
+       declare +r.
+
+- x :: define as environment variable.
+** Shell Style Guide
+*** Background
+**** Which Shell to Use
+*Bash* is the only shell scripting language permitted for executables.
+
+- Executables must start with =#! /bin/bash= and a minimum number
+     of flags.
+
+- Use /set/ to set shell options so that calling your script as
+     =bash <script_name>= does not break its functionality.
+
+**** When to use Shell
+Shell should only be used for small utilities or simple wrapper
+scripts.
+
+Apply for:
+- Mostly calling other utilities and are doing relatively little data
+  manipulation.
+
+Exceptions:
+- Performance matters.
+
+- Need to use arrays for anything more than assignment of
+     =${PIPESTATUS}=, you should use Python.
+
+- A script that is more than 100 lines long, you should probably be
+  writing it in Python instead.
+  Bear in mind that scripts grow. Rewrite it in another language early
+  to avoid a time-consuming rewrite at a later date.
+
+**** TODO what using "set" means?
+
+*** Shell Files and Interpreter Invocation
+**** File Extensions
+- Executeables should have no extension (strongly preferred) or a
+  =.sh= extension.
+
+  Prefer no extension is because it is not necessary to know what
+  language a program is written in when executing it and shell doesn't
+  require an extension.
+
+- Libraries must have a =.sh= extension and should not be executable.
+
+  For libraries, it's important to know what language it is and
+  sometimes there's a need to have similar libraries in different
+  languages.
+
+**** SUID/SGID
+SUID and SGID are /forbidden/ on shell scripts.
+
+Use =sudo= to provide elevated access if you need it.
+
+There are too many security issues with shell that make it nearly
+impossible to secure sufficiently to allow SUID/SGID. While bash does
+make it difficult to run SUID, it's still possible on some platforms
+which is why we're being explicit about banning it.
+
+*** Environment
+**** STDOUT vs STDERR
+- All error message should go to =STDERR=.
+  This makes it easier to separate normal status from actual issues.
+
+- A function to print out error messages along with other status
+  information is recommended.
+
+   #+BEGIN_SRC sh
+     err() {
+       echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $@" >&2
+     }
+
+     if ! do_something; then
+       err "Unable to do_something"
+       exit "${E_DID_NOTHING}"
+     fi
+   #+END_SRC
+
+*** Comments
+**** File Header
+- Start each file with a description of its contents.
+
+#+BEGIN_SRC sh
+  #!/bin/bash
+  #
+  # Perform hot backups of Oracle databases.
+#+END_SRC
+
+**** Function Comments
+
+- Any function that is not both obvious and short must be commented.
+  It should be possible for others to learn how to use the program
+  by reading the comments but code.
+
+- Any function in a library must be commented regardless of length of
+  complexity.
+
+- All function comments should contain:
+  - Description
+
+  - Global variables used and modified
+
+  - Arguments taken
+
+  - Returned values other than the default exit status of the last
+    command run.
+
+#+BEGIN_SRC sh
+  #!/bin/bash
+  #
+  # Perform hot backups of Oracle databases.
+
+  export PATH='/usr/xpg4/bin:/usr/bin:/opt/csw/bin:/opt/goog/bin'
+
+  #######################################
+  # Cleanup files from the backup dir
+  # Globals:
+  #   BACKUP_DIR
+  #   ORACLE_SID
+  # Arguments:
+  #   None
+  # Returns:
+  #   None
+  #######################################
+  cleanup() {
+    ...
+  }
+#+END_SRC
+
+**** Implementation Comments
+Comment tricky, non-obvious, interesting or important parts of your
+code.
+
+**** TODO Comments
+Use TODO comments for code that is temporary, a short-term solution,
+or good-enough but not perfect.
+
+*** Formatting
+
+**** Indentation
+- Indent 2 spaces. No tabs.
+
+Use blank lines between blocks to improve readability. Indentation is
+*two spaces*. Whatever you do, don't use tabs. For existing files, stay
+faithful to the existing indentation.
+
+**** Line Length and Long String
+- Maxmum line length is 80 characters.
+
+- Use here document or embedded newline.
+
+#+BEGIN_SRC sh
+  # DO use 'here document's
+  cat <<END;
+  I am an exceptionally long
+  string.
+  END
+
+  # Embedded newlines are ok too
+  long_string="I am an exceptionally
+    long string."
+#+END_SRC
+
+**** Pipelines
+- If a pipeline all fits on one line, it should be on one line.
+
+- If not, it should be split at one pipe segment per line with the
+  pipe on the newline and a 2 space indent for the next section of the pipe.
+
+#+BEGIN_SRC sh
+  # All fits on one line
+  command1 | command2
+
+  # Long commands
+  command1 \
+    | command2 \
+    | command3 \
+    | command4
+#+END_SRC
+
+**** Loops
+Put =do= and =then= on the same line as the =while=, =for= or =if=.
+
+#+BEGIN_SRC sh
+  for dir in ${dirs_to_cleanup}; do
+    if [[ -d "${dir}/${ORACLE_SID}" ]]; then
+      log_date "Cleaning up old files in ${dir}/${ORACLE_SID}"
+      rm "${dir}/${ORACLE_SID}/"*
+      if [[ "$?" -ne 0 ]]; then
+        error_message
+      fi
+    else
+      mkdir -p "${dir}/${ORACLE_SID}"
+      if [[ "$?" -ne 0 ]]; then
+        error_message
+      fi
+    fi
+  done
+#+END_SRC
+
+**** Case statement
+- Indent alternatives by 2 spaces.
+
+- A one-line alternative needs a apace after the close parenthesis of
+  the pattern and before the =;;=
+
+- Long or multi-command alternatives should be split over multiple
+  lines with the pattern, actions, and ;; on separate lines.
+
+
+#+BEGIN_SRC sh
+  case "${expression}" in
+    a)
+      variable="..."
+      some_command "${variable}" "${other_expr}" ...
+      ;;
+    absolute)
+      actions="relative"
+      another_command "${actions}" "${other_expr}" ...
+      ;;
+    ,*)
+      error "Unexpected expression '${expression}'"
+      ;;
+  esac
+#+END_SRC
+
+Simple commands may be put on the same line as the pattern and =;;= as
+long as the expression remains readable. This is often appropriate for
+single-letter option processing.
+
+#+BEGIN_SRC sh
+  verbose='false'
+  aflag=''
+  bflag=''
+  files=''
+  while getopts 'abf:v' flag; do
+    case "${flag}" in
+      a) aflag='true' ;;
+      b) bflag='true' ;;
+      f) files="${OPTARG}" ;;
+      v) verbose='true' ;;
+      ,*) error "Unexpected option ${flag}" ;;
+    esac
+  done
+#+END_SRC
+
+**** Variable expansion
+
+1. Stay consistent with what you find for existing code.
+2. Quote variables.
+3. Don't brace-quote single character shell specials / positional
+   parameters, unless strictly necessary or avoiding deep confusion.
+   Prefer brace-quoting all other variables.
+
+#+BEGIN_SRC sh
+  # Section of recommended cases.
+
+  # Preferred style for 'special' variables:
+  echo "Positional: $1" "$5" "$3"
+  echo "Specials: !=$!, -=$-, _=$_. ?=$?, #=$# *=$* @=$@ \$=$$ ..."
+
+  # Braces necessary:
+  echo "many parameters: ${10}"
+
+  # Braces avoiding confusion:
+  # Output is "a0b0c0"
+  set -- a b c
+  echo "${1}0${2}0${3}0"
+
+  # Preferred style for other variables:
+  echo "PATH=${PATH}, PWD=${PWD}, mine=${some_var}"
+  while read f; do
+    echo "file=${f}"
+  done < <(ls -l /tmp)
+
+  # Section of discouraged cases
+
+  # Unquoted vars, unbraced vars, brace-quoted single letter
+  # shell specials.
+  echo a=$avar "b=$bvar" "PID=${$}" "${1}"
+
+  # Confusing use: this is expanded as "${1}0${2}0${3}0",
+  # not "${10}${20}${30}
+  set -- a b c
+  echo "$10$20$30"
+#+END_SRC
+
+**** Quoting
+- Always quote strings containing variables, command substitutions,
+  spaces or shell meta characters, unless careful unquoted expansion
+  is required.
+
+- Prefer quoting strings that are "words" (as opposed to command
+  options or path names).
+
+- Never quote /literal/ integers.
+
+- Be aware of the quoting rules for pattern matches in [[.
+
+- Use "$@" unless you have a specific reason to use $*.
+
+
+#+BEGIN_SRC sh
+  # 'Single' quotes indicate that no substitution is desired.
+  # "Double" quotes indicate that substitution is required/tolerated.
+
+  # Simple examples
+  # "quote command substitutions"
+  flag="$(some_command and its args "$@" 'quoted separately')"
+
+  # "quote variables"
+  echo "${flag}"
+
+  # "never quote literal integers"
+  value=32
+  # "quote command substitutions", even when you expect integers
+  number="$(generate_number)"
+
+  # "prefer quoting words", not compulsory
+  readonly USE_INTEGER='true'
+
+  # "quote shell meta characters"
+  echo 'Hello stranger, and well met. Earn lots of $$$'
+  echo "Process $$: Done making \$\$\$."
+
+  # "command options or path names"
+  # ($1 is assumed to contain a value here)
+  grep -li Hugo /dev/null "$1"
+
+  # Less simple examples
+  # "quote variables, unless proven false": ccs might be empty
+  git send-email --to "${reviewers}" ${ccs:+"--cc" "${ccs}"}
+
+  # Positional parameter precautions: $1 might be unset
+  # Single quotes leave regex as-is.
+  grep -cP '([Ss]pecial|\|?characters*)$' ${1:+"$1"}
+
+  # For passing on arguments,
+  # "$@" is right almost everytime, and
+  # $* is wrong almost everytime:
+  #
+  # * $* and $@ will split on spaces, clobbering up arguments
+  #   that contain spaces and dropping empty strings;
+  # * "$@" will retain arguments as-is, so no args
+  #   provided will result in no args being passed on;
+  #   This is in most cases what you want to use for passing
+  #   on arguments.
+  # * "$*" expands to one argument, with all args joined
+  #   by (usually) spaces,
+  #   so no args provided will result in one empty string
+  #   being passed on.
+  # (Consult 'man bash' for the nit-grits ;-)
+
+  set -- 1 "2 two" "3 three tres"; echo $# ; set -- "$*"; echo "$#, $@"
+  set -- 1 "2 two" "3 three tres"; echo $# ; set -- "$@"; echo "$#, $@"
+#+END_SRC
+
+*** Features and Bugs
+**** Command Substitution
+Use =$(command) instead of backticks.
+
+Nested backticks require escaping the inner ones with =\=.
+
+#+BEGIN_SRC sh
+  # This is preferred:
+  var="$(command "$(command1)")"
+
+  # This is not:
+  var="`command \`command1\``"
+#+END_SRC
+
+**** Test, [ and [[
+=[ [ ... ]]= is preferred over =[=, =test= and =/usr/bin/[=.
+
+[[ reduces errors as no pathname expansion or word splitting takes
+place inside it. It also allows for regular expression matching.
+
+
+#+BEGIN_SRC sh
+  # This ensures the string on the left is made up of characters in the
+  # alnum character class followed by the string name.
+  # Note that the RHS should not be quoted here.
+  # For the gory details, see
+  # E14 at http://tiswww.case.edu/php/chet/bash/FAQ
+  if [[ "filename" =~ ^[[:alnum:]]+name ]]; then
+    echo "Match"
+  fi
+
+  # This matches the exact pattern "f*" (Does not match in this case)
+  if [[ "filename" == "f*" ]]; then
+    echo "Match"
+  fi
+
+  # This gives a "too many arguments" error as f* is expanded to the
+  # contents of the current directory
+  if [ "filename" == f* ]; then
+    echo "Match"
+  fi
+#+END_SRC
+
+**** Testing Strings
+Use quotes rather than filler characters where possible.
+
+#+BEGIN_SRC sh
+  # Do this:
+  if [[ "${my_var}" = "some_string" ]]; then
+    do_something
+  fi
+
+  # -z (string length is zero) and -n (string length is not zero) are
+  # preferred over testing for an empty string
+  if [[ -z "${my_var}" ]]; then
+    do_something
+  fi
+
+  # This is OK (ensure quotes on the empty side), but not preferred:
+  if [[ "${my_var}" = "" ]]; then
+    do_something
+  fi
+
+  # Not this:
+  if [[ "${my_var}X" = "some_stringX" ]]; then
+    do_something
+  fi
+#+END_SRC
+
+To avoid confusion about what you're testing for, explicitly use -z or
+-n.
+
+#+BEGIN_SRC sh
+  # Use this
+  if [[ -n "${my_var}" ]]; then
+    do_something
+  fi
+
+  # Instead of this as errors can occur if ${my_var} expands to a test
+  # flag
+  if [[ "${my_var}" ]]; then
+    do_something
+  fi
+#+END_SRC
+
+**** Wildcard Expansion of Filename
+Use an explicit path when doing wildcard expansion of filenames.
+As filenames can begin with a -, it's a lot safer to expand wildcards
+with =./*= instead of =*=.
+
+#+BEGIN_SRC sh
+  # Here's the contents of the directory:
+  # -f  -r  somedir  somefile
+
+  # This deletes almost everything in the directory by force
+  psa@bilby$ rm -v *
+  removed directory: 'somedir'
+  removed 'somefile'
+
+  # As opposed to:
+  psa@bilby$ rm -v ./*
+  removed './-f'
+  removed './-r'
+  rm: cannot remove './somedir': Is a directory
+  removed './somefile'
+#+END_SRC
+
+**** Eval
+=eval= should be avoided.
+Eval munges the input when used for assignment to variables and can
+set variables without making it possible to check what those variables
+were.
+
+#+BEGIN_SRC sh
+  # What does this set?
+  # Did it succeed? In part or whole?
+  eval $(set_my_variables)
+
+  # What happens if one of the returned values has a space in it?
+  variable="$(eval some_function)"
+#+END_SRC
+
+**** Pipes to While
+Use process substitution or for loops in preference to piping to
+while. Variables modified in a while loop do not propagate to the
+parent because the loop's commands run in a subshell.
+
+Use a for loop if you are confident that the input will not contain
+spaces or special characters (usually, this means not user input).
+
+
+#+BEGIN_SRC sh
+  last_line='NULL'
+  your_command | while read line; do
+    last_line="${line}"
+  done
+
+  # This will output 'NULL'
+  echo "${last_line}"
+
+
+  total=0
+  # Only do this if there are no spaces in return values.
+  for value in $(command); do
+    total+="${value}"
+  done
+#+END_SRC
+
+Using process substitution allows redirecting output but puts the
+commands in an explicit subshell rather than the implicit subshell
+that bash creates for the while loop.
+
+#+BEGIN_SRC sh
+  total=0
+  last_file=
+  while read count filename; do
+    total+="${count}"
+    last_file="${filename}"
+  done < <(your_command | uniq -c)
+
+  # This will output the second field of the last line of output from
+  # the command.
+  echo "Total = ${total}"
+  echo "Last one = ${last_file}"
+#+END_SRC
+
+Use while loops where it is not necessary to pass complex results to
+the parent shell - this is typically where some more complex "parsing"
+is required. Beware that simple examples are probably more easily done
+with a tool such as awk. This may also be useful where you
+specifically don't want to change the parent scope variables.
+
+#+BEGIN_SRC sh
+  # Trivial implementation of awk expression:
+  #   awk '$3 == "nfs" { print $2 " maps to " $1 }' /proc/mounts
+  cat /proc/mounts | while read src dest type opts rest; do
+    if [[ ${type} == "nfs" ]]; then
+      echo "NFS ${dest} maps to ${src}"
+    fi
+  done
+#+END_SRC
+
+*** Naming Conventions
+**** Function Names
+Lower-case, with underscores to separate words. Separate libraries
+with =::=. Parentheses are required after the function name. The
+keyword function is optional, but must be used consistently throughout
+a project.
+
+#+BEGIN_SRC sh
+  # Single function
+  my_func() {
+    ...
+  }
+
+  # Part of a package
+  mypackage::my_func() {
+    ...
+  }
+#+END_SRC
+
+**** Variable Names
+As for function names.
+
+#+BEGIN_SRC sh
+  for zone in ${zones}; do
+    something_with "${zone}"
+  done
+#+END_SRC
+
+**** Constants and Environment Variable Names
+All caps, separated with underscores, declared at the top of the file.
+
+#+BEGIN_SRC sh
+  # Constant
+  readonly PATH_TO_FILES='/some/path'
+
+  # Both constant and environment
+  declare -xr ORACLE_SID='PROD'
+#+END_SRC
+
+Some things become constant at their first setting (for example, via
+getopts). Thus, it's OK to set a constant in getopts or based on a
+condition, but it should be made readonly immediately afterwards. Note
+that declare doesn't operate on global variables within functions, so
+readonly or export is recommended instead.
+
+
+#+BEGIN_SRC sh
+  VERBOSE='false'
+  while getopts 'v' flag; do
+    case "${flag}" in
+      v) VERBOSE='true' ;;
+    esac
+  done
+  readonly VERBOSE
+#+END_SRC
+
+**** Source Filenames
+Lowercase, with underscores to separate words if desired.
+=maketemplate= or =make_template= but not =make-templat=
+
+**** Read-only Variables
+Use =readonly= or =declare -r= to ensure they're read only.
+
+#+BEGIN_SRC sh
+  zip_version="$(dpkg --status zip | grep Version: | cut -d ' ' -f 2)"
+  if [[ -z "${zip_version}" ]]; then
+    error_message
+  else
+    readonly zip_version
+  fi
+
+  Use
+#+END_SRC
+
+**** Use Local Variables
+Declare function-specific variables with =local=. Declaration and
+assignment should be on different lines, as the 'local' builtin does
+not propagate the exit code from the command substitution.
+
+#+BEGIN_SRC sh
+  my_func2() {
+    local name="$1"
+
+    # Separate lines for declaration and assignment:
+    local my_var
+    my_var="$(my_func)" || return
+
+    # DO NOT do this: $? contains the exit code of 'local', not my_func
+    local my_var="$(my_func)"
+    [[ $? -eq 0 ]] || return
+
+    ...
+  }
+#+END_SRC
+
+**** Function Location
+Put all function together in the file just below constants. Don't hide
+executable code between functions.
+
+Only =includes=, =set= statements and setting constants may be done
+before declaring functions.
+
+**** main
+A function called =main= is required for scripts long enough to
+contain at least one other function.
+
+Put it as the bottom most function. And the last non-comment line in
+the file should be a call :
+#+BEGIN_SRC sh
+  main "$@"
+#+END_SRC
+
+*** Calling Commands
+**** Checking Return Values
+Always check return values and give informative return values.
+
+For unpiped commands, use =$?= or check directly via an =if=
+statement.
+
+#+BEGIN_SRC sh
+  if ! mv "${file_list}" "${dest_dir}/" ; then
+    echo "Unable to move ${file_list} to ${dest_dir}" >&2
+    exit "${E_BAD_MOVE}"
+  fi
+
+  # Or
+  mv "${file_list}" "${dest_dir}/"
+  if [[ "$?" -ne 0 ]]; then
+    echo "Unable to move ${file_list} to ${dest_dir}" >&2
+    exit "${E_BAD_MOVE}"
+  fi
+#+END_SRC
+
+Bash also has the =PIPESTATUS= variable that allows checking of the
+return code from all parts of a pipe.
+
+But this variable will be overwritten as soon as you do any other
+command. So, assign it to another variable immediately after running
+the command (don't forget that [ is a command and will wipe out
+PIPESTATUS).
+
+#+BEGIN_SRC sh
+  tar -cf - ./* | ( cd "${dir}" && tar -xf - )
+  if [[ "${PIPESTATUS[0]}" -ne 0 || "${PIPESTATUS[1]}" -ne 0 ]]; then
+    echo "Unable to tar files to ${dir}" >&2
+  fi
+
+  tar -cf - ./* | ( cd "${DIR}" && tar -xf - )
+  return_codes=(${PIPESTATUS[*]})
+  if [[ "${return_codes[0]}" -ne 0 ]]; then
+    do_something
+  fi
+  if [[ "${return_codes[1]}" -ne 0 ]]; then
+    do_something_else
+  fi
+#+END_SRC
+
+**** Builtin Commands vs. External Commands
+Given the choise between invoking a shell builtin and invoking a
+separate process, choose the builtin.
+
+We prefer the use of builtins such as the Parameter Expansion
+functions in bash(1) as it's more robust and portable (especially when
+compared to things like sed).
+
+#+BEGIN_SRC sh
+  # Prefer this:
+  addition=$((${X} + ${Y}))
+  substitution="${string/#foo/bar}"
+
+  # Instead of this:
+  addition="$(expr ${X} + ${Y})"
+  substitution="$(echo "${string}" | sed -e 's/^foo/bar/')"
+#+END_SRC
+** getopts
+getopts æ¯shellåå»ºçä¸ä¸ªå½ä»¤ï¼ä¸æ¯æé¿åæ°ãè getopt æ¯æï¼ä½å®æ¯ä¸ª
+å¤é¨å½ä»¤ï¼Linux å Unix çç¨æ³ä¸ä¸æ ·ã
+
+#+BEGIN_SRC sh
+  getopts option_string variable #[arg...]
+#+END_SRC
+
+- option_string :: ä»¥åå·åéçéé¡¹
+- variable :: ä¿å­æ¯æ¬¡å¹éæåçéé¡¹çåé
+- OPTIND :: ç¹æ®åéï¼åå§å¼ä¸º1, æåæ¯æ¬¡ getopts åºè¯¥å¤ççä¸ä¸ä¸ªéé¡¹
+            çåºå·ã
+- OPTARG :: ç¹æ®åéï¼è¡¨ç¤ºå·ä½åæ°
+
+Example:
+
+#+BEGIN_SRC sh
+  #!/bin/bash
+  QUIET=
+  VERBOSE=
+  DEVICE=
+  LOGFILE=/tmp/default
+
+  usage()
+  {
+      echo "Usage: `basename $0` [-qv] [-l LOGFILE] -d DEVICE input_file [input_file2...]"
+      exit 1
+  }
+
+  [ $# -eq 0 ] && usage
+
+  #option_stringä»¥åå·å¼å¤´è¡¨ç¤ºå±è½èæ¬çç³»ç»æç¤ºéè¯¯ï¼èªå·±å¤çéè¯¯æç¤ºã
+  #åé¢æ¥åæ³çåå­æ¯éé¡¹ï¼éé¡¹åè¥æåå·ï¼åè¡¨ç¤ºè¯¥éé¡¹å¿é¡»æ¥å·ä½çåæ°
+  while getopts :qvd:l: OPTION
+  do
+      case $OPTION in
+          q)
+              QUIET=y
+              ;;
+          v)
+              VERBOSE=y
+              ;;
+          d)
+              DEVICE=$OPTARG        #$OPTARGä¸ºç¹æ®åéï¼è¡¨ç¤ºéé¡¹çå·ä½åæ°
+              ;;
+          l)
+              LOGFILE=$OPTARG
+              ;;
+          \?)                       #å¦æåºç°éè¯¯ï¼åè§£æä¸º?
+              usage
+              ;;
+      esac
+  done
+
+  #$OPTINDä¸ºç¹æ®åéï¼è¡¨ç¤ºç¬¬å ä¸ªéé¡¹ï¼åå§å¼ä¸º1
+  shift $(($OPTIND - 1))      #é¤äºéé¡¹ä¹å¤ï¼è¯¥èæ¬å¿é¡»æ¥è³å°ä¸ä¸ªåæ°
+  if [ $# -eq 0 ]; then
+      usage
+  fi
+
+  if [ -z "$DEVICE" ]; then   #è¯¥èæ¬å¿é¡»æä¾-déé¡¹
+      echo "You must specify DEVICE with -d option"
+      exit
+  fi
+
+
+  echo "you chose the following options.."
+  echo "Quiet=$QUIET VERBOSE=$VERBOSE DEVICE=$DEVICE LOGFILE=$LOGFILE"
+
+  for file in $@          #ä¾æ¬¡å¤çå©ä½çåæ°
+  do
+      echo "Processing $file"
+  done
+#+END_SRC
+** shift, select
+shift ARG è¡¨ç¤ºæåæ°å¨é¨åç§»ARGä½ï¼ä¾å¦ï¼shift 3 ä¹åï¼ $1,$2,$3 å°ä¸
+å¯ä»¥ç¨ï¼åæ¥ç$4 åæ$1
+
+#+BEGIN_SRC sh
+  #!/bin/bash
+
+  PS3=âéæ©ä½ åæ¬¢çè¬èæ¯ ï¼ â
+  echo
+  select vegetable in âè±è§â âç½èâ âå¸¦é±¼â âè¥¿çº¢æ¿â âé»çâ
+  do
+
+      echo
+      echo âä½ æåæ¬¢çè¬èæ¯ $vegetableâ
+      echo
+      break
+
+  done
+#+END_SRC
+
+** Define function
+1. using "function"
+   Such definition is availability in bash,ksh and zsh.
+   But not in Bourne Shell.
+
+2. just function_name() {...}
+   compatible in older system.
+
+** Avoid using which
+
+
+Yes; avoid which. Not only is it an external process you're launching for doing very little (meaning builtins like hash, type or command are way cheaper), you can also rely on the builtins to actually do what you want, while the effects of external commands can easily vary from system to system.
+
+Why care?
+
+    Many operating systems have a which that doesn't even set an exit status, meaning the if which foo won't even work there and will always report that foo exists, even if it doesn't (note that some POSIX shells appear to do this for hash too).
+    Many operating systems make which do custom and evil stuff like change the output or even hook into the package manager.
+
+So, don't use which. Instead use one of these:
+
+
+#+BEGIN_SRC sh
+  $ command -v foo >/dev/null 2>&1 || { echo >&2 "I require foo but it's not installed.  Aborting."; exit 1; }
+  $ type foo >/dev/null 2>&1 || { echo >&2 "I require foo but it's not installed.  Aborting."; exit 1; }
+  $ hash foo 2>/dev/null || { echo >&2 "I require foo but it's not installed.  Aborting."; exit 1; }
+#+END_SRC
+
+
+If your hash bang is /bin/sh then you should care about what POSIX says. type and hash's exit codes aren't terribly well defined by POSIX, and hash is seen to exit successfully when the command doesn't exist (haven't seen this with type yet). command's exit status is well defined by POSIX, so that one is probably the safest to use.
+
+If your script uses bash though, POSIX rules don't really matter anymore and both type and hash become perfectly safe to use. type now has a -P to search just the PATH and hash has the side-effect that the command's location will be hashed (for faster lookup next time you use it), which is usually a good thing since you probably check for its existence in order to actually use it.
+
+As a simple example, here's a function that runs gdate if it exists, otherwise date:
+
+#+BEGIN_SRC sh
+  gnudate() {
+      if hash gdate 2>/dev/null; then
+          gdate "$@"
+      else
+          date "$@"
+      fi
+  }
+#+END_SRC
+
+In summary:
+
+Where bash is your shell/hashbang, consistently use hash (for commands) or type (to consider built-ins & keywords).
+
+When writing a POSIX script, use command -v.
+
+** variable
+The global variable is not guaranteed !!
+If the subshell change the value , parent won't know !!!
+
+** Case statement
+1. &; can be used to fail-through case statement.
+* Command
+** Redirect
+following command is correct. it redirect  STDOUT to /dev/null, and will then handle STDERR via the pipeline.
+#+BEGIN_SRC sh
+  doit 2>&1 >/dev/null | mailx -s "$0" stefanl@example.org
+#+END_SRC
+
+doit 2>&1 >/dev/null | mailx -s "$0" stefanl@example.org
+** Dump
+Dump -W to watch which partition has been dumped.
+Dump -S to calculate how many space is need.
+Dump -1u -f /partition/need_to/dump  dump_file_name
+http://linux.vbird.org/linux_basic/0240tarcompress.php#dump_restore
+
+** find
+- prune
+  è¿æ¯ä¸ä¸ªæä½ï¼ç±»ä¼¼ -printï¼ï¼èä¸æ¯ä¸ä¸ªå¤æ­ï¼ç±»ä¼¼ -nameï¼ãå¹¶ä¸å®æ»
+  æ¯è¿å true çã
+
+  =find [path] [condition to prune] -prune -o [your usual condidtions] [ actioins to perform]=
+
+  findæ»æ¯é»è®¤ä½¿ç¨ -print æ¥è¿æ¥å¤ä¸ªexpressionï¼å æ­¤è¦æ³¨æå¨ä½¿ç¨
+  -prune åæ¶ä½¿ç¨ -print ï¼ å¦åå°±ä¼ï¼
+
+#+BEGIN_SRC sh
+  find . -name .snapshot -prune -o -name '*.foo'=
+
+  # åæ
+
+  find . \( -name .snapshot -prune -o -name '*.foo' \) -print
+#+END_SRC
+
+*** filter path
+http://stackoverflow.com/questions/4210042/exclude-directory-from-find-command
+
+find -name "*.js" -not patht "./directory/*"
+
+*** exec
+find /tmp/ -type f -exec md5sum {} +
+similar efficient to use xargs but it also work with file whose name have -, {,  }
+http://stackoverflow.com/questions/896808/find-exec-cmd-vs-xargs
+
+
+** awk
+*** 转置行列
+#+BEGIN_SRC sh
+  awk '{
+    for(i=1;i<=NF;i++) {
+      a[FNR,i]=$i
+    }
+  }
+
+  END{
+    for(i=1;i<=NF;i++) {
+      for(j=1;j<=FNR;j++) {
+        printf a[j,i]\" \"
+      }
+      print \"\"
+    }
+  }'"
+
+#+END_SRC
+
+alias tsp="awk '{for(i=1;i<=NF;i++){a[FNR,i]=$i}} END{for(i=1;i<=NF;i++) {for(j=1;j<=FNR;j++) {printf a[j,i]\" \"}print \"\"}}'"
+
+http://www.thegeekstuff.com/2010/01/8-powerful-awk-built-in-variables-fs-ofs-rs-ors-nr-nf-filename-fnr/
+*** Invoke
+1) 引号
+   使用单绰号防止shell转译，并让其当为一个单独的参数传给awk。当然也能用双引号，但要自己注意转译。
+
+   #+BEGIN_SRC sh
+     awk 'BEGIN { print "Here is a single quote <'"'"'>" }'
+     # Here is a single quote <'>
+
+     awk 'BEGIN { print "Here is a single quote <'\''>" }'
+     # Here is a single quote <'>
+
+     awk "BEGIN { print \"Here is a single quote <'>\" }"
+     # Here is a single quote <'>
+
+     awk 'BEGIN { print "Here is a single quote <\47>" }'
+     # Here is a single quote <'>
+     awk 'BEGIN { print "Here is a double quote <\42>" }'
+     # Here is a double quote <">
+
+     awk -v sq="'" 'BEGIN { print "Here is a single quote <" sq ">" }'
+     # Here is a single quote <'>
+   #+END_SRC
+
+2) 使用脚本
+   脚本头
+   #+BEGIN_SRC sh
+     #! /bin/awk -f
+     BEGIN {print "start"}
+   #+END_SRC
+
+3) 不带对象名
+   此时针对 *标准输入* 每一行处理,直至用户键入Ctrl-d。
+
+4) null
+   awk会把跟参数放在一起null忽略，因此
+
+   #+BEGIN_SRC sh
+     awk -F "" 'program' files # correct
+     awk -F"" 'program' files # wrong!
+   #+END_SRC
+   第二种情况里，awk会把program当作-F 的值。
+
+5) -f 与 @include
+   -f参数可以多次使用，则会把内容组合成一个大的脚本，即可以利用这个特性来写库函数之类的脚本，再多次引用。
+   -f参数也可以与 /dev/tty 或 ‘-’ 连用来读取标准输入。
+
+   @include(-i)
+
+   @load (-l)
+
+*** Variable
+
+**** 传递
+1) 直接传递
+   直接与文件名参数放在一起的 var=value 语句并不会当作文件，而是会类似于带上-v参数。但这种变量在BEGIN中是不能获得的。
+2) -v传递
+   所有action中都能用，但要在action前定义。
+3) 环境变量
+   使用ENVIRON就可以获得环境变量。这是一个字典数组，以变量名为key。
+
+**** 转换
+awk会根据需要自动转换string和number。也可以借助“”和+来强制转换。
+
+#+BEGIN_SRC awk
+  two=2
+  three=3
+  print (two three ) + 4
+  # 输出 27
+
+  a=100
+  b=100
+  c=(a""b)
+  print c
+  # 输出100100
+
+  a="100"
+  b="10test10"
+  print (a+b+0)
+  # 输出110。非数字会变成0,发现第一个非数字字符，后面的会自动忽略
+#+END_SRC
+
+*** Array
+*** Function
+*** System Call
+*** Debug
+** sort
+Sort numerically on the second field and resolve ties by sorting alphabetically on the third and fourth characters of field five. Use ‘:’ as the field delimiter.
+
+#+BEGIN_SRC sh
+  sort -t : -k 2,2n -k 5.3,5.4
+
+  # a way to 'uniq' by column
+  sort -u -t, -k1,1 file'
+#+END_SRC
+
+** crontab
+[[http://unix.stackexchange.com/questions/3724/etc-cron-daily-foo-send-email-to-a-particular-user-instead-of-root][disable sending result to root@domain.com]]
+
+** iptables
+http://wangcong.org/articles/learning-iptables.cn.html
+
+* Tools
+
+** LVM
+   [[https://wiki.archlinux.org/index.php/LVM][archwiki]]
+   [[http://www.ibm.com/developerworks/cn/linux/l-cn-pclvm-rstr/][ibm]]
+   [[http://linux.vbird.org/linux_basic/0420quota.php#ps3][Bro_bird]]
+   [[http://robbin.iteye.com/blog/283065][iteye]]
+   [[http://www.babyface2.com/NetAdmin/18200707SoftRAIDLVM02/][RAID and application]]
+
+* Configure
+* Emacs
+** ibuffer
+1. Search in multiple buffer.
+   1. goto ibuffer.
+   2. press =% - n= to mark the buffers you want to search
+   3. press "O" and input the text you search.
+
+** ido
+- C-k :: delete the candidate file.
+- C-b :: into the buffer mode
+- C-d :: Into Dired mode
+- C-j :: Create the new file instead of open match file.
+- C-e :: Into edit mode.
+** toggle white space highlight
+Hi Andrew!
+
+Hmm, it should work fine to just (setq show-trailing-whitespace nil) like you did. First, try executing that in the current buffer, using M-: (setq show-trailing-whitespace nil) -- if that doesn't work, then something else is going on.
+
+I assume you restarted Emacs after modifying init-local.el, and that there were no errors reported at start-up in *Messages* which might have prevented the code in there from being reached?
+
+Note also that Emacs has two ways of triggering the display of trailing whitespace: the other one is whitespace-mode, so you could check (with C-h m if necessary) to see if it's still enabled in the buffers.
+
+-Steve
+** Register
+Register name  is case-sensitive and it can be number.
+
+Bookmarks have long names and persist automatically from one Emacs to the next.
+
+1. text register
+   - C-x r s a :: store region as âaâ
+   - C-x r i a :: insert region stored in âaâ
+   - C-x r r a :: store rectangle as âaâ
+
+2. point register
+   - C-x r SPC a :: store current point as âaâ
+   - C-x r j a :: move to point in âaâ
+
+3. window register
+   - C-x r w a :: store configuration of windows in frame
+   - C-x r j a ::restore window configurations
+
+4. frame register
+   - C-x r f a :: store window configuration for all frames
+   - C-x r j a :: restore all window configurations
+
+5. number register
+   - C-u 1 C-x r n a :: store 1 in âaâ
+   - C-u 1 C-x r + a :: add 1 to number in âaâ
+   - C-x r i a :: insert number in âaâ
+
+6. position register
+   - C-x r m RET :: save default
+   - C-x r m <NAME> RET :: save as NAME
+   - C-x r b RET :: move to default
+   - C-x r b <NAME> RET :: move to NAME
+   - C-x r l :: list
+** XML
+*** validate
+use trang to convert dtd to rnc file then emacs could validate the xml
+http://fedoraproject.org/wiki/How_to_use_Emacs_for_XML_editing
+
+*** outline
+The variable nxml-section-element-name-regexp gives a regexp for the local names (i.e., the part of the name following any prefix) of section elements. The variable nxml-heading-element-name-regexp gives a regexp for the local names of heading elements. For an element to be recognized as a section
+
+    C-c C-o C-a shows all sections in the buffer normally.
+    C-c C-o C-t hides the text content of all sections in the buffer.
+    C-c C-o C-c hides the text content of the current section.
+    C-c C-o C-e shows the text content of the current section.
+    C-c C-o C-d hides the text content and subsections of the current section.
+    C-c C-o C-s shows the current section and all its direct and indirect subsections normally.
+    C-c C-o C-k shows the headings of the direct and indirect subsections of the current section.
+    C-c C-o C-l hides the text content of the current section and of its direct and indirect subsections.
+    C-c C-o C-i shows the headings of the direct subsections of the current section.
+    C-c C-o C-o hides as much as possible without hiding the current section's text content; the headings of ancestor sections of the current section and their child section sections will not be hidden. 
+
+** Helm
+http://tuhdo.github.io/helm-intro.html
+
+
+* Utility script
+** calculate ic host
+#+BEGIN_SRC sh
+  sed -n '/^known name: UnixAgent/,/<\/asp/p' DiagnosticSnapshot_2014-06-30_110448.txt | grep "<prompt>Host<"  -A 1 | grep param | awk -F "<|>" '{print $3}' | sort | uniq -c
+#+END_SRC
+** Filter out ERROR log
+
+#+BEGIN_SRC sh
+  awk  -v eof=$(wc -l < ManagementServer_2014-06-15_103610_001.log ) '{ if (b=="ERROR") { print a; while( $1 !~ /2014/ && NR < eof) {print $0; getline} }   a=$0;b=$3;  }' ManagementServer_2014-06-15_103610_001.log | less
+
+#+END_SRC
+
+** Count Fglam
+
+#+BEGIN_SRC sh
+  sed -n '/^-* credential clients -*/,/-- Finish/p' DiagnosticSnapshot_2014-06-30_110448.txt| grep "host:" | sort | uniq -c
+
+#+END_SRC
+
+** Calculate database size from sql
+
+#+BEGIN_SRC sh
+  grep -i OBS_STRING_0022 all_*.log | awk '{print $2} END{print "OBS_STRING_0022"}' | while read line; do grep -i "${line//\$/}" segments.log -A1 | awk 'NF==2{print $2}'; done   | awk '{a+=$1} END{print a/1024/1024}'
+#+END_SRC
+
+** sort latency for a given address list
+
+#+BEGIN_SRC sh
+  grep =  ~/oldhome/VPNList.txt | tail -n +4  | while read line; do host="$(echo "$line" | cut -d "=" -f 2)" ; ping "$host" -c 5 -q | awk -v host="$host" 'BEGIN{printf host} NR>3{printf " " $6 "  "; getline; print $0;}' ; done
+
+#+END_SRC
+
+** Filter result of countertyep
+#+BEGIN_SRC sh
+    egrep "=> \"\"|^--" result.txt -B1 > result_empty_type.txt
+    egrep "=> \"\"|^--" result.txt  | awk '{print $2}' | sort |uniq >> result_empty_type.txt
+
+    egrep "( *not found)|(^[^     ]+)|(^---)" result.txt | awk 'NF!=3{print $0}' |egrep "^       |---" -B1 > result_not_found.txt
+
+    grep "=> \"\"" result.txt  -v  | grep -v "not found" | egrep "^  |^----" -B1 > result_wrong_match.txt
+
+    sed 's/  /,/g' result_not_found.txt |sed '/^--$/d' | tr -d "=>" | tr -d "\""  | sed 's/ \+/,/g' | awk -F"[,-]" '{ if (NF==1) printf $0; else print $0}' > not_found.csv
+#+END_SRC
+
+
+* Others
+** Copy partition
+   http://www.nilbus.com/linux/disk-copy.php
+** Mount a vdi file
+1. Install the virtualbox-fuse
+2. vdfuse -v -d -f /path/to/file.vdi vdi_dev
+3. mount vdi_dev vdi_dir
+http://superuser.com/questions/483773/how-to-copy-virtualbox-vdi-contents-to-a-partition-and-dual-boot-the-os-from-it
+If we need to investigate the content of a VirtualBox VDI image file, we can use qemu-nbd to mount it.
+
+$ sudo apt-get install qemu
+
+Reload network block device kernel module.
+$ sudo rmmod nbd
+$ sudo modprobe nbd max_part=16
+
+Making the VDI image file as a network device.
+$ sudo qemu-nbd -c /dev/nbd0 ~myuser/.VirtualBox/VDI/myimage.vdi
+
+After the network device is successfully attached to a network device, if you want mount its 1st partition, you may mount it.
+$ sudo mount /dev/nbd0p1 /mnt
+
+After you finished your investigation, you should discount VDI image from the network device.
+$ sudo qemu-nbd -d /dev/nbd0
+
+** route particular package to different interface
+http://serverfault.com/questions/128357/routing-application-traffic-through-specific-interface
+http://www.ljjjinuxhorizon.ro/iproute2.html
+http://unix.stackexchange.com/questions/21093/output-traffic-on-different-interfaces-based-on-destination-port
+http://snikt.net/blog/2013/10/10/how-to-force-program-to-use-vpn-tunnel/
+
+* Java
+
+** Log4j
+
+*** Architecture
+[[./Log4jClasses.jpg]]
+
+- LoggerContext :: 日志系统的基准点，但在同一个应用下也可以同时有多个
+- Configuration :: 每个LoggerContext都有一个激活的Configuration，它包
+                   含了所有的Appenders, context-wide Filters,
+                   LoggerConfigs 还有对 StrSubstitutor 的引用。
+                   在重新读取配置时，可能会存在两个实例，但当所有的
+                   Logger都指向新实例后，旧的那个会被抛弃。
+- Logger :: 
+
+  
+
+*** Configuration
+
+**** 读取文件
+不提供任何增删改configuration的API。
+读取配置的优先顺序为：
+1. 查找 *log4j.configurationFile* 的系统属性
+2. 找 classpath 下的 log4j2-test.yaml
+3. 找 classpath 下的 log4j2-test.jsn
+4. 找 classpath 下的 log4j2-test.xml
+5. 找 classpath 下的 log4j2.yaml
+6. 找 classpath 下的 log4j2.jsn
+7. 找 classpath 下的 log4j2.xml
+8. 使用默认配置 DefaultConfiguration , 会输出到控制台，Leve 默认为Error
+   
+默认配置等同于
+
+#+BEGIN_SRC nxml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <Configuration status="WARN">
+      <Appenders>
+          <Console name="Console" target="SYSTEM_OUT">
+              <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+          </Console>
+      </Appenders>
+      <Loggers>
+          <Root level="error">
+              <AppenderRef ref="Console"/>
+          </Root>
+      </Loggers>
+  </Configuration>
+#+END_SRC
+
+
+因此可以为test 单独配置额外的log4j。
+
+**** 配置继承
+父Logger配置的appender会被子继承，可以通过设additivity为false来消除
+下面的配置不会有重复输出。
+#+BEGIN_SRC nxml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <Configuration status="WARN">
+      <Appenders>
+          <Console name="Console" target="SYSTEM_OUT">
+              <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+          </Console>
+      </Appenders>
+      <Loggers>
+          <Logger name="com.foo.Bar" level="trace" additivity="false">
+              <AppenderRef ref="Console"/>
+          </Logger>
+          <Root level="error">
+              <AppenderRef ref="Console"/>
+          </Root>
+      </Loggers>
+  </Configuration>
+#+END_SRC
+
+**** 自动读新配置
+可以通过设置 monitorInterval 来让Log4j检查配置文件是否更新,（至少5秒）
+=<Configuration monitorInterval ="30"> ...</Configuration>=
+
+**** Advertising appender
+
+
+**** 配置logger
+
+
+*** Web 应用
+
+*** Lookups
+
+*** Filters
+
+*** Appenders
+
+*** Layouts
+
+*** JMX

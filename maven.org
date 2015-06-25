@@ -1,0 +1,488 @@
+* Maven 的好处
+Maven 对于项目目录结构，测试用例命名方式等内容都有既定的规则，只要遵循
+了这些成熟的规则，用户在项目间切换的时候就免去了的学习成本，可以说是
+*约定优于配置* .
+
+Maven 具有依赖管理，并能够统一，方便地构建项目，与持续集成工具兼容性良
+好，方便TDD，并且富有信息的工作区。
+
+* 安装设置
+1. 设置 *JAVA_HOME* 环境变量
+2. 下载解压
+3. 设置 *M2_HOME* 环境变量,并把 M2_HOME/bin 添加到 *Path* 中
+4. =mvn -v=
+
+** 更新
+重新下载即可，可以设置软链接以便更改。
+
+** 内容
+- bin/mvnDebug :: 添加 MAVEN_DEBUG_OPTS 配置，以便调试Maven本身。
+- boot :: 类加载框架
+- conf :: setting.xml 全局地定制Maven的行为
+- lib :: Maven运行时需要的Java类库
+
+** ~/.m2
+=mvn help:system= 打印所有的Java系统属性和环境变量
+
+/repository 这是Maven的本地仓库，所有的Maven构件都被存储到该仓库中
+/settings.xml 最佳实践--M2_HOME/conf/settings.xml的复制。
+
+** 设置HTTP代理
+=ping repol.maven.org= 检查连接
+在settings.xml中添加以下设置
+
+#+BEGIN_SRC xml
+  <settings>
+      ...
+      <proxies>
+          <proxy>
+              <id>my-proxy</id>
+              <active>true</active>
+              <protocol>http</protocol>
+              <host>x.x.x.x</host>
+              <port>xxxx</port>
+              <!-- <username>xxxx</username> -->
+              <!-- <password>xxxx</password> -->
+              <!-- <nonProxyHosts>repository.mycom.com|*.google.com</nonProxyHosts> -->
+          </proxy>
+      </proxies>
+  </settings>
+#+END_SRC
+
+** m2eclipse
+- Maven SCM handler for
+- Maven SCM Integration
+
+
+** Best Practice
+- MAVEN_OPTS 环境变量
+  存放maven 的java运行变量， 大项目常常需要手动增大运行内存,如
+  -Xms128m -Xmx512m
+
+- 用户范围的setting.xml
+  ~/.m2/settings.xml
+  $M2_HOME/conf/settings.xml
+
+- 不使用IDE插件内嵌的Mvn
+
+* Maven使用入门
+
+** 编写POM
+/POM/ -- Project Object Model
+POM与代码相分离，解耦。当POM稳定后通常不再需要改。
+  #+BEGIN_SRC nxml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <project xmlns="http://maven.apache.org/POM/4.0.0"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+        http://maven.apache.org/maven-v4_0_0.xsd">
+        <modelVersion>4.0.0</modelVersion>
+        <groupId>com.juvenxu.mvnbook</groupId>
+        <artifactId>hello-world</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <name>Maven Hello World Project</name>
+    </project>
+  #+END_SRC
+  
+- project 是POM的根元素，声明相关命名空间及xsd元素
+- 对于 Maven2，3 来说，modelVersion只能是4.0.0
+- groupId, artifactId, version 是一个项目的基本坐标，所有jar,pom,或war
+  都是以这种方式区分。
+- groupId 定义项目属于哪个组织，公司，例如在googlecode上建立一个myapp
+  的项目，则groupId应该是 com.googlecode.myapp 。
+- artifactId 定义当前Maven项目在组中的唯一Id
+- version  表明项目的当前版本。SNAPSHOT表示该项目还处于开发中，不是稳
+  定版本。
+- name 不是必须的，但可以给用户提供一个更为友好的项目名称。
+
+  [[file:/media/oldhome/leo/Program/Learn_Cases/HelloWorld/pom.xml::<version>4.7</version][greeter:pom.xml]]
+
+** 编写主代码
+不同于测试代码，主代码会被打包到最终的构件中（如jar），Maven默认假设主
+代码位于 src/main/java 目录下。
+包名也应该尽量与groupId,artifactId相吻合。
+
+** 编写测试
+src/test/java
+[[file:/media/oldhome/leo/Program/Learn_Cases/HelloWorld/src/test/java/com/shellway/learn/mvn/HelloWorld/GreeterTest.java::package%20com.shellway.learn.mvn.HelloWorld;][GreeterTest.java]]
+
+** 打包运行
+Hello world的pom中没有指定打包的类型,默认使用JAR.
+jar插件会将项目主代码打包成一个名为HelloWorld-0.0.1-SNAPSHOT.jar 放到target目录下. 有需要的话,可以使用finalName来指定文件名.
+
+install可以把jar安装到本地仓库中,此时其他项目可以引用
+
+但该jar还不能直接运行,因为main方法的信息没有添加到manifest中.需要借助maven-shade-plugin插件实现.
+
+** 使用Archetype生成项目骨架
+Maven3:
+=mvn archetype:generate=
+
+** IDE插件使用
+import maven project
+file new other maven project choose archetype
+
+
+* 背景案例
+
+* 坐标和依赖
+
+** 坐标
+任何构件都可以由坐标唯一地标识,其元素包括
+- groupId :: 定义当前mvn项目隶属的实际项目.
+     不一定是一对一的关系,例如SpringFramework这一实际项目所对应的mvn项
+     目有spring-core, spring-context等. 
+
+- artifactId :: 定义实际项目中的一个Maven项目(模块).
+     推荐的做法是使用实际项目名称作为artifactId的前缀.如spring-core,这
+     样的好处是寻找实际构件时比较方便.因为Maven生成构件时,文件名默认以
+     本元素开头.
+          
+- version :: 定义Maven项目当前所处的版本.
+     注意版本规范
+     
+- packaging :: 定义打包方式.
+     与构件的拓展名相对应,如jar,war. 然而并不一定. 没有本元素时默认用
+     jar
+
+- classifier :: 定义构件输出的一些附属构件.
+     如nexus-indexer-2.0.0-javadoc.jar,
+     nexus-indexer-2.0.0-source.jar.
+     javadoc 和 sources 就是附属构件的classifier.
+     注意不能直接定义项目的classsifier,因为附属构件不是项目直接默认生
+     成的,而是由附加的插件生成的.
+
+默认的中央仓库: http://repol.maven.org/maven2
+
+** account-email模块
+
+
+** 依赖的配置
+
+** 依赖范围
+
+** 传递性依赖
+
+** 依赖调解
+
+** 可选依赖
+
+** 最佳实践
+
+** 小结
+
+* 仓库
+
+* 生命周期和插件
+
+* 聚合与继承
+
+* Nexus创建私服
+
+* Maven测试
+
+* Hudson持续集成
+
+* Maven Web 应用
+
+* 版本管理
+
+* 灵活的构建
+
+* 生成项目站点
+
+* 编写Maven插件
+
+* Archetype
+
+* POM的组成
+http://www.sonatype.com/books/mvnref-book/reference/figs/web/pom-relationships_pom-small.png
+
+- General project information
+  包换项目名，项目URL，资助机构，开发者，贡献者列表以及许可证。
+
+- Build setting
+  通过在这里设置来更改 Maven 的默认项目生成方式。例如，更改源文件，测
+  试文件地址，添加插件，绑定插件目标到生成周期，还有更改网页的生成参数。
+
+- Build Environment
+  包含了多套不同的存档，以更用户用在不同的环境当中。例如，在开发中部署
+  到开发机器，而发布时部署到生成环境中。这里的设置是针对Build Setting
+  中的设置根据环境的不同，而进一步定制。通常写到放在 ~/.m2 底下的一个
+  自定义的 xml 文件当中。
+
+- POM Relationships
+  定义项目所依赖的其他项目，会继承父项目的POM设置，也可以包括子模块的
+  设置。
+
+** Super POM
+在 ${M2_HOME}/lib 的 maven-3.0.3-uber.jar 中，在
+org.apache.maven.project 包下的名为 =pom-4.0.0.xml= 的文件 即为
+superPOM.
+
+它是所有POM文件的parent，包含了默认配置。
+- 默认的super POM 定义了一个id为central的单独的远程Maven库。 所有Maven
+  Client默认读取该仓库。 可以在setting.xml 中设置。
+- central 仓库包含了插件，并且不会自动更新。
+
+
+** 项目版本号
+=<major version>.<minior version>.<incremental version>-<qualifier>=
+
+maven会根据这个版本号进行排序等处理。其中qualifier后面接buildNumber，
+由于为字符串排序，所以 beta-01 < beta-10 < beta-2
+
+*** SNAPSHOT
+如果版本号中包含 "-SNAPSHOT", 则表明这是一个快照版本，deploy的时候，
+maven会把该字符串替换为UTC时间值，并release一个快照版本到快照库中，而
+不是正式版 TODO
+
+** Property Reference
+maven可以引用环境变量，POM信息和Maven Setting，具体如下
+
+#+BEGIN_SRC org
+  ${env.PATH}
+  ${project.groupId}
+  ${settings.offline}  引用的是 ~/.m2/settings.xml 的offline元素值
+#+END_SRC
+
+在POM中定义属性
+#+BEGIN_SRC nxml
+  <properties>
+      <foo>bar</foo>
+  </properties>
+#+END_SRC
+
+预定义的属性
+| System Property               | Description                      |
+|-------------------------------+----------------------------------|
+| java.version                  | Java Runtime Environment version |
+| java.vendor                   |                                  |
+| java.vendor.url               |                                  |
+| java.home                     | Java Installation directory      |
+| java.vm.specification.version | JVM specification version        |
+| java.vm.specification.vendor  |                                  |
+| java.vm.specification.name    |                                  |
+| java.vm.version               | JVM implementation version       |
+| java.vm.vendor                | ...                              |
+| java.vm.name                  | ...                              |
+| java.specification.version    | JRE specification version        |
+| java.specification.vendor     | ...                              |
+| java.specification.name       | ...                              |
+| java.class.version            | Java class format version number |
+| java.class.path               |                                  |
+| java.ext.dirs                 |                                  |
+| os.name                       |                                  |
+| os.arch                       |                                  |
+| os.version                    |                                  |
+| file.separator                | / on Unix    \ on windows        |
+| path.separtor                 | : on Unix    ; on windows        |
+| line.separator                | \n on Unix  and Windows          |
+| user.name                     |                                  |
+| user.home                     |                                  |
+| user.dir                      |                                  |
+
+
+* 项目依赖
+
+** Dependency Scope
+1. compile
+   *默认值* 全过程包含，在所有classpath可见，并且会被打包
+
+2. provided
+   表明在运行时由其他系统（JDK，或container）提供，在编译时会使用，但
+   不被打包，在 compilation classpath 可见。 例如，servlet API JAR
+
+3. runtime
+   仅在运行时才需要，而编译时则不用。例如 JDBC driver implementation
+
+4. test
+   仅在测试编译和运行时需要
+
+5. system
+   类似provided，但要手动指定文件系统上的JAR路径，例如，需要用到系统库
+   中的native object时。maven总会认为该依赖可用，而不会去查仓库，使用
+   这个scope需要同时提供systemPath元素。通常不建议使用这个scope，因为
+   你总应该使用公用或私有的仓库。
+
+** 可选依赖
+当项目所使用的API有两种实现，并且你想自行决定用哪个时，可以把依赖标注为optional。
+
+例如，项目A使用到缓存，它可以依赖EHCache或是SwarmCache，但不想当被引用的时候
+把两个都添加到ransitive runtime dependencies 则可以下如下：
+
+#+BEGIN_SRC nxml
+  <project>
+      <modelVersion>4.0.0</modelVersion>
+      <groupId>org.sonatype.mavenbook</groupId>
+      <artifactId>my-project</artifactId>
+      <version>1.0.0</version>
+      <dependencies>
+          <dependency>
+              <groupId>net.sf.ehcache</groupId>
+              <artifactId>ehcache</artifactId>
+              <version>1.4.1</version>
+              <optional>true</optional>
+          </dependency>
+          <dependency>
+              <groupId>swarmcache</groupId>
+              <artifactId>swarmcache</artifactId>
+              <version>1.0RC2</version>
+              <optional>true</optional>
+          </dependency>
+          <dependency>
+              <groupId>log4j</groupId>
+              <artifactId>log4j</artifactId>
+              <version>1.2.13</version>
+          </dependency>
+      </dependencies>
+  </project>
+#+END_SRC
+
+而B项目想引用A项目时，则可以把为optional的其中一个依赖标明出来：
+
+#+BEGIN_SRC nxml
+  <project>
+      <modelVersion>4.0.0</modelVersion>
+      <groupId>org.sonatype.mavenbook</groupId>
+      <artifactId>my-application</artifactId>
+      <version>1.0.0</version>
+      <dependencies>
+          <dependency>
+              <groupId>org.sonatype.mavenbook</groupId>
+              <artifactId>my-project</artifactId>
+              <version>1.0.0</version>
+          </dependency>
+          <dependency>
+              <groupId>net.sf.ehcache</groupId>
+              <artifactId>swarmcache</artifactId>
+              <version>1.4.1</version>
+          </dependency>
+      </dependencies>
+  </project>
+#+END_SRC
+
+** 声明版本范围
+例如，想声明你的项目依赖3.8Jun it，可以使用括号括起多个版本号。
+
+- ( , )  不包含
+- [ , ]  包含
+
+- Juanita 3.8 -- 4.0
+  #+BEGIN_SRC nxml
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>[3.8,4.0)</version>
+        <scope>test</scope>
+    </dependency>
+  #+END_SRC
+
+- 小于3.8.1
+  #+BEGIN_SRC nxml
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>[,3.8.1]</version>
+        <scope>test</scope>
+    </dependency>
+  #+END_SRC
+
+- 仅声明为3.8.2,其实在内部表示为允许所有，但最好用3.8.2,maven可以使用冲突解决算法来选择最佳版本。
+- 声明为[3.8.2],则表示，仅允许使用3.8.2,当有冲突发生时，会报错
+
+** 间接依赖
+A依赖B，B依赖C，则C是A的 /间接依赖/ 。 Maven会尽量自行管理间接依赖，而不必用户了解细节。用户也可以自己设置来应对一些特殊情况。
+
+scope不仅影响明确声明的直接依赖，也影响间接依赖。
+
+Direct            vs. Transitive Scope
+|          | compile  | provided | runtime  | test |
+|----------+----------+----------+----------+------|
+| compile  | compile  | -        | runtime  | -    |
+| provided | provided | -        | provided | -    |
+| runtime  | runtime  | -        | runtime  | -    |
+| test     | test     | -        | test     | -    |
+
+上表表明，间接依赖基本上会按照直接依赖的scope配置。例如，项目A 在test scope 上依赖项目B， 而项目B在copile scope 依赖项目C， 则项目C是项目A的 test scope 的间接依赖。
+
+不管项目的直接依赖是哪个scope，其中包含的compile和runtime的间接依赖总会影响项目。
+
+
+** 解决冲突
+在以下场景，你可能需要使用exclude，来禁止或替换某些依赖
+- 依赖的 groupId 或 artifactId 改了，而当前项目已经在用着新的名字来查找依赖，这会导致引入同一依赖的两个版本
+- 不想使用某个依赖，但它并没有被声明为optional
+- 在运行时由容器提供，因而不用被包含进来的artifact.如Servlet API.
+- 使用API的另一个实现。 (Sun’s JTA JAR)  
+
+#+BEGIN_SRC nxml
+  <dependencies>
+      <dependency>
+          <groupId>org.hibernate</groupId>
+          <artifactId>hibernate</artifactId>
+          <version>3.2.5.ga</version>
+          <exclusions>
+              <exclusion>
+                  <groupId>javax.transaction</groupId>
+                  <artifactId>jta</artifactId>
+              </exclusion>
+          </exclusions>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.geronimo.specs</groupId>
+          <artifactId>geronimo-jta_1.1_spec</artifactId>
+          <version>1.1</version>
+      </dependency>
+  </dependencies>
+#+END_SRC
+
+** 依赖管理
+如果你的项目特别多，而很多项目又引用了MySQL的连接器，当你想把连接器换成更高版本的时候，你将要改变多个POM文件里的版本值，这不仅麻烦而且容易漏掉。此时，你可以在顶层的POM文件中使用 dependencyManagement 元素来进行管理。这样你就可以在子POM中不明确版本号来描述dependency.
+
+顶层POM声明
+#+BEGIN_SRC nxml
+  <project>
+      <modelVersion>4.0.0</modelVersion>
+      <groupId>org.sonatype.mavenbook</groupId>
+      <artifactId>a-parent</artifactId>
+      <version>1.0.0</version>
+      ...
+      <dependencyManagement>
+          <dependencies>
+              <dependency>
+                  <groupId>mysql</groupId>
+                  <artifactId>mysql-connector-java</artifactId>
+                  <version>5.1.2</version>
+                  <scope>runtime</scope>
+              </dependency>
+              ...
+              <dependencies>
+      </dependencyManagement>
+#+END_SRC
+
+子项目声明
+
+#+BEGIN_SRC nxml
+  <project>
+      <modelVersion>4.0.0</modelVersion>
+      <parent>
+          <groupId>org.sonatype.mavenbook</groupId>
+          <artifactId>a-parent</artifactId>
+          <version>1.0.0</version>
+      </parent>
+      <artifactId>project-a</artifactId>
+      ...
+      <dependencies>
+          <dependency>
+              <groupId>mysql</groupId>
+              <artifactId>mysql-connector-java</artifactId>
+          </dependency>
+      </dependencies>
+  </project>
+#+END_SRC
+但如果子文件中明确了版本号，则会覆盖掉父POM声明的版本号。
+
+这与直接在你POM中定义一个公用的dependency不一样，使用dependencyManagement可以避免引用多余的依赖。 
+
+* 项目关联

@@ -1,0 +1,2572 @@
+* Book Notes
+http://hadoop.apache.org/.
+Hadoop's Java API documentation.
+
+http://www.hadoopbook.com/
++ sample programs
++ instructions for obtaining datasets
++ Author's blog
+
+** 1.Meet Hadoop
+*** Comparison
+|-----------+---------------------------+----------------------------|
+|           | Traditional RDBMS         | MapReduce                  |
+|-----------+---------------------------+----------------------------|
+| Data size | GB                        | PB                         |
+| Access    | Interactive and batch     | Batch                      |
+| Updates   | Read and write many times | Write once,read many times |
+| Structure | Static schema             | Dynamic schema             |
+| Integrity | High                      | Low                        |
+| Scaling   | nonlinear                 | Linear                     |
+|-----------+---------------------------+----------------------------|
+*** Hadoop Releases
+| Feature                     | 1.x                              | 0.22       | 2.x        |
+|-----------------------------+----------------------------------+------------+------------|
+| Secure authentication       | Yes                              | No         | Yes        |
+| Old configration names      | Yes                              | Deprecated | Deprecated |
+| New configration names      | No                               | Yes        | Yes        |
+| Old MapReduce API           | Yes                              | Yes        | Yes        |
+| New MapReduce API           | Yes (with some missing libraries | Yes        | Yes        |
+| MapReduce1 runtime(Classic) | Yes                              | Yes        | NO         |
+| MapReduce2 runtime(YARN)    | No                               | NO         | Yes        |
+| HDFS federation             | No                               | NO         | Yes        |
+| HDFS high-availability      | No                               | No         | Yes        |
+*** Hadoop features
+
+**** Analyze the whole dataset, hoc analysis.
+
+**** Semi-structured data.
+MapReduce works well on unstructured or semi-structured data, since it
+is designed to interpret the data at processing time. In other words,
+the input keys and values for MapReduce are not an intrinsic property
+of the data, but they are chosen by the person analyzing the data.
+
+**** Normalization
+Log files is suitable for MapReduce.
+MapReduce favor record-oriented data.
+
+**** Linearly scalable programming model.
+The programmer write two functions -- a map function and a reduce
+function -- each of which defines mapping form one set of key-value
+pairs to another.And it has no concern about the size of the data.
+
+**** Data Locality
+Hadoop try to colocate the data with the compute node.It preserves
+network bandwidth by explicitly modelling network topology.
+
+**** Used in higher-level.
+Do not need to touch to the data flow, and only thinks in terms of
+functions of key and value pairs.
+
+**** Auto reschedule tasks when encounter a failure.
+It is a shared-nothing architecture, which makes rescheduling task on
+machines that are healthy possible.
+
+**** Restricive programming model.
+You are limited to key and value types that are related in specified
+ways and mappers and reducers run with very limited coordination
+between one another.
+*** Apache Hadoop Project
+
+| Pig       | Chukwa | Hive      | HBase |
+|-----------+--------+-----------+-------|
+| MapReduce | HDFS   | ZooKeeper |       |
+|-----------+--------+-----------+-------|
+| Core      | Avro   |           |       |
+
+**** Core
+A set of components and interfaces for distributed filesystems and
+general I/O (serialization, Java RPC, persistent data structures).
+
+**** Avro
+A data serialization system for efficient, cross-language RPC, and persistent data
+storage. (At the time of this writing, Avro had been created only as a new subpro-
+ject, and no other Hadoop subprojects were using it yet.)
+
+**** MapReduce
+ distributed data processing model and execution environment that runs on large
+clusters of commodity machines.
+
+**** HDFS
+A distributed filesystem that runs on large clusters of commodity machines.
+
+**** Pig
+A data flow language and execution environment for exploring very large datasets.
+Pig runs on HDFS and MapReduce clusters.
+
+**** HBase
+A distributed, column-oriented database. HBase uses HDFS for its underlying
+storage, and supports both batch-style computations using MapReduce and point
+queries (random reads).
+
+**** ZooKeeper
+A distributed, highly available coordination service. ZooKeeper provides primitives
+such as distributed locks that can be used for building distributed applications.
+
+**** Hive
+A distributed data warehouse. Hive manages data stored in HDFS and provides a
+query language based on SQL (and which is translated by the runtime engine to
+MapReduce jobs) for querying the data.
+
+**** Chukwa
+A distributed data collection and analysis system. Chukwa runs collectors that
+store data in HDFS, and it uses MapReduce to produce reports. (At the time of this
+writing, Chukwa had only recently graduated from a “contrib” module in Core to
+its own subproject.)
+
+** 2.MapReduce
+introduction to Mapreduce.
+
+*** Without Hadoop
+Facing with the problem that find the highest temperature for each
+year from abundant of records,a large instance took up 40mins to
+execute a bash command.
+
+Express your query as a MapReduce job.
+
+MapReduce works by breaking the processing into two phases:the map
+phase and the reduce phase.Each phase has key-value pairs as input and
+output,the types of which may be chosen by the programmer.
+
+Use raw text as input for the map phase.The key should be the offset
+of the beginning of the from the beginning of the file.
+
+
+*** With Hadoop
+Use Hadoop's basic types instead of built-in Java types for achieving good
+performance when serialize.You can find them in org.apache.hadoop.io
+package.
+**** Jobtracker and tasktrackers
+The jobtracker coordinates all the jobs run on the system by
+scheduling tasks to run on tasktrackers. Tasktrackers run tasks and send progress re-
+ports to the jobtracker, which keeps a record of the overall progress of each job. If a
+tasks fails, the jobtracker can reschedule it on a different tasktracker.
+
+**** Map tasks write their output to local disk,not to HDFS.
+As it is not the finall result ,it's kind of waist to store in
+HDFS,which will back up.
+
+**** Input splits
+Input splits should be small enough to achieve the good load-balance.
+A good split size tends to be the size of a HDFS block,64MB by
+defualt,which means that a node can process its task without query
+other node to get all of the data.
+
+The number of reduce tasks is not governed by the size of the input, but is specified
+independently. 
+
+**** Combiner
+Combiner is a function juist like the reduce function, whereas it is
+executed before send data the the node where executing
+reduce.Therefor,you can define it using the reduce class.
+It is focus on minimize the using of bandwidth.
+
+**** Stream
+Hadoop also provide Unix standard streams as the interface between Hadoop and your program.
+
+** 3.The Hadoop Distributed Filesystem
+Looks at Hadoop filesystems,HDFS in depth.
+
+Hadoop has a general purpose filesystem abstraction,so it can also integrates with other storage systems.
+
+*** The Design of HDFS
++ HDFS :: is filesystem designed for storing very large files with
+          streaming data access patterns,running on clusters on
+          commodity hardware.
+
+**** Aood at	  
+***** Very large file 
+ hundreds of megabytes,gigabytes,or terabytes in size.
+
+***** Streaming data access
+HDFS is built around the idea that the most efficient data processing
+pattern is a write-once,read-many-times pattern.And analyses are
+performed on a large proportion of data.
+
+***** Commodity hardware
+It's designed to run on clusters of commodity hardware.
+
+**** Not fit for
+***** Low-latency data access
+In the tens of milliseconds range.HBase is currently a better for
+low-latency access.
+
+***** Losts of small files
+Because the namenode holds filesystem metadata in memory, the limit to the
+number of files in a filesystem is governed by the amount of memory on the name-
+node.
+
+***** Multiple writers,arbitrary file modifications
+File in HDFS may be written to by a single writer.And they are always
+write at the end of the file.
+
+*** HDFS Concepts
+**** Blocks
+Just like the blocks in a single disk.
+
+Block's default size in HDFS is 64MB.But a file that is smaller than
+64MB would not occupy a full block's worth of underlying storge.
+
+With such size of blocks,HDFS can minimize the cost of seeks.This
+figure will continue to be revised upward as transfer speeds grow.But
+it also shouldn't be taken too far.Map tasks normally operate on one
+block at a time,so if you have too few tasks (fewer than nodes in the
+clusters), your jobs will run slower than they could otherwise.
+
+list the blocks that make up each file in the filesystem
+*% Hadoop fsck -files -blocks*
+
+***** Benefits
++ a file can be larger than any single disk.
++ Making the unit of abstraction a block rather than a file simplifies
+  the storage subsystem.
+
+**** Namenodes and Datanodes
+master-worker pattern -- a namenode (the master) and a number of
+datanodes(workers).
+
+***** Client 
+It communicates with the namenode and datanodes and provide a
+POSIX-like interface to user.
+
+***** Datanode
+They store and retrieve blocks when they are told to (by clients or
+the namenode).
+Report to the namenode periodically with lists of blocks that they are
+storing.
+
+***** NameNode
+The namenode manages the filesystem namespace.
+Everytime the system starts,it generate two files that store the
+information -- namespace and edit log.
+It also knows nodes on which a file's blocks locate.
+
++ Causion :: If namenode obliterated,the filesystem broke.So it is
+             important to make the namenode resilient to failure.
+
++ Backup :: Hadoop can be configured so that the namenode write its
+            persistent state to local disk as well as a remote NFS
+            mount which is synchronous and atomic.
+
++ Secondary Namenode :: Its main role is to periodically merge the
+     namespace image with the edit log to prevent the edit log from
+     becoming too large.It keeps a copy of the merged namespace
+     image.But the information generated from merged
+     and faild will be lost.
+
+*** Command-Line Interface
+**** Setting Up HDFS
++ fs.default.name :: The HDFS daemons will use this property to determine the host and port for the HOST namenode.
++ dfs.replication :: Set it to one to cancel replicate filesystem blocks by the usual default for tree.
+
+**** Basic Operations
+fs -help for help.
+
++ Copy a file from the localfilesystem to HDFS ::
+  % hadoop fs -copyFromLocal input/docs/quangle.text [hdfs://localhost][/user/tom/]quangle.txt
+  (omitting hdfs uri will pick up the default hdfs://localhost)
+
++ HDFS file listing ::
+  % hadoop fs -ls .
+  The result is very similar to the "ls -l".
+
+  The second column is the replication factor of the file.Directories
+  do no have this value for they do not have the replication
+  concept.They are treated as metadata and stored by the namenode.
+  Datafiles do not have execute permission and directories must have
+  it for accessing its children.
+
+  Permission /*TODO*/
+
+*** Hadoop Filesystems
+Filesystem is an abstract notion and it has some implementation (HDFS
+is just one of them).
+
+|------------------+-----------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------|
+| Filesystem       | URIscheme | Java Implementation            | Description                                                                                                                            |
+|------------------+-----------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------|
+| Local            | file      | fs.LocalFileSystem             | A filesystem for a locally connected disk with client-side check-sums.Use RawLocalFileSystem for a local filesystem with no checksums. |
+| HDFS             | hdfs      | hdfs.DistributedFileSystem     | Hadoop's distributed filesystem.HDFS is designed to work efficiently in conjunction with MapReduce.                                    |
+| HFTP             | hftp      | hdfs.HftpFileSystem            |                                                                                                                                        |
+| HsFtp            | hsftp     | hdfs.HsftpFileSystem           |                                                                                                                                        |
+| HAR              | har       | fs.HarFileSystem               |                                                                                                                                        |
+| KFS(Cloud-Store) | kfs       | fs.kfs.KosmoFileSystem         |                                                                                                                                        |
+| FTP              | ftp       | fs.ftp.FTPFileSystem           |                                                                                                                                        |
+| S3(native)       | s3n       | fs.s3native.NativeS3FileSystem |                                                                                                                                        |
+| S3(block-based)  | s3        | fs.s3.S3FileSystem             |                                                                                                                                        |
+|------------------+-----------+--------------------------------+----------------------------------------------------------------------------------------------------------------------------------------|
+(All Java implementations are under org.apache.hadoop)
+
+Listing the files in the root directory of the local filessytem.
+% hadoop fs -ls file:////
+
+**** Interfaces
+/*TODO*/  
+
+*** The Java Interface
+Writting code against the FileSystem abstract class to retain
+portability across filesystem,which allows you to run tests rapidly
+using data stored on the local filesystem.
+
+**** Reading Data from a Hadoop URL
+One of the simplest ways to read a file from a Hadoop filesystem is by
+using a java.net.URL object to open a stream to read the data from.
+
+#+BEGIN_SRC
+InputStream in = null;
+try {
+  in = new URL("hdfs://host/path").openStream();
+  // process in
+} finally {
+  IOUtils.closeStream(in);
+}
+#+END_SRC
+
+To make Java recognize Hadoop's hdfs URL cheme,you need to call the
+setURLStreamHadnlerFactory method on URL with an instance of
+FsUrlStreamHandlerFactory.
+
+This method can only be called once per JVM,it better to executed in a
+static block while it may be conflict with some third-party component.
+
+#+BEGIN_SRC
+public class URLCat {
+  static {
+    URL.setURLStreamHandlerFactory(new FsUrlStreamHandlerFactory());
+  }
+
+  public static void main(String[] args) throws Exception {
+    InputStream in = null;
+    try {
+      in = new URL(args[0]).openStream();
+      //args[0] must met the format like : hdfs://localhost/path/to/file
+      IOUtils.copyBytes(in, System.out, 4096, false);
+    } finally {
+      IOUtils.closeStream(in);
+    }
+  }
+}
+#+END_SRC
+
+**** Reading Data Using the FileSystem API
+A file in a Hadoop filesystem is represented by a Hadoop Path
+object.You can think of a Path as a Hadoop filesystem URI.
+
+
+Configuration object represents the configuration files such as core-site.xml.
+
+#+BEGIN_SRC
+public class FileSystemCat {
+
+  public static void main(String[] args) throws Exception {
+    String uri = args[0];
+    Configuration conf = new Configuration();
+    //FileSystem from org.apache.hadoop.fs
+    FileSystem fs = FileSystem.get(URI.create(uri), conf);
+    InputStream in = null;
+    try {
+      in = fs.open(new Path(uri));//Path from org.apache.hadoop.fs
+      IOUtils.copyBytes(in, System.out, 4096, false);
+    } finally {
+      IOUtils.closeStream(in);
+    }
+  }
+}
+#+END_SRC
+
+***** FSDataInputstream
+The open() method on FileSystem actually returns a
+FSDataInputstream.It is a specialization of =java.io.DataInputStream= 
+with support for random access.It also implements =Seekable= ,
+=PositionedReadable= interfaces.
+
+Seekable interface has a seek() method that allow you to move to an 
+arbitrary,absolute position in the file and getPos() method.
+	      
+PositionedReadable interface give you ability to read parts of a file
+at a given offset.All of these methods preserve the current offset in
+the file and are thread-safe.
+
++ /CAUTION/ :: seek() is a relatively expensive operation.You should
+             structure your application access patterns to rely on
+             streaming data,(by using MapReduce) rather than
+             performing a large number of seeks.
+
+**** Writing Data
+Simplest to create a file:
+#+BEGIN_SRC
+  public FSDataOutStream create (Path f) throw IOException
+#+END_SRC
+  
+  + /CAUTION/ :: this method will create the parent directory that
+               doesn't exist.
+
+There's an overloaded method for passing a callback
+interface, =Progressable=,which will be invoken when data written to
+the datanode.
+
+Appending to an existing file.
+#+BEGIN_SRC
+  public FSDataOutStream append (Path f) throw IOException
+#+END_SRC
+  
+It can be used to create unbounded files ,such as logfile, can write
+to an existing file after a restart.
+
+/Copying a local file to a Hadoop filesystem, and show proress/
+#+BEGIN_SRC
+public class FileCopyWithProgress {
+  public static void main(String[] args) throws Exception {
+    String localSrc = args[0];
+    String dst = args[1];
+
+    InputStream in = new BufferedInputStream(new FileInputStream(localSrc));
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(URI.create(dst), conf);
+
+    OutputStream out = fs.create(new Path(dst), new Progressable() {
+      public void progress() {
+        System.out.print(".");
+      }
+    });
+    IOUtils.copyBytes(in, out, 4096, true);
+  }
+}
+#+END_SRC
+
+***** FSDataOutputStream
+The create() method above returns a FSDataOutputStream.
+It can getPos() but not seek().
+It was designed to the principal that writing only occur at the end of
+a file.
+
+**** Directories
+Create a directory:
+#+BEGIN_SRC
+  public boolean mkdirs (Path f) throws IOException
+#+END_SRC
+This method creates all of the parent dir if they don't exist just
+like the method creating a file or =java.io.File's mkdir()= .
+It returns true if creating is success.
+  
+**** Querying the Filesystem
+***** File metadata : FileStatus
+The FileStatus class encapsulates filesystem metadata for files and
+dirs,including /file length/ , /block size/ , /replication/ , /modification
+time/ , /ownership/ , and /permission information/.
+
+FileSystem's getFileStatus() method.
+#+BEGIN_SRC
+public class ShowFileStatusTest {
+  private MiniDFSCluster cluster; // use an in-process HDFS cluster for testing
+  private FileSystem fs;
+  @Before
+  public void setUp() throws IOException {
+    Configuration conf = new Configuration();
+    if (System.getProperty("test.build.data") == null) {
+      System.setProperty("test.build.data", "/tmp");
+    }
+    cluster = new MiniDFSCluster(conf, 1, true, null);
+    fs = cluster.getFileSystem();
+    OutputStream out = fs.create(new Path("/dir/file"));
+    out.write("content".getBytes("UTF-8"));
+    out.close();
+  }
+  @After
+  public void tearDown() throws IOException {
+    if (fs != null) { fs.close(); }
+    if (cluster != null) { cluster.shutdown(); }
+  }
+  @Test(expected = FileNotFoundException.class)
+  public void throwsFileNotFoundForNonExistentFile() throws IOException {
+    fs.getFileStatus(new Path("no-such-file"));
+  }
+  @Test
+  public void fileStatusForFile() throws IOException {
+    Path file = new Path("/dir/file");
+    FileStatus stat = fs.getFileStatus(file);
+    assertThat(stat.getPath().toUri().getPath(), is("/dir/file"));
+    assertThat(stat.isDir(), is(false));
+    assertThat(stat.getLen(), is(7L));
+
+    assertThat(stat.getModificationTime(),
+    is(lessThanOrEqualTo(System.currentTimeMillis())));
+    assertThat(stat.getReplication(), is((short) 1));
+    assertThat(stat.getBlockSize(), is(64 * 1024 * 1024L));
+    assertThat(stat.getOwner(), is("tom"));
+    assertThat(stat.getGroup(), is("supergroup"));
+    assertThat(stat.getPermission().toString(), is("rw-r--r--"));
+  }
+
+}
+
+//public boolean exists(Path f ) throws IOException
+#+END_SRC
+
+***** Listing files
+#+BEGIN_SRC
+public FileStatus[] listStatus(Path f) throws IOException
+public FileStatus[] listStatus(Path f, PathFilter filter) throws IOException
+public FileStatus[] listStatus(Path[] files) throws IOException
+public FileStatus[] listStatus(Path[] files, PathFilter filter) throws IOException
+#+END_SRC
+
+Depending on what you pass into (file or dir),method return one or
+more FileStatus instances.
+
+#+BEGIN_SRC
+    public class ListStatus {
+	public static void main(String[] args) throws Exception {
+	    String uri = args[0];
+	    Configuration conf = new Configuration();
+	    FileSystem fs = FileSystem.get(URI.create(uri), conf);
+	    Path[] paths = new Path[args.length];
+	    for (int i = 0; i < paths.length; i++) {
+		paths[i] = new Path(args[i]);
+	    }
+	}
+    }
+    FileStatus[] status = fs.listStatus(paths);
+    Path[] listedPaths = FileUtil.stat2Paths(status);
+    for (Path p : listedPaths) {
+	System.out.println(p);
+    }
+#+END_SRC
+
+***** File Patterns
+Using wildcard to match a set of files:
+#+BEGIN_SRC
+public FileStatus[] globStatus(Path pathPattern) throws IOException
+public FileStatus[] globStatus(Path pathPattern, PathFilter filter) throws IOException
+#+END_SRC
+Just like is works in Unix bash.
+
+***** PathFilter
+To make listStatus() and globStatus() more powerfull you can
+implements your PathFilter.
+There's method in this interface:
+#+BEGIN_SRC
+  boolean accept(Path path);
+#+END_SRC
+But filters can only act on a file's name.
+
+**** Deleting Data
+public boolean delete (Path f, boolean recusive) throws IOException
+
+*** Data Flow
+**** Anatomy of a File Read
+/Figure A client reading data from HDFS/
+[[file://~/Pictures/dataflow01.png]]
+
+1.
+  =DistributedFileSystem= calls the namenode, using /RPC/, to determine the
+  locations of the blocks for the first few blocks in the file (step
+  2).For each block, the namenode returns the addresses of the datanodes
+  that have a cop of that block,which are sorted according to their
+  proximity to the client.
+
+FSDataInputStream in turn wraps a =DFSInputStream=, which manages the
+datanode and namenode I/O.
+
+2.
+  The client then calls read() on the stream (step 3). DFSInputStream,
+  which has stored the datanode addresses for the first few blocks in
+  the file, then connects to the first (closest) datanode for the first
+  block in the file. 
+
+3.
+  When the end of the block is reached, DFSInputStream will close the
+  connection to the datanode, then find the best datanode for the next
+  block (step 5). This happens transparently to the client.
+
+4.
+  Blocks are read in order with the DFSInputStream opening new
+  connections to datanodes as the client reads through the stream. It
+  will also call the namenode to retrieve the datanode locations for
+  the next batch of blocks as needed. When the client has finished
+  reading, it calls close() on the FSDataInputStream (step 6).
+
+***** Exception
+If the client encounters an error while communicating with a
+datanode,it will try the next closest one for the block and remember
+the broken datanode for later blocks.
+
+The client also verifies checksums for the data.If a corrupted block
+is found, it is reported to the namenode, before reading from another
+node.
+
+Namenodes are only responsible for telling client the datanodes'
+location according to the information stored in memory.
+And client contacts best datanodes directly to retrieve data.
+
+***** Network Topology and Hadoop
+It's ideal to use the bandwidth between two nodes as a measure of
+distance.However, this measure is impractical.
+
+Hadoop takes a simple approach in which the network is represented as
+a tree and the distance between two nodes is the sum of their
+distances to their closest common ancestor.
+
++ Processes on the same node
++ Different nodes on the same rack
++ Nodes on different racks in the same data center
++ Nodes in different data centers
+
+Hadoop cannot divine your network topology for you.You should
+configure youself.By default, it assumes that all nodes are on a
+single rack in a single data center.
+
+**** Anatomy of a File Write
+[[./write file.png]]
+
+1.
+  *DistributedFileSystem* makes an RPC call to the namenode to create a
+  new file in the filesystem’s namespace, with no blocks associated
+  with it (step 2). 
+
+2.
+  The namenode first check whether the file already exist and the client
+  has the right permissions.Only after pass the checking,will it makes a
+  record of the new file.Otherwise, *IOException*.
+
+Just as the read case,FSDataOutputStream wraps a DFSOutputStream,
+which handles communication with the datanodes and namenode.
+
+3.
+  As the client writes data (step 3), DFSOutputStream splits it into
+  packets, which it writes to an internal queue, called the /data
+  queue/.
+
+4.
+  The data queue is consumed by the Data Streamer, whose responsibility
+  it is to ask the namenode to allocate new blocks by picking a list of
+  suitable datanodes to store the replicas.
+  The list of datanodes forms a pipeline to replicate data.
+
+5.  
+  DFSOutputStream also maintains an internal queue of packets that are
+  waiting to be acknowledged by datanodes, called the /ack queue/.A
+  packet is removed from the ack queue only when it has been
+  acknowledged by all the datanodes in the pipeline (step 5).
+
+6.
+  When writing finished,the client calls close() on the stream (step
+  6),which will flushes all the remaining packets to the datanode
+  pipeline and waits for ack before telling the namenode file is
+  complete (step 7). And it return successfully after blocks have been
+  minimally replicated.
+
+***** Exception
+When failture occured,firstly,the pipeline is closed,and any packets
+in the ack queue are added to the front of the data
+queue. Secondly,remove failed datanode from the pipeline and the
+others work as normal.The namenode notices then will arrange for a
+further replica.
+
+If all datanodes went out,the wrte will still succeed as long as
+*dfs.replication.min* are written.And the block will be asynchronously
+replicated across the cluster.
+
+***** Replica Placement
+How does the namenode choose the replicate nodes ?
+P 67.
+[[./choosereplicanode.png]]
+
+**** Coherency Model
+Once more than a block’s worth of data has been written, the first
+block will be visible to new readers. This is true of subsequent
+blocks, too: it is always the current block being written that is not
+visible to other readers.
+
+Using *sync()* method on FSDataOutStream give you ability to
+guarantees that the data written up to that point in the file is
+persisted and visible to all new readers.
+#+BEGIN_SRC Java
+Path p = new Path("p");
+FSDataOutputStream out = fs.create(p);
+out.write("content".getBytes("UTF-8"));
+out.flush();
+out.sync();
+// or using out.close();
+assertThat(fs.getFileStatus(p).getLen(), is(((long) "content".length())));
+#+END_SRC
+
+This behavior is similar to the fsync system call in Unix that commits
+buffered data for a file descriptor.
+#+BEGIN_SRC Java
+FileOutputStream out = new FileOutputStream(localFile);
+out.write("content".getBytes("UTF-8"));
+out.flush(); // flush to operating system
+out.getFD().sync(); // sync to disk
+assertThat(localFile.length(), is(((long) "content".length())));
+#+END_SRC
+
+Closing a file in HDFS performs an implicit sync().
+
+Without using sync(),you should be prepared to lose up to a block of
+data when failture occur.However,it also take some system performance.
+
+*** Parallel Copying with distcp
+*distcp* is a useful program in Hadoop for copying large amounts of
+data to and from Hadoop filesystems in parallel.
+
+/Copy the foo directory to under bar directory/
+*% hadoop distcp hdfs://namenode1/foo hdfs://namenode2/bar*
+
+bar will be created if it doesn't exist.
+-update -overwrite  => rsync
+The two cluster must run under the same version of Hadoop.
+
+/distcp/ is implemented as a MapReduce job where the work of copying
+is done by the maps that run in parallel across the cluster.There are
+no reducers.Each file is copied by a single map, and distcp tries to
+give each map approximately the same amount of data, by bucketing
+files into roughly equal allocations.
+
+Each map copies at least 256 MB (if less than this,it will create only
+one map) to minimize overheads in task setup.By default, the maximun
+number of maps is 20 per cluster node.
+
+**** Keeping and HDFS Cluster Balanced
+Coyping 1000GB files with specifying -m 1 will result in the first
+replica of each block would reside on the node running the map.
+The best practice is create more maps than nodes in the cluster.
+
+*** Hadoop Archives
+HDFS stores small files inefficiently, since each file is stored in a
+block, and block metadata is held in memory by the namenode. Thus, a
+large number of small files can eat up a lot of memory on the
+namenode. (Note, however, that small files do not take up any more
+disk space than is required to store the raw contents of the file. For
+example, a 1 MB file stored with a block size of 128 MB uses 1 MB of
+disk space, not 128 MB.)
+
+/Hadoop Archives/ ,or HAR files, are a file archiving facility that
+packs files into HDFS blocks more efficiently, thereby reducing
+namenode memory usage while still allowing transparent access to
+files. In particular, Hadoop Archives can be used as input to
+MapReduce.
+
+**** Using Hadoop Archives
+A Hadoop Archive is created from a collection of files using /archive/
+tool,which runs a MapReduce job.
+*% hadoop archive -archiveName files.har /my/files /my*
+
+.har extension is mendatory.
+Accepts multiple source trees and the final argument is the output
+directory.
+
+HAR file is made of : two index files and a collection of part files.
+
+*% hadoop fs -lsr har:///myfiles.har/my/files/dir*
+*% hadoop fs -lsr har://hdfs-localhost:8020/myfiles.har/my/files/dir*
+
+**** Limitations
+Archives are immutable once they have been created. 
+Processing lots of small files, even in a HAR file, can still be
+inefficient.
+
+** 4.Hadoop I/O
+covers the fundamentals of I/O in Hadoop:data integrity, compression, serialization, and file-based data structures.
+
+*** Data Integrity
+The usual way of detecting corrupted data is by computing a checksum
+for the data when it first enters the system, and then whenever it is
+transmitted across a channel that is unreliable and hence capable of
+corrupting the data. 
+CRC-32
+
+**** Data Integrity in HDFS
+HDFS transparently checksums all data writtn to it and by default
+verifies checksums when reading data.A separate checksum is created
+for every io.bytes.per.checksum bytes of data (default 512B).
+
+***** Write
+Datanodes are responsible for verifying the data they receive before
+storing the data and its checksum, no matter receives it from client
+or datanodes during replication.The last datanode in the pipeline
+verifies the checksum. If it detects an error, the client receives a
+*ChecksumException*, a subclass of IOException.
+
+***** Read
+Each datanode keeps a persistent log of chechsum verifications, so it
+knows the last time each of its blocks was verified. When a client
+successfully verifies a block, it tells the datanode, which updates
+its log. Keeping Statics such as these is valuable in detecting bad
+disks.
+
+***** Guard
+Each datanode runs a *DataBlockScanner* in a background thread that
+periodically verifies all the blocks stored ono the datanode. This is
+to guard against corruption due to "bit rot" in the physical storage
+media.
+
+***** Heal
+HDFS can "heal" corrupted blocks by copying one of the good
+replicas.If a client detects an error when reading a block, it reports
+the bad block and the datanode it was trying to read from to the
+namenode before throwing a ChecksumExcption.
+
+***** Disable Checksum
+Passing false to the *setVerifyChecksum()* method on FileSystem,
+before using the open() method to read a file.Using the *-ignoreCrc*
+option with the *-get* or the equivalent *-copyToLocal* command in the
+shell has the same effect.
+This feature is useful if you have a corrupt file that you want to
+inspect so you can decide what to do with it.
+
+**** LocalFileSystem
+The Hadoop LocalFileSystem performs client-side checksumming.
+This means that when you write a file called filename, the filesystem
+client transparently creates a hidden file, .filename.crc, in the same
+directory containing the checksums for each chunk of the file.
+Checksums are verified when the file is read, and if an error is
+detected, LocalFileSystem throws a ChecksumException.
+
+Checksums are fairly cheap, but you may want to disable it when the
+underlying filesystem support checksums natively.This is accomplished
+by using *RawLocalFileSystem* in place of *LocalFileSystem*.
+#+BEGIN_SRC
+Configuring conf = ...
+FileSystem fs = new RawLocalFileSystem();
+fs.initialize(nullm, conf);
+#+END_SRC
+
+You can also apply this setting globally by changing the property
+*fs.file.impl* to *org.apache.hadoop.fs.RawLocalFileSystem*.
+
+**** ChecksumFIleSystem
+It's just a wrapper around FIleSystem and makes it easy to add
+checksumming to other (nonchecksummed) filesystems.
+
+getRawFileSystem(), getChecksumFile(),reportChecksumFailure().
+
+reportChecksumFailure() which default implementation does nothing, but
+LocalFileSystem moves the offending file and its checksum to a side
+dir on the same device called /bad_files/.
+
+*** Compression
+Twomajor benefits (which are significant when dealing with large
+vaolumes of data) :
++ Reduces the needed to store files
++ speeds up data transfer across the network,or to or from disk.
+
+/A summary of compression formats/
+| Compression format | Tool  | Algorithm | Filename extension | Multiple files | Splittable             |
+|--------------------+-------+-----------+--------------------+----------------+------------------------|
+| DEFLATE            | N/A   | DEFLATE   | .deflate           | No             | No                     |
+| gzip               | gzip  | DEFLATE   | .gz                | No             | No                     |
+| ZIP                | zip   | DEFLATE   | .zip               | Yes            | Yes,at file boundaries |
+| bzip2              | bzip2 | bzip2     | .bz2               | No             | Yes                    |
+| LZO                | lzop  | LZO       | .lzo               | No             | No                     | 
+NOTE: Splittable means whether you can seek to any point in the stream
+and start reading from some point further on,which is especially
+suitable for MapReduce.
+
+**** Codecs
+A codec is the implementation of a compression-decompression
+algorithm.
+In Hadoop, a codec is represented by an implementation of the
+CompressionCodec interface. 
+
+| Compression format | Hadoop CompressionCodec                    |
+|--------------------+--------------------------------------------|
+| DEFLATE            | org.apache.hadoop.io.compress.DefaultCodec |
+| gzip               | org.apache.hadoop.io.compress.GzipCodec    |
+| bzip2              | org.apache.hadoop.io.compress.BZip2Codec   |
+| LZO                | com.hadoop.compression.lzo.LzopCodec       |
+
+***** Compressing and decompressing streams with CompressionCodec
+Use *createOutputStream(OutputStream out)* method to create a
+*CompressionOutputSream* to which you write your uncompressed data to
+have it written in compressed form to the underlying sream.
+Use *createInputStream(InputSream in)* to obtain a
+*CompressionInputSream*, which allows you to read uncompressed data
+from the underlying stream.
+
+Different from java.util.zip.DefaultOutputStream,
+CompressionOutputStream provide the ability to reset their underlying
+compressor.
+
+/Compress data read from standard input and write it to standard
+output/
+#+BEGIN_SRC
+  public static void main(String[] args) throws Exception {
+    String codecClassname = args[0];
+    Class<?> codecClass = Class.forName(codecClassname);
+    Configuration conf = new Configuration();
+    CompressionCodec codec = (CompressionCodec)
+      ReflectionUtils.newInstance(codecClass, conf);
+    CompressionOutputStream out = codec.createOutputStream(System.out);
+    IOUtils.copyBytes(System.in, out, 4096, false);
+    out.finish();
+  }
+#+END_SRC
+*% echo "Text" | hadoop StreamCompressor org.apache.hadoop.io.compress.GzipCodec \ | gunzip -*
+
+***** Inferring CompressionCodecs using CompressionCodecFactory
+CompressionCodecFactory provides a way of mapping a filename extension
+to a CompressionCodec using its *getCodec()* method, which takes a Path
+object for the file in question.
+
+#+BEGIN_SRC
+public static void main(String[] args) throws Exception {
+  String uri = args[0];
+  Configuration conf = new Configuration();
+  FileSystem fs = FileSystem.get(URI.create(uri), conf);
+  Path inputPath = new Path(uri);
+  CompressionCodecFactory factory = new CompressionCodecFactory(conf);
+  CompressionCodec codec = factory.getCodec(inputPath);
+  if (codec == null) {
+    System.err.println("No codec found for " + uri);
+    System.exit(1);
+  }
+  String outputUri =
+    CompressionCodecFactory.removeSuffix(uri, codec.getDefaultExtension());
+  
+  InputStream in = null;
+  OutputStream out = null;
+  try {
+    in = codec.createInputStream(fs.open(inputPath));
+    out = fs.create(new Path(outputUri));
+    IOUtils.copyBytes(in, out, conf);
+  } finally {
+  IOUtils.closeStream(in);
+  IOUtils.closeStream(out);
+  }
+}
+#+END_SRC
+*% hadoop FileDecompressor file.gz*
+
+*CompressionCodecFactory* finds codecs from a list defined by the
+*io.compression.codecs* configuration property.
+
+***** Native libraries
+Using a native library for compression and decompression gives you up
+to 50% decompression time reducing and 10% for compression.
+
+| Compression format | Java Implementation | Native implementation |
+|--------------------+---------------------+-----------------------|
+| DEFLATE            | Yes                 | Yes                   |
+| gzip               | yes                 | Yes                   |
+| bzip2              | Yes                 | no                    |
+| LZO                | No                  | Yes                   | 
+
+Hadoop comes with prebuilt native compression libraries for 32- and
+64-bit Linux.The native libraries are picked up using the Java system
+property java.library.path.
+
+Setting the property hadoop.native.lib to false will ensure that the
+built-in Java equivalents will be used (if they are available).
+
+*CodecPool* allow you to reuse (de)compressors.
+#+BEGIN_SRC
+Class<?> codecClass = Class.forName(codecClassname);
+Configuration conf = new Configuration();
+CompressionCodec codec = (CompressionCodec)
+  ReflectionUtils.newInstance(codecClass, conf);
+  
+Compressor compressor = null;
+try {
+  compressor = CodecPool.getCompressor(codec);
+  CompressionOutputStream out =
+    codec.createOutputStream(System.out, compressor);
+    
+} finally {
+  CodecPool.returnCompressor(compressor);
+}
+#+END_SRC
+
+**** Compression and Input Splits
+When considering how to compress data that will be processed by
+MapReduce, it is important to understand whether the compression
+format supports splitting.
+
+Mapreduce will arrange a single map for gzip file since it is
+un-splitable.
+
+***** Which Compression Format
++ For large, unbounded files, like logfiles, the options are:
+  + Store the files uncompressed
+  + Use a splitable compress Formats
+  + Split the file into chunks in the application and compress each
+    chunk separately using any supported compression format.
+  + Use Sequence File, which supports comprssion and splitting.
+
++ For large files, you should not use a compression format that
+  doesn't support splitting on the whole file, since you lose
+  locality.
+
++ For archival purposes, consider the Hadoop archive format.
+
+**** Using Compression in MapReduce
+/Application to run the maximum temperature job producing compressed
+output/
+#+BEGIN_SRC
+public class MaxTemperatureWithCompression {
+  public static void main(String[] args) throws IOException {
+    if (args.length != 2) {
+      System.err.println("Usage: MaxTemperatureWithCompression <input path> " +
+        "<output path>");
+      System.exit(-1);
+    }
+    
+    JobConf conf = new JobConf(MaxTemperatureWithCompression.class);
+    conf.setJobName("Max temperature with output compression");
+
+    FileInputFormat.addInputPath(conf, new Path(args[0]));
+    FileOutputFormat.setOutputPath(conf, new Path(args[1]));
+
+    conf.setOutputKeyClass(Text.class);
+    conf.setOutputValueClass(IntWritable.class);
+
+    conf.setBoolean("mapred.output.compress", true);
+    conf.setClass("mapred.output.compression.codec", GzipCodec.class,
+      CompressionCodec.class);
+
+    conf.setMapperClass(MaxTemperatureMapper.class);
+    conf.setCombinerClass(MaxTemperatureReducer.class);
+    conf.setReducerClass(MaxTemperatureReducer.class);
+
+    JobClient.runJob(conf);
+  }
+}
+#+END_SRC
+
+*% hadoop MaxTemperatureWithCompression input/ncdc/sample.txt.gz output*
+
+***** Compressing map output
+Since the map output is written to disk and transferred across the
+network to the reducer nodes, by using a fast compressor such as LZO,
+you can get performance gains simply because the volume of data to
+transfer is reduced. 
+
+| Property name                       | Type    | Default value                              | Description          |
+|-------------------------------------+---------+--------------------------------------------+----------------------|
+| mapred.compress.map.output          | boolean | false                                      | Compress map outputs |
+| mapred.map.output.compression.codec | Class   | org.apache.hadoop.io.compress.DefaultCodec | map outputs          |
+
+=conf.setCompressMapOutput(true);=
+=conf.setMapOutputCompressorClass(GzipCodec.class);=
+
+*** Serialization
+In Hadoop, interprocess communication between nodes in the system in
+Implemented using /remote procedure calls/ (RPCs).
+
+RPC serialization format is:
++ Compact
++ Fast
++ Extensible
++ Interoperable
+
+**** The Writable Interface
+Hadoop's own serialization format,which is certainly compact and fast
+(but not so easy to extend or use from languages other than Java).
+
+This interface defines two methodss:
+*write* and *readFields*
+#+BEGIN_SRC
+package org.apache.hadoop.io;
+
+import java.io.DataOutput;
+import java.io.DataInput;
+import java.io.IOException;
+
+public interface Writable {
+  void write(DataOutput out) throws IOException;
+  void readFields(DataInput in) throws IOException;
+}
+#+END_SRC
+
+
+#+BEGIN_SRC
+IntWritable writable = new IntWritable();
+writable.set(163);
+
+/*Equivalent to */
+IntWritable writable = new IntWritable(163);
+
+public static byte[] serialize( Writable writable ) throws IOException{
+  ByteArrayOutputStream out = new ByteArrayOutputStream();
+  DataOutputStream dataOut = new DataOutputStream(out);
+  writable.write(dataOut);
+  dataOut.close();
+  return out.toByteArray();
+}
+
+
+    public static byte[] deserialize(Writable writable, byte[] bytes)
+	throws IOException {
+	ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+	DataInputStream dataIn = new DataInputStream(in);
+	writable.readFields(dataIn);
+	dataIn.close();
+	return bytes;
+    }
+#+END_SRC
+
+***** WritableComparable and comparatiors
+IntWritable implements the WritableComparable interface, which is just
+a subinterface of the Writable and java.lang.Comparable interfaces:
+
+*RawComparator* ,extension of Java's *Comparator*, is important for
+MapReduce, because there is a sorting phase.
+
+This interface permits implementors to compare records read from a
+stream without deserializing them into objects, which is efficient.
+
+*public int compare(byte[] b1, int s1, int l1, byte[] b2, int s2, int l2)*
+
+reading an integer from each of the byte arrays ba and be and
+comparing them directly, from the given start posistion (s1 and s2)
+and lengths (l1 and l2).
+
+*WritableComparator* is a general-purpose implementation of
+*RawComparator* for *WritableComparable* classes. It provides two main
+functions. One for general-purpose comparing and the other for
+getting Comparator instance.
+
+=RawComparator<IntWritable> comparator = WritableCompartor.get(IntWritable.class)=
+
+**** Writable Classes
+***** Writable wrappers for Java primitives
+All have a *get()* and a *set()* method for retrieving and storing the
+wrapped value.
+
+| Java primitive | Writable Implementation | Serialized size(bytes) |
+|----------------+-------------------------+------------------------|
+| boolean        | BooleanWritable         |                      1 |
+| byte           | ByteWritable            |                      1 |
+| int            | IntWritable             |                      4 |
+|                | VIntWritable            |                    1-5 |
+| float          | FloatWritable           |                      4 |
+| long           | LongWritable            |                      8 |
+|                | VLongWritable           |                    1-9 |
+| double         | DoubleWritable          |                      8 |
+
+[[ ./writableinheritance.png ]]
+
+How to choose between fixed-length and a variable-length encoding?
+Fixed-Length is suitable for values that is fairly uniform across the
+whole value space.Otherwise, variable-length.
+More, variable-length can be switched to more long type.
+
+***** Text
+*Text* is a *Writable* for UTF-8 sequences, which can be thought of as
+the *Wriable* equivalent of *java.lang.String*.
+
++ Indexing ::
+  Indexing for the Text class is in terms of position in the encoded
+  byte sequence, not the Unicode character in the string.
+
+  #+BEGIN_SRC
+    Text t = new Text("hadoop");
+    assertThat(t.getLength(), is(6));
+    assertThat(t.getBytes().length, is(6));
+
+    assertThat(t.charAt(2), is((int) 'd'));
+    assertThat("Out of bounds", t.charAt(100), is(-1));
+  #+END_SRC
+
+    *charAt()* returns an int representsing a Unicode code point.
+
+    *find()* is analogous to String's indexOf().
+
++ Unicode ::
+  
++ Iteration ::
+  /Iterating over the characters in a Text object/
+  #+BEGIN_SRC
+   public class TextIterator {
+     public static void main(String[] args) {
+       Text t = new Text("\u0041\u00DF\u6771\uD801\uDC00");
+
+       ByteBuffer buf = ByteBuffer.wrap(t.getBytes(), 0, t.getLength());
+       int cp;
+       while (buf.hasRemaining() && (cp = Text.bytesToCodePoint(buf)) != -1) {
+         System.out.println(Integer.toHexString(cp));
+	 }
+     }
+   }
+  #+END_SRC
+
++ Mutalibity ::
+  You can reuse a Text instance by calling one of the *set()* methods.
+  #+BEGIN_SRC
+  Text t = new Text("hadoop");
+  t.set(new Text("pig"));
+  assertThat(t.getLength(), is(3));
+  assertThat("Byte length not shortened", t.getBytes().length, is(6));
+  #+END_SRC
+
++ Resorting to String ::
+  *toString()* method.
+  
++ BytesWritable ::
+  This is a wrapper for an array of binary data.
+  Consist of One integer for length and bytes.
+  #+BEGIN_SRC
+  BytesWritable b = new BytesWritable(new byte[] { 3, 5 });
+  byte[] bytes = serialize(b);
+  assertThat(StringUtils.byteToHexString(bytes), is("000000020305"));
+
+  /*It also has set method*/
+  
+  b.setCapacity(11);
+  assertThat(b.getLength(), is(2));
+  assertThat(b.getBytes().length, is(11));
+  #+END_SRC
+
+***** NullWritable
+NullWritable is a special type of Writable, as it has a zero-length
+serialization. No bytes are written to, or read from, the stream. It
+is used as a placeholder.
+
+Singleton get() method to retrieve.
+
+***** ObjectWritable and GenericWritable
+ObjectWritable is a general-purpose wrapper for the following: Java
+primitives, String, enum, Writable, null, or arrays of any of these
+types. It is used in Hadoop RPC to marshal and unmarshal method
+arguments and return types.
+
+***** Writable collections
+*ArrayWritable, TwoDArrayWritable, MapWritable, and
+SortedMapWritable.*
+
+=ArrayWritable writable = new ArrayWritable(Text.class);=
+
+ArrayWritable and TwoDArrayWritable have *set(), get(), toArray()* methods.
+
+*MapWritable and SortedMapWritable* are implementations of
+java.util.Map (SortedMap) <Writable, Writable>.
+
+#+BEGIN_SRC
+MapWritable src = new MapWritable();
+src.put(new IntWritable(1), new Text("cat"));
+src.put(new VIntWritable(2), new LongWritable(163));
+
+MapWritable dest = new MapWritable();
+WritableUtils.cloneInto(dest, src);
+assertThat((Text) dest.get(new IntWritable(1)), is(new Text("cat")));
+assertThat((LongWritable) dest.get(new VIntWritable(2)), is(new LongWritable(163)));
+#+END_SRC
+
+For lists of a single type of Writable, ArrayWritable is adequate, but
+to store different types of Writable in a single list, you can use
+GenericWritable to wrap the elements in an ArrayWritable. 
+
+**** Implementing a Custom Writable
+As Writable are at the heart of the MapReduce data path, tuning the
+binary representation can have a significant effect on performance.
+
+For more elaborate structures, it's often better to create a new
+Writable type, rather than compose the stock types.
+
+/A writable implementation that stores a pair of Text objects/
+#+BEGIN_SRC
+import java.io.*;
+import org.apache.hadoop.io.*;
+
+public class TextPair implements WritableComparable<TextPair> {
+  private Text first;
+  private Text second;
+
+  public TextPair() {
+    set(new Text(), new Text());
+  }
+  public TextPair(String first, String second) {
+    set(new Text(first), new Text(second));
+  }
+  public TextPair(Text first, Text second) {
+    set(first, second);
+  }
+  public void set(Text first, Text second) {
+    this.first = first;
+    this.second = second;
+  }
+  public Text getFirst() {
+    return first;
+  }
+  public Text getSecond() {
+    return second;
+  }
+  @Override
+  public void write(DataOutput out) throws IOException {
+    first.write(out);
+    second.write(out);
+  }
+  @Override
+  public void readFields(DataInput in) throws IOException {
+    first.readFields(in);
+    second.readFields(in);
+  }
+  @Override
+  public int hashCode() {
+    return first.hashCode() * 163 + second.hashCode();
+  }
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof TextPair) {
+      TextPair tp = (TextPair) o;
+      return first.equals(tp.first) && second.equals(tp.second);
+    }
+    return false;
+  }
+  @Override
+  public String toString() {
+    return first + "\t" + second;
+  }
+  @Override
+  public int compareTo(TextPair tp) {
+    int cmp = first.compareTo(tp.first);
+    if (cmp != 0) {
+      return cmp;
+    }
+    return second.compareTo(tp.second);
+  }
+}
+#+END_SRC
+
+Writable instances are mutable and often reused, so you should take
+care to avoid allocating objects in the write() or readFields()
+methods.
+
+***** Implementing a RawComparator for speed
+Compare two TextPair Objects just by looking at their serialized
+representation.
+
+#+BEGIN_SRC
+public static class Comparator extends WritableComparator {
+    private static final Text.Comparator TEXT_COMPARATOR = new Text.Comparator();
+    public Comparator() {
+	super(TextPair.class);
+    }
+    @Override
+    public int compare(byte[] b1, int s1, int l1,
+		       byte[] b2, int s2, int l2) {
+    }
+}
+try {
+    int firstL1 = WritableUtils.decodeVIntSize(b1[s1]) + readVInt(b1, s1);
+    int firstL2 = WritableUtils.decodeVIntSize(b2[s2]) + readVInt(b2, s2);
+    int cmp = TEXT_COMPARATOR.compare(b1, s1, firstL1, b2, s2, firstL2);
+    if (cmp != 0) {
+	return cmp;
+    }
+    return TEXT_COMPARATOR.compare(b1, s1 + firstL1, l1 - firstL1,
+				   b2, s2 + firstL2, l2 - firstL2);
+} catch (IOException e) {
+    throw new IllegalArgumentException(e);
+}
+static {  /*regest comparator*/
+    WritableComparator.define(TextPair.class, new Comparator());
+}
+#+END_SRC
+
+***** Custom comparators
+Reference org.apache.hadoop.io package for further ideas before
+writing your own comparator.
+And utility methods on *WritableUtils* are very handy too.
+
+**** Serialization Frameworks
+In fact, any types can be used; the only requirement is that there be
+a mechanism that translates to and from a binary representation of
+each type.
+
+A serialization framework is represented by an implementation of
+*Serialization*.For example:
+*org.apache.hadoop.io.serializer.WritableSerialization*
+
+A *Serialization* defines a mapping from types to *Serializer* instances
+(for turning an object into a byte stream) and *Deserializer* instances
+(for turning a byte stream into an object).
+
+Set io.serializations property to a comma-separated list of classnames
+to register Serialization.
+
+This's more compact ,compare to Java Object Serialization.
+
+***** Serialization IDL
+*interface description language*.
+The system can generate type for different languages, which is good
+for interoperability.
+
+Record I/O has an IDL that is compiled into Writable objects.
+
+Apache Thrift and Google Protocol Buffers are commonly used as a
+format for persistent binary data.
+
+*** Avro
+Apache Avro is a Serialization framework that is independent from
+program languages.It's designed for interoperatable.
+
+**** Avro datatypes and schemas
+
+**** Serialization and Deserialization in memory
+
+**** Avro Data Files
+
+**** Interoperability
+
+**** Schema Parsing 
+
+**** Sorting
+
+**** Avro MapReduce
+
+*** File-Based Data Structures
+Hadoop developed a number of higher-level containers for holding your
+data without putting each blob of binary data into its own file, which
+doesn't scale.
+
+**** SequenceFile
+Imagine a logfile, where each log record is a new line of
+text.Hadoop’s *SequenceFile* class fits the bill in this situation,
+providing a persistent data structure for *binary key-value pairs*. To
+use it as a logfile format, you would choose a key, such as timestamp
+represented by a LongWritable, and the value is a Writable that
+represents the quantity being logged.
+
+HDFS and MapReduce are optimized for large files, so packing files
+into a SequenceFile makes storing and pro- cessing the smaller files
+more efficient.
+
+***** Writing a SequenceFile
+To create a SequenceFile,  use one of its *createWriter()* static
+methods, which returns a SequenceFile.Writer instance.
+
+You need to specify a stream to write to (either a
+*FSDataOutputStream* or a *FileSystem* and *Path* pairing), a
+Configuration object, and the key and value types.
+
+Optional arguments include the compression type and codec, a
+Progressable callback to be informed of write progress, and a
+Metadata instance to be stored in the SequenceFile header.
+
+The keys and values stored in a SequenceFile donot neccessarily need
+to be Writable. Any types that can be serialized and deserialized by a
+Serialiazation may be used.
+
+Once you have a SequenceFile.Writer, you then write key-value pairs,
+using the *append()* method and finish with calling *close()* method.
+
+/Simple/
+#+BEGIN_SRC
+public class SequenceFileWriteDemo {
+    private static final String[] DATA = {
+	"One, two, buckle my shoe",
+	"Three, four, shut the door",
+	"Five, six, pick up sticks",
+	"Seven, eight, lay them straight",
+	"Nine, ten, a big fat hen"
+    };
+
+    public static void main(String[] args) throws IOException {
+	String uri = args[0];
+	Configuration conf = new Configuration();
+	FileSystem fs = FileSystem.get(URI.create(uri), conf);
+	Path path = new Path(uri);
+	IntWritable key = new IntWritable();
+	Text value = new Text();
+	SequenceFile.Writer writer = null;
+	try {
+	    writer = SequenceFile.createWriter(fs, conf, path,
+					       key.getClass(), value.getClass());
+
+	    for (int i = 0; i < 100; i++) {
+		key.set(100 - i);
+		value.set(DATA[i % DATA.length]);
+		System.out.printf("[%s]\t%s\t%s\n", writer.getLength(), key, value);
+		writer.append(key, value);
+	    }
+	} finally {
+	    IOUtils.closeStream(writer);
+	}
+    }
+}
+#+END_SRC
+
+***** Reading a SequenceFile
+Reading sequence files from beginning to end is a matter of creating
+an instance of SequenceFile.Reader, and iterating over records by
+repeatedly invoking one of the next() methods. 
+
+For Writable Framework 
+=public boolean next(Writable key, Writable value)=
+
+For other
+=public Object next(Object key) thorws IOException=
+=public Object getCurrentValue(Object val) throws IOException=
+
+Note how the types are discovered from the SequenceFile.Reader via
+calls to *getKeyClass()* and *getValueClass()*, then ReflectionUtils
+is used to create an instance for the key and value.
+
+/Reading a SequenceFile/
+#+BEGIN_SRC
+    public static void run(String args) throws IOException {
+	String uri = args;
+	Configuration conf = new Configuration();
+	FileSystem fs = FileSystem.get(URI.create(uri), conf);
+	Path path = new Path(uri);
+	SequenceFile.Reader reader = null;
+	try {
+	    reader = new SequenceFile.Reader(fs, path, conf);
+	    Writable key = (Writable)
+		ReflectionUtils.newInstance(reader.getKeyClass(), conf);
+	    Writable value = (Writable)
+		ReflectionUtils.newInstance(reader.getValueClass(), conf);
+	    long position = reader.getPosition();
+	    while (reader.next(key, value)) {
+		String syncSeen = reader.syncSeen() ? "*" : "";
+		System.out.printf("[%s%s]\t%s\t%s\n", position, syncSeen, key, value);
+		position = reader.getPosition(); // beginning of next record
+	    }
+	} finally {
+	    IOUtils.closeStream(reader);
+	}
+    }
+#+END_SRC
+
++ Sync Points ::
+  Another feature of the program is that it displays the position of
+  the sync points in the sequence file. A sync point is a point in the
+  stream which can be used to resynchronize with a record boundary if
+  the reader is “lost”—for example, after seeking to an arbitrary
+  position in the stream.
+  They are recorded by SequenceFile.Writer.
+
+There are two ways to seek to a given position in a sequence file.
+
++ seek() :: 
+          #+BEGIN_SRC
+	    reader.seek(359); 
+	    assertThat(reader.next(key, value), is(true));
+	    /*throw IOException if position out of boundary*/
+	    assertThat(((IntWritable) key).get(), is(95));
+          #+END_SRC
+
++ sync() :: positions the reader at the next sync point after position.
+          #+BEGIN_SRC
+	    reader.sync(360);
+	    assertThat( reader.getPosition(), is(2021L));
+	    assertThat(reader.next(key, value), is(true));
+	    /*throw IOException if position out of boundary*/
+	    assertThat(((IntWritable) key).get(), is(95));
+          #+END_SRC
+Sync points permit the file to be split when using sequence files as
+input to MapReduce.
+
+***** Displaying a SequenceFile with the command-line interface
+*% hadoop fs -text numbers.seq | head*
+
+Make sure the keys and values have a meaningful string representation
+(as defined by the toString() method).If you have your own key or
+value classes, then you will need to make sure they are on Hadoop's
+classpath.
+
+***** Sorting and merging SequenceFiles
+The most powerfull way of sorting (and merging) one or more sequence
+files is to use MapReduce.
+
+There is a SequenceFiles.Sorter class that has a number of sort() and
+merge() methods.For this, you should partition your data manually.
+
+***** The SequenceFile Format
+
+Each file has a randomly generated sync marker, whose value is stored
+in the header. 
+
+Note that keys are not compressed.
+
+Block compression over record compression because the former has the
+opportunity to take advantage of similarities between records.
+
+[[ ./image.Y2GPTW.png ]]  record comrpession
+[[ ./image.149DTW.png ]]  block compression
+
+Records are added to a block until it reaches a minimum size in bytes,
+defined by the *io.seqfile.compress.blocksize* property: the default is
+1,000,000 bytes. 
+
+**** MapFile
+A MapFile is a sorted SequenceFile with an index to permit lookups by key. 
+
+***** Writing a MapFile
+Writing a *MapFile* is similar to writing a SequenceFile.
+Except that keys must be instances of WritableComparable and vlues
+must be Writable.
+#+BEGIN_SRC
+    public static void run(String args) throws IOException {
+	String uri = args;
+	Configuration conf = new Configuration();
+	FileSystem fs = FileSystem.get(URI.create(uri), conf);
+	IntWritable key = new IntWritable();
+	Text value = new Text();
+	MapFile.Writer writer = null;
+	try {
+	    writer = new MapFile.Writer(conf, fs, uri,
+					key.getClass(), value.getClass());
+	    for (int i = 0; i < 1024; i++) {
+		key.set(i + 1);
+		value.set(DATA[i % DATA.length]);
+		writer.append(key, value);
+	    }
+	} finally {
+	    IOUtils.closeStream(writer);
+	}
+    }
+#+END_SRC
+
+MapFile is actually a directory containing two files called data and
+index. Both of them are SequenceFile.
+
+The index file contains a fraction of the keys and a mapping from the
+key to that key's offset in the data file.
+
+By default, ony every 128th key is included in the index. You can
+change this value either by setting the *io.map.index.interval*
+property or by calling the *setIndexInterval()* method on the
+*MapFile.Writer* instance.
+
+Since the index is only a partial index of keys, MapFile is not able
+to provide methods to enumerate, or even count, all the keys it
+contains.
+
+***** Reading a MapFile
+*public boolean next( WritableComparable key, Writable val) throws IOException*
+
+Random access
+*public Writable get( WritableComparable key, Writable val) throws IOException*
+
+Reader will read the index file into memory and find the corresponding
+offset. Then search in the binary file.
+You can setting *io.map.index.skip* property (default 0) to avoid
+taking too much menory.
+
+getClosest() returns the "closest" match to the specified key.
+
+***** Converting a SequenceFile
+#+BEGIN_SRC
+    public static void run(String args) throws IOException {
+	String mapUri = args;
+	Configuration conf = new Configuration();
+	FileSystem fs = FileSystem.get(URI.create(mapUri), conf);
+	Path map = new Path(mapUri);
+
+	Path mapData = new Path(map, MapFile.DATA_FILE_NAME);
+	// Get key and value types from data sequence file
+	SequenceFile.Reader reader = new SequenceFile.Reader(fs, mapData, conf);
+	Class keyClass = reader.getKeyClass();
+	Class valueClass = reader.getValueClass();
+	reader.close();
+
+	// Create the map file index file
+	long entries = MapFile.fix(fs, map, keyClass, valueClass, false, conf);
+	System.out.printf("Created MapFile %s with %d entries\n", map, entries);
+    }
+#+END_SRC
+
+The fix() method is usually used for recreating corrupted indexes.
+    
+** 5.Developing a MapReduce Application
+Go through the practical step needed to develop a MapReduce
+application.
+
+1.You start by writing your map and reduce functions, ideally with unit
+tests to make sure they do what you expect.
+
+2.you write a driver program to run a job, which can run from your IDE
+using a small subset of the data to check that it is working. If it
+fails, then you can use your IDE’s debugger to find the source of the
+problem.
+
+3.With this information, you can expand your unit tests to cover this
+case,and improve your mapper or reducer as appropriate to handle such
+input correctly.
+
+cluster -> more test case -> IsolationRunner debug -> task profiling
+
+*** The Configuration API
+An instance of the Configuration class represents a collection of
+configuration properyies and their values. XML files.
+
+#+BEGIN_SRC
+Configuration conf = new Configuration();
+conf.addResource("configuration-1.xml");
+assertThat(conf.get("color"), is("yellow"));
+assertThat(conf.getInt("size", 0), is(10));
+assertThat(conf.get("breadth", "wide"), is("wide"));
+#+END_SRC
+
+Notes: type information is not stored in the XML file, which means
+properties can be interpreted as a given type when they are read.
+
+**** Combining Resources
+#+BEGIN_SRC
+Configuration conf = new Configuration();
+conf.addResource("configuration-1.xml");
+conf.addResource("configuration-2.xml");
+#+END_SRC
+Properties defined in resources that are added later override the
+earlier definitions except the property is final.
+
+**** Variable Expansion
+Configuration properties can be defined in terms of other properties,
+or system properties. ${size}, ${weight}.
+
+System properties take priority over properties defined in resource
+files, which is useful for overriding properties on the command line
+by using -Dproperty=value JVM arguments.
+
+*** Configuring the Development Environment
+**** Managing Configuring
+Seting up a directory holding multiple configuration files, you can
+use any of them with the -conf command-line switch easily to run
+application on different platform (cluster ,localhost ,others).
+
+=% hadoop fs -conf conf/hadoop-localhost.xml -ls .=
+
+If you omit the -conf option, then you pick up the Hadoop
+configuration in the conf subdirectory under install dir.
+
+All the tools come with Hadoop support this feature.
+You can use *Tool* interface for your own application to archive this
+function.
+
+**** GenericOptionsparser, Tool, and ToolRunner
+*GenericOptionsParser* is a class that interprets common Hadoop
+command-line options and sets them on a Configuration object for your
+application to use as desired. You don’t usually use
+GenericOptionsParser directly, as it’s more con- venient to
+implement the *Tool* interface and run your application with the
+*ToolRunner*, which uses GenericOptionsParser internally:
+
+#+BEGIN_SRC
+public class ConfigurationPrinter extends Configured implements Tool {
+  static {
+    Configuration.addDefaultResource("hdfs-default.xml");
+    Configuration.addDefaultResource("hdfs-site.xml");
+    Configuration.addDefaultResource("mapred-default.xml");
+    Configuration.addDefaultResource("mapred-site.xml");
+  }
+
+  @Override
+  public int run (String[] args) throws Exception {
+    Configuration conf = getConf();
+    for (Entry<String, String> entry : conf) {
+      System.out.printf("%s=%s\n", entry.getKey(), entry.getValue());
+    }
+    return 0;
+  }
+
+  public static void main (String[] args) throws Exception {
+    int exitCode = ToolRunner.run( new ConfigurationPrinter(), args);
+  }
+}
+#+END_SRC
+
+All implementations of Tool need to implement Configurable (since Tool
+extends it).And Configured is an implementation of the Configurable
+interface.
+
+Some properties can only set in xml files and they usually have a
+special name. Reference to html file under install dir.
+
+The supported generic options are:
+| Option                          | Descroption                                               |
+|---------------------------------+-----------------------------------------------------------|
+| -D property=value               | use value for given property                              |
+| -conf <conf file> ...           | specify a configuration file                              |
+| -fs <local/namenode:port>       | specify a namenode                                        |
+| -jt <local/namenode:port>       | specify a job tracker                                     |
+| -files file1,file2,...          | specify files to be copied to the map reduce cluster      |
+| -archives archive1,archive2,... | specify archives to be unarchived on the compute machines |
+| -libjars jar1,jar2,...          | specify files to include in the classpath.                |
+
+*** Writting a Unit Test with MRUnit
+MRUnit is a testing library that makes it easy to pass known inputs to
+a mapper or a reducer and check that the outputs are as expected.
+Just like JUnit.
+
+**** Mapper
+/Unit test for MaxTemperatureMaper/
+#+BEGIN_SRC
+import java.io.IOException;
+import org.apache.hadoop.io.*;
+import org.apache.hadoop.mrunit.mapreduce.MapDriver;
+import org.junit.*;
+
+public class MaxTemperatureMapperTest {
+  @Test
+  public void processesValidRecord() throws IOException, InterruptedException {
+    Text value = new Text("0043011990999991950051518004+68750+023550FM-12+0382" +
+                                  // Year ^^^^
+        "99999V0203201N00261220001CN9999999N9-00111+99999999999");
+                              // Temperature ^^^^^
+    new MapDriver<LongWritable, Text, Text, IntWritable>()
+      .withMapper(new MaxTemperatureMapper())
+      .withInputValue(value)
+      .withOutput(new Text("1950"), new IntWritable(-11))
+      .runTest();
+  }
+}
+#+END_SRC
+
+it passes a weather record as input to the mapper, then checks the
+output is the year and temperature reading.
+
+*Test-Driven*
+1.
+  /First version of a Mapper that passes MaxTemperatureMapperTest/
+  #+BEGIN_SRC
+public class MaxTemperatureMapper
+  extends Mapper<LongWritable, Text, Text, IntWritable> {
+  
+  @Override
+ public void map(LongWritable key, Text value, Context context)
+      throws IOException, InterruptedException {
+    
+    String line = value.toString();
+    String year = line.substring(15, 19);
+    int airTemperature = Integer.parseInt(line.substring(87, 92));
+    context.write(new Text(year), new IntWritable(airTemperature));
+  }
+}
+#+END_SRC
+2.new test
+3.perfect the first verison
+  
+**** Reducer
+The reducer has to find the maximum value for a given key.
+
+#+BEGIN_SRC
+@Test
+  public void returnsMaximumIntegerInValues() throws IOException,
+      InterruptedException {
+    new ReduceDriver<Text, IntWritable, Text, IntWritable>()
+      .withReducer(new MaxTemperatureReducer())
+      .withInputKey(new Text("1950"))
+      .withInputValues(Arrays.asList(new IntWritable(10), new IntWritable(5)))
+      .withOutput(new Text("1950"), new IntWritable(10))
+      .runTest();
+  }
+#+END_SRC
+
+/source/
+#+BEGIN_SRC
+public class MaxTemperatureReducer
+  extends Reducer<Text, IntWritable, Text, IntWritable> {
+  @Override
+  public void reduce(Text key, Iterable<IntWritable> values,
+      Context context)
+      throws IOException, InterruptedException {
+    
+    int maxValue = Integer.MIN_VALUE;
+    for (IntWritable value : values) {
+      maxValue = Math.max(maxValue, value.get());
+    }
+    context.write(key, new IntWritable(maxValue));
+  }
+}
+#+END_SRC
+
+*** Running locally on Test Data
+Since we have the mapper and reducer, the next step is to write a job
+driver and run it on some test data on a development machine.
+
+**** Running a Job in a Local Job Runner
+It's easy to write one using the *Tool* interface.
+
+/Application to find the maximum temperature/
+#+BEGIN_SRC
+public class MaxTemperatureDriver extends Configured implements Tool {
+  @Override
+  public int run(String[] args) throws Exception {
+    if (args.length != 2) {
+      System.err.printf("Usage: %s [generic options] <input> <output>\n",
+          getClass().getSimpleName());
+      ToolRunner.printGenericCommandUsage(System.err);
+      return -1;
+    }
+    
+    Job job = new Job(getConf(), "Max temperature");
+    job.setJarByClass(getClass());
+    FileInputFormat.addInputPath(job, new Path(args[0]));
+    FileOutputFormat.setOutputPath(job, new Path(args[1]));
+    
+    job.setMapperClass(MaxTemperatureMapper.class);
+    job.setCombinerClass(MaxTemperatureReducer.class);
+    job.setReducerClass(MaxTemperatureReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    
+    return job.waitForCompletion(true) ? 0 : 1;
+  }
+  
+  public static void main(String[] args) throws Exception {
+    int exitCode = ToolRunner.run(new MaxTemperatureDriver(), args);
+    System.exit(exitCode);
+  }
+}
+#+END_SRC
+
+The input types are determined by the input format, which defaults to
+*TextInputFormat* and has *LongWritable* keys and *Text* values.
+
+It's a good idea to set a name for the job which is the name of the
+JAR file by default.Do this by using Job constructor or setJobName()
+method, both of which internally set the *mapred.job.name* property.
+
+Hadoop comes with a local job runner, a cut-down version of the
+MapReduce execution engine for running MapReduce jobs in a single JVM.
+It's designed for testing and can be run in a debugger.
+
++ Note :: It can't run more than one reducer.
+
+The local job runner is enabled by a configuration
+setting. *mapred.job.tracker* is a host:port pair to specify the
+address of the jobstracker, but when it has the special value of local
+(which is the defualt), the job is run in-process without a accessing
+an external jobtracker.
+
+#+BEGIN_SRC
+% mvn compile
+% export HADOOP_CLASSPATH=target/classes/
+% hadoop v2.MaxTemperatureDriver -conf conf/hadoop-local.xml \
+  input/ncdc/micro output
+
+  OR
+
+% hadoop v2.MaxTemperatureDriver -fs file:/// -jt local input/ncdc/micro output
+#+END_SRC
+
+***** Fixing the mapper
+
+**** Testing the Driver
+Apart from the flexible configuration options offered by making your
+application implement Tool, you also make it more testable because it
+allows you to inject an arbitrary Configuration.
+
+Two approaches.
+
++ First ::
+  Test driver using a local, in-process job runner/
+  #+BEGIN_SRC
+ @Test
+  public void test() throws Exception {
+    Configuration conf = new Configuration();
+    conf.set("fs.default.name", "file:///");
+    conf.set("mapred.job.tracker", "local");
+    
+    Path input = new Path("input/ncdc/micro");
+    Path output = new Path("output");
+
+    FileSystem fs = FileSystem.getLocal(conf);
+    fs.delete(output, true); // delete old output
+    
+    MaxTemperatureDriver driver = new MaxTemperatureDriver();
+    driver.setConf(conf);
+    
+    int exitCode = driver.run(new String[] {
+        input.toString(), output.toString() });
+    assertThat(exitCode, is(0));
+    
+    checkOutput(conf, output);
+  }
+  #+END_SRC
+  The test explicitly sets fs.default.name and mapred.job.tracker so
+  it uses the local filesystem and the local job runner. 
+
++ Second ::
+  Run it using a "mini-" cluster.
+  
+  Hadoop has a set of testing classes, called *MiniDFSCluster*,
+  *MiniMRCluster*, and *MiniYARNCluster*, that provide a programmatic
+  way of creating in-process cluster.
+
+  Unlike local job runner, this allow testing against the full HDFS
+  and Mapreduce machinery, which is also make debug more difficult.
+
+  *ClusterMapReduceTestCase*
+
+*** Running on a Cluster
+**** Packaging a Job
+For a start, a job's classes must be packaged into a /job JAR file/ to
+send to the cluster. Hadoop will find the job JAR automatically by
+searching for the JAR on the driver's classpath that contains the
+class set in the *setJarByClass()* method (on JobConf or Job).
+
+%mvn package -DskipTests
+
+Any dependent JAR files can be packaged in a lib subdirectory in the
+job JAR file. Similarly, resource files can be packaged in a classes
+subdirectory. Just like WAR files.
+
+***** The client classpath
+HADOOP_CLASSPATH is a client-side setting and only sets the classpath
+for the driver JVM.
+
+***** The task classpath
+***** Packaging dependencies
+***** Task classpath precedence
+On the client side, you can force Hadoop to put the user classpath
+first in the search order by setting the *HADOOP_USER_CLASSPATH_FIRST*
+environment variable to true. For the task classpath, you can set
+*mapreduce.task.classpath.first* to true.
+
+**** Launching a Job
+To launch the job, we need to run the driver, specifying the cluster
+that we want to run the job on with the -conf option (or use -fs and
+-jt option).
+
+#+BEGIN_SRC
+% unset HADOOP_CLASSPATH
+% hadoop jar jarname.jar v3.MaxTemperatureDriver \
+  -conf conf/hadoop-cluster.xml input/ncdc/all max-temp
+#+END_SRC
+
+We unset the HADOOP_CLASSPATH because we don't have any third-party
+dependencies for this job. And if it were left set to target/classes/
+(from earlier in the chapter), Hadoop wouldn’t be able to find the
+job JAR if it loaded the MaxTemperatureDriver class from
+target/classes rather than the JAR, and the job would fail.
+
+Output: id, progress, info
+
+A job ID is composed of the time that the jobtracker started and an
+incrementing counter maintained by the jobtracker to uniquely identify
+the job to that instance of the jobtracker.
+like : job_200904110811_0002
+
+Tasks belong to a job. task_200904110811_0002_m_000003_0
+Tasks may be executed more than once, due to failure or speculative
+execution. The last number indicate how many time it attempts.
+
+**** The MapReduce Web UI
+It's useful for following a job's progress while it is running, as
+well as finding job statistics and logs after job has completed.
+http://jobtracker-host:50030
+
+***** The jobstracker page
+Details of the Hadoop installation.
+summary of the cluster , measures of cluster capacity and utilization.
+Job scheduler.
+
+jobtracker's logs and the jobtracker's history.
+*mapred.jobtracker.completeuserjobs.maximum*
+****** JobHistory
+Job history refers to the events and configuration for a completed
+job. It is retained regardless of whether the job was successful, in
+an attempt to provide interesting information for the user running a
+job.
+
+history files are kept under logs/history for 30 days.
+Setting *hadoop.job.history.location* to change the logs directory.
+
+Second copy is stored for user in the _logs/history subdirectory of
+the job's output directory which won't be deleted. *hadoop.job.history.user.location* (set to
+none result in no files).
+
+=hadoop job -history=
+
+***** The job page
+Clicking on a job ID. Job progress.
+
+
+**** Retrieving the Results
+Once the job is finished, there are various ways to retrieve the
+results.
+
+Each reducer produces one oupout file, /part-r-000000/ to
+/part-r-000029/ in the max-temp directory.
+
+If the output is large, it's important to have multiple parts so that
+more than one reducer can work in parallel.
+
+Geting all the files in the directory and merges them into a single
+file.
+=% hadoop fs -getmerge max-temp max-temp-local=
+
+
+**** Debugging a Job
+We can use a debug statement to log to standard error, in conjunction
+with a message toupdate the task’s status message to prompt us to
+look in the error log. The web UImakes this easy.
+
+When trying to debug a job, you should alwaysask yourself if you can
+use a counter to get the information you need to find out
+what’shappening.
+
+If the amount of log data is large, you can write the information to
+the map's output, rather than to standard error, for analysis and
+aggregation by the reduce.
+There is a better way that you can write a program (in MapReduce) to
+analyse the logs.
+
+#+BEGIN_SRC
+public class MaxTemperatureMapper
+  extends Mapper<LongWritable, Text, Text, IntWritable> {
+  enum Temperature {
+    OVER_100
+  }
+  
+  private NcdcRecordParser parser = new NcdcRecordParser();
+  @Override
+  public void map(LongWritable key, Text value, Context context)
+      throws IOException, InterruptedException {
+    
+    parser.parse(value);
+    if (parser.isValidTemperature()) {
+      int airTemperature = parser.getAirTemperature();
+      if (airTemperature > 1000) {
+        System.err.println("Temperature over 100 degrees for input: " + value);
+        context.setStatus("Detected possibly corrupt record: see logs.");
+        context.getCounter(Temperature.OVER_100).increment(1);
+      }
+      context.write(new Text(parser.getYear()), new IntWritable(airTemperature));
+    }
+  }
+}
+#+END_SRC
+
+Update the map's status message using the *setStatus()* method on
+Context directing us to look in the log.
+
+We also increment a counter, which in Java is represented by a field
+of an enum type.
+
+***** The tasks page
+The job page has a number of links for viewing the tasks in a job in
+more detail.
+
+***** The task details page
+The *dfs.web.ugi* property determines the user that the HDFS web UI
+runs as, thus controlling which files may be viewed and deleted.
+
+For map tasks, there is also a section showing which nodes the input
+split was located on.
+
+By following one of the links to the logfiles for the successful task
+attempt (you can see the last 4 KB or 8 KB of each logfile, or the
+entire file).
+
+=% hadoop job -counter job_200904110811_0003 'v4.MaxTemperatureMapper$Temperature' OVER_100=
+The -counter option takes the job ID, counter group name, and the
+counter name.
+
+***** Handling malformed data
+
+**** Hadoop Logs
+Hadoop produces logs in various places, and for various audiences.
+/Types of Hadoop logs/
+| Logs                       | Primary audience | Description                                                     | Further Information |
+|----------------------------+------------------+-----------------------------------------------------------------+---------------------|
+| System daemon logs         | Administrator    |                                                                 |                     |
+| HDFS audit logs            | Administrators   | A log of all HDFS request, turned off by default.               |                     |
+| MapReduce job history logs | Users            | A log of the events that occur in the course of running a job.  |                     |
+| MapReduce task logs        | Users            | Each tasktracker child process produces a log file using log4j. |                     |
+|----------------------------+------------------+-----------------------------------------------------------------+---------------------|
+
+MapReduce task logs are accessible through the web UI. You can also
+find the logfiles on the local filesystem of the tasktracker that run
+the task attempt, located in a directory named by the task attempt.
+
+In Java, you can write to the task’s syslog file if you wish by using
+the Apache Commons Logging API.
+
+#+BEGIN_SRC
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.mapreduce.Mapper;
+public class LoggingIdentityMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT>
+  extends Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+  
+  private static final Log LOG = LogFactory.getLog(LoggingIdentityMapper.class);
+  
+  @Override
+  public void map(KEYIN key, VALUEIN value, Context context)
+      throws IOException, InterruptedException {
+    // Log to stdout file
+    System.out.println("Map key: " + key);
+    
+    // Log to syslog file
+    LOG.info("Map key: " + key);
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Map value: " + value);
+    }
+    context.write((KEYOUT) key, (VALUEOUT) value);
+  }
+}
+#+END_SRC
+
+Log level : INFO, DEBUG
+=% hadoop jar hadoop-example.jar LoggingDriver -conf/hadoop-cluster.xml \ -D mapred.map.child.log.level=DEBUG input/ncdc/sample.txt logging-out=
+
+**** Remote Debugging
+
+*** Tuning a Job
+Can I make it run faster?
+/Tuning checklist/
+| Area                     | Best practice                                                                                                                                                                                                                   |
+|--------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Number of mappers        | How long are your mappers running for? Make it longer. This may depends on the input format you are using.                                                                                                                      |
+| Number of reducers       | For maximum performance, the number of reducers should be slightly less than the number of reduce slots in the cluster. This allows the reducers to finish in one wave and fully utilizers the cluster during the reduce phase. |
+| Combiners                | Check whether your job can take advantage of a combiner to reduce the amount of data passing though the shuffle.                                                                                                                |
+| Intermediate Compression | Job execution time can almost always benefit from enable map output compression.                                                                                                                                                |
+| Custom serialization     | If you using your own custom Writable object or custom comparators, make sure you have implemented RawComparator.                                                                                                               |
+| Shuffle tweaks           | the MapReduce shuffle expose around a dozen tuning parameters for memory management, which may help you wring out the last bit of performance.                                                                                  |
+
+**** Profiling Tasks
+***** The HPROF profiler
+***** Other profilers
+*** MapReduce Workflows
+When the processing gets more complex, this complexit is generally
+manifested by having more MapReduce jobs, rather than having more
+complex map and reduce functions.
+
+For more complex problems, it's worth considering a higher-level
+language than MapReduce, such as Pig, Hive, Cascading,Cascalog, or
+Crunch. One immediate benefit isthat it frees you from having to do
+the translation into MapReduce jobs, allowing youto concentrate on
+the analysis you are performing.
+
+**** Decomposing a Problem into MapReduce Jobs
+The arguments for having more (but simpler) MapReduce stages are that
+doing so leads to more composable and more maintainable mappers and
+reducers.
+
+A mapper commonly performs input format parsing, projection (selecting
+the relevant fields0, and filtering (removing records that are not of
+interest).
+
+And you can split these into distinct mappers and chaining them into a
+single mapper using the *ChainMapper* library class .
+
+Combined with a ChainReducer, you can run a chain of mappers, followed
+by a reducer and another chain of mappers, in a single MapReduce job.
+
+**** JobControl
+When there is more than one job in a MapReduce workflow, in order to
+make them executed in order, you have serveral choises.
+
+The main consideration is whether you have a linear chain of jobs or a
+more complex directed acyclic graph (DAG) of jobs.
+
++ Linear chain :: Simplest approach is to run each job one after
+		  another, waiting until a job completes successfully.
+
+		  #+BEGIN_SRC
+		  JobClient.runJob(conf1);
+		  JobClient.runJob(conf2);
+		  #+END_SRC
+
+		  If a job fails the runJob() method will throw an
+		  IOException, so later jobs in the pipeline don't
+		  get executed.
+
++ More complex :: there are libraries that can help or chestrate your
+		  workflow.
+
+		  *org.apache.hadoop.mapreduce.jobcontrol* package.
+		  
+		   An instance of JobControl represents a graph of
+		   jobs to be run. You add the job configurations,
+		   then tell the JobControl instance the dependencies
+		   between jobs.
+		  
+**** Apache Oozie
+Apache Oozie is a system for running workflows of dependent jobs.
+
+It is composed of two main parts: a /workflow engine/ that stores and
+runs workflows composed of different types of Hadoop jobs (MapReduce,
+Pig, Hive, and so on), and a /coordinator engine/ that runs workflow
+jobs based on predefined schedules and data availability.
+
+Oozie runs as a service in the cluster, and clients submit workflow
+definitions for immediate or later execution. In Oozie parlance, a
+workflow is a DAG of action nodes and controlflow nodes.
+
+An action node performs a workflow task, such as moving files in HDFS,
+running a MapReduce, Streaming, Pig, or Hive job, performing a Sqoop
+import, or running an arbitrary shell script or Java program. A
+control-flow node governs the workflow execution between actions by
+allowing such constructs as conditional logic or Parallel execution.
+
+When the workflow completes, Oozie can make an HTTP callback to the
+client to inform it of the workflow status. It is also possible to
+receive callbacks every time the workflow enters or exits an action
+node.
+
+***** Defining an Oozie workflow
+#+BEGIN_SRC
+<workflow-app xmlns="uri:oozie:workflow:0.1" name="max-temp-workflow">
+  <start to="max-temp-mr"/>
+  <action name="max-temp-mr">
+    <map-reduce>
+      <job-tracker>${jobTracker}</job-tracker>
+      <name-node>${nameNode}</name-node>
+      <prepare>
+        <delete path="${nameNode}/user/${wf:user()}/output"/>
+      </prepare>
+      <configuration>
+        <property>
+          <name>mapred.mapper.class</name>
+          <value>OldMaxTemperature$OldMaxTemperatureMapper</value>
+        </property>
+        <property>
+          <name>mapred.combiner.class</name>
+          <value>OldMaxTemperature$OldMaxTemperatureReducer</value>
+        </property>
+        <property>
+          <name>mapred.reducer.class</name>
+          <value>OldMaxTemperature$OldMaxTemperatureReducer</value>
+        </property>
+        <property>
+          <name>mapred.output.key.class</name>
+          <value>org.apache.hadoop.io.Text</value>
+        </property>
+        <property>
+          <name>mapred.output.value.class</name>
+          <value>org.apache.hadoop.io.IntWritable</value>
+        </property>        
+        <property>
+          <name>mapred.input.dir</name>
+          <value>/user/${wf:user()}/input/ncdc/micro</value>
+        </property>
+        <property>
+          <name>mapred.output.dir</name>
+          <value>/user/${wf:user()}/output</value>
+        </property>
+      </configuration>
+    </map-reduce>
+    <ok to="end"/>
+    <error to="fail"/>
+  </action>
+  <kill name="fail">
+    <message>MapReduce failed, error message[${wf:errorMessage(wf:lastErrorNode())}]
+    </message>
+  </kill>
+  <end name="end"/>
+</workflow-app>
+#+END_SRC
+
+***** Packaging and deploying an Oozie workflow application
+
+***** Running an Oozie workflow job
+
+** 6.How MapReduce Works
+How MapReduce is implemented in Hadoop,from the point of view of a
+#user.
+
+*** Anatomy of a MapReduce Job Run
+You can run a MapReduce job with a single method call: *submit()* on a
+*Job* object (or *waitForCompletion()* ).
+
+For Hadoop version up to 0.20, *mapred.job.tracker* determines the
+means of execution. If this configuration set to *local* (default
+value), the local job runner is used. This runner runs the whole job
+in a single JVM. It's designed for testing.
+
+Set *mapred.job.tracker* to a colon-separated host and port pair, then
+the property is interpreted as a jobstracker address.
+
+In Hadoop 2.0, a new MapReduce implementation was introduced --
+MapReduce2 , which built on a system called YARN.
+
+Switch *mapreduce.framework.name* property with "local, classic, yarn"
+to use different frameworks.
+
+The old and new MapReduce APIs are not the same thing as the classic
+and YARN-based MapReduce implementations.All four combinations are
+supported in different releases.
+
+**** Class MapReduce (MapReduce 1)
+There are four independent entities:
++ client :: submits the MapReduce job
+
++ jobtracker :: coordinates the job run. The jobtracker is a Java
+		application whose main class is JobTracker.
+
++ tasktracker :: run the tasks that the job has been split
+		 into. Tasktrackers are Java applications whose main
+		 class is TaskTracker.
+
++ HDFS :: 
+
+***** Job submission
+The submit() method on Job creates an internal *JobSummitter* instance
+and calls *submitJobInternal()* on it (step 1 in Figure 6-1).
+
+
+
+** 7.MapReduce Tyeps and Formats
+About the MapReduce programming model, and the various data formats that MapReduce can work with.
+
+*** MapReduce Types
+map: (K1, V1) -> list (K2, V2)
+reduce: (K2, list(V2)) -> list(K3, V3)
+
+#+BEGIN_SRC
+    public interface Mapper<K1, V1, K2, V2> extends JobConfigurable, Closeable {
+      void map(K1 key, V1 value, OutputCollector<K2, V2> output, Reporter reporter)
+        throws IOException;
+
+    }
+    public interface Reducer<K2, V2, K3, V3> extends JobConfigurable, Closeable {
+      void reduce(K2 key, Iterator<V2> values,
+            OutputCollector<K3, V3> output, Reporter reporter) throws IOException;
+    }
+
+//  2.0
+public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+    public class Context extends MapContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> { 
+	// ... 
+    } 
+    protected void map(KEYIN key, VALUEIN value, Context context) throws IOException, InterruptedException { 
+	// ...
+    }
+}
+
+public class Reducer<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+    public class Context extends ReducerContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+	    // ...
+	  }
+    
+    protected void reduce(KEYIN key, Iterable<VALUEIN> values, Context context) throws IOException, InterruptedException {
+	// ...
+    }
+}    
+#+END_SRC
+The context objects are used for emitting key0value pairs, and so they
+are parameterized by the output types so that the signature of the
+*write()* method is :
+
+#+BEGIN_SRC
+public void write(KEYOUT key, VALUEOUT value)
+    throws IOException, InterruptedException
+#+END_SRC
+
+
+** 8.MapReduce Features
+Advanced MapReduce topics, including sorting and joining data.
+
+
+** 9.Setting Up a Hadoop Cluster
+Hadoop administrators, and how to set up and maintain a Hadoop cluster running HDFS and MapReduce.
+** 10.Administering Hadoop
+
+
+** 11.Pig
+** 12.HBase
+** 13.ZooKeepe
+r
+
+** 14.Case Studies
+
+
+** Installing Apache Hadoop
+   tar xzvf hadoop-x.x.x
+   export JAVA_HOME=path/to/jdk
+   export HADOOP_INSTALL=path/to/hadoop
+   export PATH=$PATH:$HADOOP_INSTALL/bin
+
+   hadoop version
+
+   JAVA_HOME should be added to conf/hadoop-env.sh
+*** Configuration
+Each component in Hadoop is configured using an XML file. Core
+properties go in core-site.xml, HDFS properties go in
+hdfs-site.xml,and MapReduce properties go in mapred-site.xml.All are
+located in conf subdirectory.
+
+Hadoop can be run in one of 3 modes:
++ Standalone (or local) mode :: Everything runs in a single JVM.This
+     mode is suitable for running MapReduce programs during
+     development.
+
++ Pseudo-distributed mode :: The Hadoop daemons run on the local
+     machine, thus simulating a cluster on a small scale.
+
++ Fully distributed mode :: run on a cluster of machines.
+
+Key configuration properties for different modes :
+|-----------+--------------------+-------------------+--------------------+-------------------|
+| Component | Property           | Standalone        | Pseudo-distributed | Fully distributed |
+|-----------+--------------------+-------------------+--------------------+-------------------|
+| Core      | fs.default.name    | file:///(default) | hdfs://localhost/  | hdsf://namenode/  |
+| HDFS      | dfs.replication    | N/A               | 1                  | 3(default)        |
+| MapReduce | mapred.job.tracker | local(default)    | localhost:8021     | jobtracker:8021   |
+|-----------+--------------------+-------------------+--------------------+-------------------|
+
+Hadoop doesn't actually distinguish between pseudo-distributed and
+fully distributed modes.Pseudo-Distributed mode is just a special case
+of fully distributed mode in which the (single) host is localhost.
+
+It's necessary to make sure that we can SSH to localhost and log in
+without having to enter a password.
+
+**** Pseudo-Distributed Mode
+<?xml version="1.0"?>
+<!-- core-site.xml -->
+<configuration>
+  <property>
+    <name>fs.default.name</name>
+    <value>hdfs://localhost/</value>
+  </property>
+</configuration>
+
+<?xml version="1.0"?>
+<!-- hdfs-site.xml -->
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>1</value>
+  </property>
+</configuration>
+
+<?xml version="1.0"?>
+<!-- mapred-site.xml -->
+<configuration>
+  <property>
+    <name>mapred.job.tracker</name>
+    <value>localhost:8021</value>
+  </property>
+</configuration>
+
+***** Configuring SSH
+Enable password-less login:
+% ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa
+% cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
+***** Formatting the HDFS filesystem
+The formatting process creates an empty filesystem by creating the
+storage directories and the initial versions of the namenode's
+persistent data strucures.
+
+Datanodes are not involved in the initial formatting process,since the
+namenode manages all of the filesys-tem’s metadata, and datanodes can
+join or leave the cluster dynamically. 
+
+You don't need to declare how large a filesystem to create,since this
+is determined by the number of datanodes in the cluster,which can be
+increased as needed.
+
+% hadoop namenode -format
+
+***** Starting and stopping the daemons
+% start-dfs.sh
+% start-mapred.sh
+
+Three daemons will be started on local machine:a namenode,a secondary
+namenode, and a datanode.
+Check jobstracker at http://localhost:50030
+Check namenode at http://localhost:50070
+
+% stop-dfs.sh
+% stop-mapred.sh
+
+** Cloudera's Distribution for Hadoop
+** Preparing the NCDC Weather Data
+

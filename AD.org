@@ -1,0 +1,633 @@
+* First 
+** Basic Concepts
+Active Directory is a service component in Windows Server that provides the directory service to ACUD directory database.
+
+*** Scope
+single computer,LAN,WAN.
+It can include all object inside this area,such files,printers,applications,servers,domains,users.
+
+*** Namespace
+Namespace is a bounded area inside which we can find realted
+information with a given name.
+
+For example,in XP's filesystem,we can get a file's size,modify date by
+searching with its name.
+
+Inside Windows Servers ,we can consider AD as a namespace.
+
+The way AD constructs its namespace is much like DNS.
+
+*** Object and Attribute
+All resources inside Windows Servers exist as object.
+Object is a set of attributes.
+
+*** Container
+Containers are similar to objects for owning its name and
+attributes.But containers can contain other objects or containers.
+
+Organization Units is a special container for a additional function
+called group policy.
+
+AD associates all the objects,containers,OU together in AD directory
+database with the /hierarchical/ structure.
+
+*** Domain Tree
+With the help of domain tree structure,you can construct a network
+that contains numbers of domains.
+
+They shown as a tree.At the top is the "root domain"(e.g
+abc.ocm),under which there could exist two sub-domains,scales.ab.com
+and mkt.abc.com.
+They are named after to follow the DNS form.
+
+All the domains insides the domain tree are share a same AD,which
+means there is only one AD.This AD seperates its data all over the
+domain.Every domain only store their own data.Windows Servers call the
+union of these data Active Directory.
+
+*** Trust
+Only after two domains have construct a trust relationship,can they
+request each other's resource.
+
+This kind of relationship is two-way transitive which means adding any
+of Windows Servers domains to the domains tree,the added domain will
+trust all of its parents automatically and vise versa.
+
+A trusts B and B trusts C,as a result,A will trusts C vise versa.
+
+*** Forest
+If there are many domains tree under the same network,you can combine
+them as a forest.Every domain tree inside a forest has their own
+namespace.
+
+The first tree's root domain is forest root domain as well as the name
+of the forest.
+
+*** Scheme
+All the object class and attributes data are defined in schema.
+
+*** Domain Controller and AD Replication
+AD is stored in domain controllers.When there are changes in a
+controller,these changes data will be copied to other controllers.
+
+Using more than one controllers give you fault-tolerant capability and
+more efficient processing.
+
++ multi-master replication model(The common way) :: In this model, you
+     can directly update an object in any Controller and it will be
+     replicated automatically.
+  
++ single master replication model :: Updating is handled in operations
+     master at first.
+
+*** Lightweight Directory Access Protocol (LDAP)
+It a protocol used to query and update AD's directory service.Windows
+Servers 2003 domain uses LDAP naming path to reparent the object's
+position in AD.
+
+LDAP naming path has the following content.
+**** Distinguished Name,DN
+It the object's full path inside AD.
+
+For example ,CN=xx, OU=xx, OU=xx, DC=abc, DC=com
+DC means domain component,such as abc or com inside "abc.com".
+CN is short for common name.All object exclude DC and OU are CN,such
+as user and computer object.
+
+**** Relative Distinguished name,RDN
+
+**** Global unique Identifier,GUID
+128bit,Not change.
+
+**** User Principal Name,UPN
+Its format is like e-mail.It better for user to use UPN to login for
+migrate a user from domain to another does not change its UPN.
+
+**** Service Principal Name,SPN
+
+*** Global Catalog
+AD is convenient for user to search a object they need.
+Although all the domains inside a domains tree share the same AD,AD's
+data is seperated all over of each domain.Each domain only stores
+their object.So inside Windows Server 2003 ,there is global catalog.
+
+It is implemented by controllers.It stores part of information of
+every object which is offen queried.
+
+It is shared by all the domain trees inside a forest.By default,system
+will set the first controller as the global catalog.
+
+*** Sites
+Site is consist of one or more subnets which connect each other with
+high speed and reliable link.
+
+Generally,the links between a LAN's subnets will meet such request
+which means that a LAN should be treated as a site,while each LANs
+inside a WAN shouble be considered as different sites.
+
+Domain is defined in a logical way,while sites uses a physical
+way.There are situations that a site may contains computers come from
+different domain and vise versa.
+
+Depending on different situation,there are different strategy in
+copying data between controllers.
+
+** Domain and Forest Functionality
+*** Doamin Functionality Level
+In Windows Server 2003,all the setting about "domain functionality"
+will only affect the domain itself.
+
+There are 3 modes that domain functionality can run in:
+**** Windows 2000 mixed mode (default value)
+Within this mode,a domain controller can be Windows Server
+2003,Windowns 2000 Server and Windowns NT 4.0 Server.
+
+**** Windows 2000 native mode
+Windows Server 2003,Windowns 2000 Server.
+
+**** Windows 2003
+Windowns Server 2003
+It has all the functionality inside AD.
+
+*** Forest Functionality Level
+The setting under forest functionality level will affect all the
+domain inside this forest.
+
+** Directory Partition
+AD's database can be divided into multi-Directory partitions
+logically.
+
+*** Schema Directory Partition
+It stores data about the defining object and attributes as well as how
+to create these object and rules about these attributes.
+
+It is shared by all the controllers inside a forest and will be copied
+among all controllers.
+
+*** Configuration Directory Partition
+It contains the information about the AD structure,such as what
+domains and site it has.It is also forest scope.
+
+*** Domain Directory Partition
+Every domain has its own Domain Directory Partition,which stores all
+the objects they have ,such as users,groups.
+
+*** Application Directory Partition
+Generally,it is created by the application to store relative data such
+as setting data about DNS server.It can be copied to particular
+controllers ,not all.
+
+* Create Windows Server 2003 Domain
+** Install
+1. Choose a domain name that follow DNS format.
+2. Choose a DNS server or create a new one on it.
+3. cmd -> dcpromo  install AD.
+4. Choose a path for Database file.
+   
+** Create a new Domain
+When creating the first domain controller ,at the same time,you are
+creating a domain which this domain controller belong to.
+
+** Check
+1. Check the DNS server to see whecher there are relative information
+   aboute the domain controllers.
+   1. ip and hostname
+   2. check SRV record in _msdes,_sites,_tcp,_udp directories using
+      DNS console
+   3. check SRV using NSLOOKUP
+      
+2. Check AD database file and SYSVOL directory
+   Database file -- ntds.dit and log files are under the
+   %systemroot%\ntds by default.
+
+   SYSVOL is created under %systemroot%\SYSVOL by default.
+** Adding New Manage Tools
+
+** Review Event Log Files
+begin -> all -> manage tool -> event log
+
+* Domain Users and Groups Manage
+** Domain User Accounts
+single sign-on
+
+*** Organization Union
+It can be used to contain other object ,such user account ,group
+accounts and bring convenience in managering resources.
+You can also manage user work envirement altogether.
+
+It should not change offently.
+
+*** User Login Account
+User can use their UPN or Login Name to login to a computer inside
+domain.Either of them is unque in a forest.
+
+*** Create UPN shortcut
+
+*** User Management
+**** Enable and Disable Account
+**** Rename Account
+Every user account added to domain will be signed a SID,which is the
+key to record the permissions of an account.Therefor,renaming doesn't
+change an account's permission.
+**** Delete Account
+**** Reset Password
+**** Unlock Account
+**** Imgrate Account
+*** Search Account
+begin -> manage tool -> AD users and computers -> action -> find
+You can find what you need with selecting type ,scope, and entering attributes.
+
+*** Copy Data between Domain Controllers
+All the changes you perform will be saved to the controller you are
+connecting with at first.Then is copying to other controllers.
+
+When copying:
++ Auto Copy :: If they are all locate in a same site,by default,the
+               last changes will be spread after 15 seconds.
++ Manual Copy :: manage tools -> AD sites and services -> sites ->
+                 default-first-Site-Name -> Servers -> choose
+                 controller -> right click copy now.
+
+** Add Number of User at once
+1. write require informations in file
+2. Use CSVDE to process file
+2. Or use LDIFDE.
+
+** Domain Group Accounts
+Base on the use of groups,it can be divided into 3 types.
+
+Group Types:
+*** Universal Group
+In universal group,you can set the access permission in all domains to
+retrieve a resource in any domain.
+
++ Universal Scope :: Its member could be a user,universal group,or global
+     group in any domain but not a local group.
+
++ Arbitrary Access :: Members in this group can access all the
+     resources in any domain,which also means that you can set the
+     group permissions under any domain.
+
+*** Global Group
+It mainly focus on associating users.
+
+Features:
++ Only the users and global group in the same domain have the possible
+  to become members.
+
++ Arbitrary Access :: the same as above.
+
+*** Domain Local Group
+This group is used to assigned the permissions in its domain.
+
++ All Users,universal and global group in any domain and local group
+  in the same domain can become member but not local group in other
+  domain.
+
++ Members in this group can only access the resources in the same domain.
+
+** Principals when Using Groups
+
+*** A,G,DL,P Strategy
+Firstly,add users to global group.Then put global group in domain
+local group.Finally,set the permissions.
+
+*** A,G,G,DL,P
+
+*** A,G,U,DL,P
+
+*** A,G,G,U,DL,P
+
+* Group Policy
+** Introduction
+*** Functionality
++ Account Policy :: such as password length.
++ Local Policy :: 
++ Script Setting :: which are runed when shutdown or start computer.
++ User Envirement :: 
++ Software (un)Install ::
++ Restrict the program running ::
++ Directories Position :: 
++ System Setting ::
+
+*** Group Policy Object,GPO
+All the setting information is stored in GPO and these setting will
+take effect once the GPO is connected to the site ,domain or OU.
+
+Default build-in GPO:
++ Default Domain Policy :: which has been connected to the domain.Any
+     change will affect all users and computer in domain.
++ Defualt Domain Controller Policy :: It has been connected to Domain
+     Controllers OU.
+
+The content in GPO can be divided into two parts:
++ Group policy container :: It's stored in AD's database.Its
+     information include the GPO attributes and versions.
+
++ Group Policy Template :: It's a directory that used to store GPO's
+     setting value and relative files.It locates in
+     %systemroot%\SYSVOL\sysvol\domain name\Policies.
+
+*** Timing to take effect
++ When computer start or user login
++ Periodly Invoke
+  + domain controller :: every 5 mins by default
+  + not domain controller :: every 90-120 mins
+  + no matter whether it's changed :: every 16 hours.
++ Mamual Invoke :: cmd : gpupdate /target:computer /force
+
+
+** Process Principals
+*** Common 
+**** Inheritable
+Group Policies setting is inheritable:
++ If high-level container's policy has been configured and low-level
+  container's not,it will inherit the setting from the high-level.
+
++ Configuring low-level container's policy will result in overriding
+  the high-level's setting.
+  
++ Configuration is cumulative,which means the final effect is high
+  plus low.
+
+**** Conflicts
+When there are conflicts between poliy configurations,system process
+them with priorities shown as below.
+
+  OU's GPO -> domain's GPO -> site's GPO
+
+The policy of the OU has multiple GPOs is affected by the cumulation
+of all GPO.And they will resolve the gconflict in the order of they
+added.
+
+*** Exception
++ Block Inheritance
++ Enforcing Inheritance
++ Filtering Group Policy
+
+*** Special
+
+*** Change the Domain controller Managering GPO
+When you configur the group policy,all the changes will be saved in
+PDC simulate host and then seperate through out the domain
+controllers.
+
+** Use Group Policy to Manage User Envirement
+
+** Delegate Group Policy Management
+*** GPO connection delegate
+By default only Domain Admins and Enterprise Admins have the right to
+connect GPO to sites ,domains and OU.
+
+For ordinary users,in order to obtain such right ,they must have read and write
+permissions to the gPLink and gPOptions attributes in
+sites,domains,OU.
+
+*** create GPO delegate
+Users belong to Domain Admins,Enterprise Admin,Group Policy Creator
+Owners have such right.
+
+* Delopy Program Using Group Policy
+You can deploy Software in two ways "assign" or "public".
+Generally,these Softwares should have a .msi file.
+
+** Assign a software to users
+You can assign a Software to users using GPO.Once the users have
+logged in any computer in the domain,this software will be advertised
+to users and be runed after user start it.
+
+** Assign softwares to computers
+When the computers start,this Software will be installed under
+Documents and Setting\All User automatically.
+
+** Publish softwares to users
+create a dir to store msi file,and set a correct path in GPO to find this file.
+
+** Delete softwares
+You can delete it from GPO's assign list and configur GPO to
+auto-delete the Software when users login.
+
+** Alter deployed Software
+P150
+
+** Public none-MSI software
+P157
+
+** Converting to MSI
+P163
+
+* Software Restriction Policy
+The key to do this is defining rules.
+
+Priorities of rules when conflict:
+  local -> site -> domain -> OU
+
++ unrestricted
++ disallowed
+
+1. Hash Rules
+2. Credential Rules
+3. Path Rules
+4. Internet Rules
+
+* Create Domain Tree and Forest
+** Create Subdomain
+Just like setting up the first domain controller,but choose another option.
+Point its DNS address to the first one.
+
+** Create Another Domain
+Domain naming master usually is the first controller in a domain.
+
++ Using Ordinary DNS :: just create another primary zone for the new
+     domain and setting Dynamic update.
+
++ Using New DNS :: create new zone and use Dynamic update.Then create
+                   secondary zone and configure to use zone transfer.
+		   
+** change Controller's Name
+Windows Server 2003 Level
+  netdom computername $nowname /add:$newname
+
+* Domain Trust Relationship
+** Trusting Domain and Trusted Domain
+Users with approriate permission in trusted domain B(aka account domain) can access
+resources in trusting domain A(aka resources domain).
+
+This is one-way trust.So users in trusting domain A can't do this as
+users in B,unless B also trust A.
+
+** Process behind Accessing across domain
+When users login,they were assigned an "access token",which need to be
+shown when accessing resources.
+
+In this token, there are data such as accout SID.
+
+** Trust Types
+|--------------+--------------+--------------------+-------------|
+| Type name    | Transitivity | one-way or two-way | auto manaul |
+|--------------+--------------+--------------------+-------------|
+| Parent-child | Yes          | two                | Auto        |
+| Tree-root    | Yes          | two                | Auto        |
+| Shortcut     | Yes          | All                | Manual      |
+| Forest       | Yes          | All                | Manual      |
+| External     | No           | All                | Manual      |
+| Realm        | All          | All                | Manual      |
+|--------------+--------------+--------------------+-------------|
+
+Shortcut can decrease time used to varify account.
+External Windows Server 2003 and Windows NT4.0
+Realm is used for Unix.
+
+** Create Trust
+P213
+
+* Active Directory Replication
+** Replication within the same site
++ Data is uncompress when transporting.
++ Change Notification :: When change occured it will inform another
+     controller in the same site in 15 seconds.
+
+*** Replication Partner
+efficient and fault-tolerant.
+
++ direct Replication Partner
++ none-direct Replication Partner
++ knowledge Consistency Checker
++ replication topology
+
++ decrease Replication latency :: hop count < 3
++ Urgent Replication
+
+** Replication across sites
+schedule to non-business hours
+
+*** Protocols
++ RPC over IP :: Remote Procedure Call over Internet Protocol can be
+                 used between sites or in a same site.
+
++ SMTP :: across sites but can't replicate domain partition.And it
+          also need to apply to CA.
+
+** Default sites Manage
+
+** Using sites to manage AD Replication
++ create site and subnet
++ create association
++ move controllers to site
++ assign bridgehead server
+
+** Global Catalog
+It's a kind of special controller that not only stores all object
+belong its domain but also other domain's object snapshoot.
+
++ Universal group menbership caching
+
+** Replication Conflicts
+Conflicts will occure when there are objects with a same name created
+in different domain controllers at the same time.
+
+*** Time Stamp
+
+*** Conflict Type
++ Attribute value Conflicts :: last is better.
++ Adding an object to a container which has been delete in other
+  controller.Container will be delte and object will move to lost and found.
++ sibling name :: the older will be renamed to 
+
+* Administrator Machine Manage
+** Functionalities of Operations Master 
+There is a domain Controller called "Operations Master" when you use
+single Master replication mode.
+
+Changes were saved and object were updated in Operations master
+at first,then replicated to others.
+
+There are five Operations master roles in AD.
+Aka FSMO -- Flexible single master operations.
+
+*** Schema Master
+Every forest has only one schema Master,and it is performed be the
+first of controller in forest root domain.
+
+It's reponsible for updating and altering object and data about
+Attributes in schema.
+
+Problems occured in this master may effect some softwares running.
+
+*** Domain Naming master
+Every forest has only one Domain Naming Master,and it is performed be the
+first of controller in forest root domain.
+
+It takes charge of domain's adding and deleting in forest.
+
+When there are problems about this master,you won't be able to add or
+delte domain in forest.
+
+*** Relative Identifier master
+Every domain has one and usually is the first controller in this
+domain.
+
+It mainly has two works:
+**** Assigning RID
+This master will distribute RIDs to all of the controllers inside the
+its domain.
+
++ RID :: Everytime controller creating an user ,group or computer
+         object,it will assign a SID to this object,which is the
+         combination of domain's SID and RID given by RID master.
+
++ Transport Objects :: No matter which controller you currently
+     connecting,when you transport an object to another domain,system
+     will move the objct inside RID master to avoid that the same
+     object in different Controllers were transported repeatly.
+
+If it's broken,there is no way to adding or transporting an object.
+
+*** PDC emulator master
+Every domain has one and usually is the first controller in this
+domain.
+
+Works:
++ Supporting old client
++ Minimize the number of problems caused by latency of copying
+  password
++ Synchronizing the time all over the domain(inherit way)
+
+*** infrastructure master
+Every domain has one and usually is the first controller in this
+domain.
+
+If there are objects that referencing others in different domain,this
+kind of masters will take care of updating the data of this referenced
+objects.
+
+With the help of Global Catalog.
+
+** Seize Operations Master Roles
+
+** Transport Operations Master Roles
+
+* AD Database Maintain
+** Introduction
+AD's data can be divided into two parts:database file and SYSVOL dir.
++ ntds.dit :: AD's database file that store the information about all
+              the objects in this controller.
++ edb.log :: Changes will be wrote into RAM at first.And then wrote
+             into ntds.dit according to the changing records in RAM
+             when the system is free or is about to shutdown.This file
+             is replication about data in RAM.Size:10MB.
++ edb.chk :: Everytime system flush its RAM data to disk,it will
+             update edb.chk to save the progress.
+
++ SYSVOL :: stores scripts ,NETLOGON Shared Dir,SYSVOL Shared
+            Dir,Group Policy Setting.
+	    
+** Backup AD database
+Both Database file and SYSVOL are belong to system state when backing
+up the system.
+
+** Restore AD database
+
+** Transport and Manage AD database 
+* Publish Resource to AD
+
