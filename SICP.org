@@ -1,59 +1,4 @@
 * Index
-- [[* 构造过程抽象][构造过程抽象]]
-  - [[* 程序设计的基本元素][程序设计的基本元素]]
-    - [[* 表达式][表达式]]
-    - [[* 命名和环境][命名和环境]]
-    - [[* 组合式求值][组合式求值]]
-    - [[* 复合过程][复合过程]]
-    - [[* 过程应用的代换模型][过程应用的代换模型]]
-    - [[* 条件表达式和谓词][条件表达式和谓词]]
-    - [[* 函数与过程][函数与过程]]
-    - [[* 过程作为黑箱抽象][过程作为黑箱抽象]]
-      - [[* 过程参数][过程参数]]
-      - [[* 块结构][块结构]]
-  - [[* 过程与它们所产生的计算][过程与它们所产生的计算]]
-    - [[* 线性递归和迭代][线性递归和迭代]]
-    - [[* 树形递归][树形递归]]
-    - [[* 增长的阶][增长的阶]]
-    - [[* 求幂][求幂]]
-    - [[* 最大公约数][最大公约数]]
-    - [[* 素数检测][素数检测]]
-  - [[* 用高阶函数做抽象][用高阶函数做抽象]]
-    - [[* 过程作为参数][过程作为参数]]
-    - [[* 用lambda构造过程][用lambda构造过程]]
-      - [[* 用let创建局部变量][用let创建局部变量]]
-    - [[* 过程作为一般性的方法][过程作为一般性的方法]]
-      - [[* 通过区间折半寻找方程的根][通过区间折半寻找方程的根]]
-      - [[* 找出函数的不动点][找出函数的不动点]]
-    - [[* 过程作为返回值][过程作为返回值]]
-      - [[* 牛顿法][牛顿法]]
-      - [[* 抽象和第一级过程][抽象和第一级过程]]
-  - [[* 习题][习题]]
-- [[* 构造数据抽象][构造数据抽象]]
-  - [[* 数据抽象导引][数据抽象导引]]
-    - [[* 实例：有理数的算术运算][实例：有理数的算术运算]]
-      - [[* 序对][序对]]
-    - [[* 抽象屏障][抽象屏障]]
-    - [[* 数据意味着什么][数据意味着什么]]
-    - [[* 扩展练习：区间算术][扩展练习：区间算术]]
-  - [[* 层次性数据和闭包性质][层次性数据和闭包性质]]
-    - [[* 序列的表示][序列的表示]]
-      - [[* 表操作][表操作]]
-      - [[* 对表的映射][对表的映射]]
-    - [[* 层次性结构][层次性结构]]
-      - [[* 对树的映射][对树的映射]]
-    - [[* 序列作为一种约定的接口][序列作为一种约定的接口]]
-      - [[* 序列操作][序列操作]]
-      - [[* 嵌套映射][嵌套映射]]
-      - [[* 图形语言][图形语言]]
-      - [[* 高阶操作][高阶操作]]
-  - [[* 符号数据][符号数据]]
-  - [[* 抽象数据的多重表示][抽象数据的多重表示]]
-  - [[* 带有通用型操作的系统][带有通用型操作的系统]]
-  - [[* 习题][习题]]
-- [[* Modularity, Objects, and State][Modularity, Objects, and State]]
-- [[* Metalinguistic Abstraction][Metalinguistic Abstraction]]
-- [[* Computing with Register Machines][Computing with Register Machines]]
 
 * 构造过程抽象
 
@@ -1536,10 +1481,72 @@ map是处理序列的一种强有力的抽象，与此类似，map与递归的�
 与Hadoop的MapReduce相似.
 
 **** 嵌套映射
+我们可以扩充序列范型,将许多通用嵌套表述的计算也包含进来.
 
-**** 图形语言
+考虑一个过程,对于n,要求返回1<=i<=j<=n,其i+j为素数.
 
-**** 高阶操作
+则其可以使用以下过程枚举输入
+#+BEGIN_SRC scheme
+  (accumulate append
+              ()
+              (map (lambda (x)
+                     (map (lambda (y)
+                            (list x y))
+                          (enumerate-interval 1 (- x 1))))
+                   (enumerate-interval 1 n)))
+#+END_SRC
+
+而这类程序里常常需要做映射,并用append做累积,可以独立定义为一个过程
+#+BEGIN_SRC scheme
+  (define (flatmap proc items)
+    (accumulate append () (map proc items)))
+#+END_SRC
+
+则程序为
+#+BEGIN_SRC scheme
+  (define (flatmap proc items)
+    (accumulate append () (map proc items)))
+
+
+  (define (prime-sum? pair)
+    (prime? (+ (car pair) (cadr pair))))
+
+  (define (prime-sum-pairs n)
+    (map (lambda (p)
+           (list (cdr p) (cadr p) (+ (cafr p) (cadr p))))
+         (filter prime-sum?
+                 (flatmap (lambda (i)
+                            (map (lambda (j) (list i j))
+                                 (enumerate-interval 1 (- i 1))))
+                          (enumerate-interval 1 n)))))
+#+END_SRC
+
+除了用于枚举这种区间组合,嵌套映射还可以用于很多序列.
+例如一个过程,对给定的序对,输出其全排列
+#+BEGIN_SRC scheme
+  (define (flatmap proc items)
+    (accumulate append () (map proc items)))
+
+  (define (remove x items)
+    (filter (lambda (p) (not (= x p))) items))
+
+  (define (permutation s)
+    (if (null? s)
+        (list '())
+        (flatmap (lambda (x)
+                   (map (lambda (y)
+                          (cons x y))
+                        (permutation (remove x s))))
+                 s)))
+
+  (permutation (list 1 2 3))
+
+  (define (remove x items)
+    (cond ((null? items) ())
+          ((= x (car items)) (cdr items))
+          (else (cons (car items)
+                      (remove x (cdr items))))))
+#+END_SRC
 
 ** 符号数据
 
@@ -1702,9 +1709,19 @@ map是处理序列的一种强有力的抽象，与此类似，map与递归的�
 
 - 3.39 :: 基于fold-right和fold-left定义reverse
      [[file:sicp_scms/3.39.scm][file:~/Dropbox/notes/sicp_scms/3.39.scm]]
-     
-     
 
+- 3.40 :: 定义过程unique-pair，对给定的整数n，输出序对i，j，其中1<＝
+     i<j<=n,用这个过程去简化prime-sum-pairs的定义
+     [[file:sicp_scms/2.40.scm][file:~/Dropbox/notes/sicp_scms/2.40.scm]]
+
+- 3.41 :: 八皇后问题
+     [[file:sicp_scms/3.41.scm][file:~/Dropbox/notes/sicp_scms/3.41.scm]]
+
+- 3.42 :: 把上述queens过程中的以下语句对调，耗时相比原来大多少？
+     =(map (lambda (new-row)=
+     =(lambda (rest-of-queens)=
+      
 * Modularity, Objects, and State
 * Metalinguistic Abstraction
 * Computing with Register Machines
+[[*高阶操作][高阶操作]]
