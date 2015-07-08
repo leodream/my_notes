@@ -1,0 +1,381 @@
+* Index
+- [[* 特点][特点]]
+- [[* 调用解释器][调用解释器]]
+  - [[* 参数传递][参数传递]]
+  - [[* 交互模式][交互模式]]
+  - [[* 错误处理][错误处理]]
+  - [[* 编写脚本][编写脚本]]
+  - [[* 源代码编码][源代码编码]]
+  - [[* 交互式启动文件][交互式启动文件]]
+  - [[* 定制模块][定制模块]]
+- [[* 字符串][字符串]]
+- [[* 列表][列表]]
+- [[* 控制流][控制流]]
+  - [[* if][if]]
+  - [[* for][for]]
+  - [[* range()函式][range()函式]]
+  - [[* break, continue, 循环中的else][break, continue, 循环中的else]]
+  - [[* pass][pass]]
+  - [[* 定义函式][定义函式]]
+  - [[* 深入函式定义][深入函式定义]]
+    - [[* 默认参数][默认参数]]
+    - [[* 关键字参数][关键字参数]]
+    - [[* 任意参数表][任意参数表]]
+    - [[* 释放参数列表][释放参数列表]]
+    - [[* Lambda形式][Lambda形式]]
+    - [[* 文档字符串][文档字符串]]
+  - [[* 代码风格][代码风格]]
+
+* 特点
+Python是可扩展的:
+1. 可以为解释器添加新的内建函式或模块
+2. 可以链接到必要的二进制架构
+
+即相当于集成进别的语言写的程序,而把Python当做这个程序的扩展或命令行语
+言.
+
+* 调用解释器
+类似bash, 也可以用以下方法来执行命令
+=python -c 'command' [arg]=
+而对于模块,可以用
+=python -m module [arg]=
+
+** 参数传递
+调用解释器时,脚本名和参数表会传入到一个名为 *sys.argv* 的字符串列表中.
+- 如果没有给定脚本和参数,则sys.argv中有一个空字符串元素
+- 脚本名为 '-' 时(表示标准输入), sys.argv[0]为 '-'
+- 使用-c时, [0]为'-c'
+- 使用-m时, [0]为模块的全名
+- -c command 或 -m module 之后的参数不会被Python解释器的选项处理机制截
+  获,而是会留在sys.argv中,供命令或模块操作.
+
+** 交互模式
+shell中可以使用Ctrl-D或是quit()退出
+主提示符为 >>>
+续行则为 ...
+最后一个(算术)表达式的值会被分配给变量 _  ,类似 $?, 对它赋值会使其失去
+该功能.
+
+** 错误处理
+如果有错误发生,则解释器会输出错误信息和栈跟踪.交互模式下会返回到主提示
+符,而文件输入执行,则会打印栈跟踪后以非零状态退出.所有的错误信息都写入
+标准错误流,而普通输出则写入标准输出流.
+
+*此处的错误与try中的异常并不一样.*
+
+在主提示符或从属提示符中中输入中断符(Ctrl-C)可以取消当前输入,加到主提
+示符.而在执行命令时输入中断符,则会抛出一个 KeyboardInterrupt异常.
+
+** 编写脚本
+类BSD的UNIX系统中,可以在脚本第一行进行如下声明,前提是pyhton的解释器位
+于PATH变量中如下
+=#! /usr/bin/env python3.2=
+
+windows中,py脚本会自动绑定python.exe,如果后缀名为pyw,则不会打开console
+
+** 源代码编码
+默认情况下,源代码会以UTF-8编码,而标准库中的所有可移植代码都仅使用ASCII
+字符编码
+可以在#!行后面,通过以下方式指定不同的编码,
+# -*- coding: encoding -*-
+
+这个声明必须 *在代码文件中的第一行或第二行*
+
+** 交互式启动文件
+通过声明 *PYTHONSTARTUP* 变量,指向一个包含启动命令的文件, 类似
+shell的.profile文件.
+
+这个文件只在交互式的启动中才被会读取,在执行脚本或显式地以/dev/tty为输
+入源时,则不会使用.该文件与解释器执行的命令处在同一个命名空间中,它所定
+义或引用的一切都可以在解释器的不爱限制地使用.
+
+#+BEGIN_SRC python
+  import os
+  filename = os.environ.get('PYTHONSTARTUP')
+  if filename and os.path.isfile(filename):
+      exec(open(filename).read())
+#+END_SRC
+
+** 定制模块
+Python默认提供两个hook来定制交互环境
+*sitecustomize* 和 *usercustomize*
+
+#+BEGIN_SRC python
+  import site
+  site.getusersitepackages()
+  '/home/usr/.local/lib/python3.2/site-packages'
+#+END_SRC
+
+此时,user site-package目录下的usercustomize.py里的所有东西都会在Python
+调用时导入,除非使用了 -s 来禁用自动导入功能.
+
+sitecustomize与上述相同,但其是在全局的site-packages目录下创建,且在
+usercustomize之前被导入.
+
+* 字符串
+- 当且仅当字符串中包含单引号,且没有双引号时,解释器会以双引号打印它.
+- 可以在行的最后使用 \ 来定义跨行字符串
+- 跨行字符串中仍然需要使用\n来获得换行效果
+- 可以使用 ''' 或 """ 来定义跨行字符串,此时不需要\ 和 \n
+- 字符串前加 r 表示该字符串 "未处理" , 此时 \和\n 都会当成数据包含在字
+  符串里.
+- 'A''pple' 的链接方法仅限于常量
+- 不没字符类型,一个字符就是一个长度为一的字符串
+- 可以使用切片截获字符串,如 a[1:2], a[:2], a[2:], 太大的索引会自动替换
+  成字符串的最大索引,而上界比下界小则会返回空字符串.
+- 可以使用负值切符,此时从右边算起. -1返回最后一个字符,而-0则与0一
+  样. 对小于100的字符串 [-100:] 会返回整串, 但[-100]则会产生错误
+- 字符串定义后,不能改变. 对字符串的索引位置赋值会产生错误
+- 对于Unicode字符, 'Hello\u0020World!' 则插入了0x0020序号值的字符.
+  另外可以使用 "xxx".encode('utf-8')来转换得到字符串字节序列
+- 空串为假
+
+
+* 列表
+# a = ['spam', 'eggs', 100, 1234]
+- 列表的索引,切片,连接与字符串操作类似
+- 3*a[:3] 返回首三项重复3次的新列表
+- 切片操作回返的是新的列表,故可以用a[:]来浅复制
+- 不同于字符串,列表中的元素可以改变,也可以对切片赋值,此时会变量列表的
+  大小, a[len(a):]=[1] 则相当于append了个元素
+- len()函数对列表同样可以返回长度
+- 可以使用[][]来对嵌套列表操作
+- 空序列为假,非零为真
+
+* 控制流
+
+** if
+可以有零个或多个elif分支,else是可选的,
+#+BEGIN_SRC python
+  if x < 0:
+      x = 0
+      print('Negative changed to zero')
+  elif x == 0:
+      print('Zero')
+  elif x == 1:
+      print('Single')
+  else:
+      print('More')
+#+END_SRC
+
+** for
+for语句在任意序列(列表或字符串)中迭代时,总是按照元素在序列中的出现顺序
+依次迭代. 如果需要在循环体中修改迭代的序列,建议制作一个副本,python不会
+自动隐式地创建一个副本.
+
+#+BEGIN_SRC python
+  for x in a[:]:
+      if len(x) > 6: a.insert(0,x)
+#+END_SRC
+
+** range()函式
+该方法可以方便地产生等差数列
+
+#+BEGIN_SRC python
+  for i in range(5):
+      print (i)     # 会输出0 1 2 3 4, 5不会包含在序列本身
+
+  # 也可以指定增量
+  range(5, 10)  # 即从5到9
+
+  range(0, 10, 3) # 即 0 3 6 9
+
+  range(-10, -100, -30) # -10 -40 -70
+#+END_SRC
+range()是一个可迭代对象,它可以返回一些连续的项,但它并没有创建一个列表
+(节省空间).
+
+这种迭代对象可以作为for 或 list 的目标.
+# list(range(5))
+会输出一个包含0到4的列表.
+
+** break, continue, 循环中的else
+循环语句中可以有一个else,只有在循环自然结束--不被break的情况下会被执行.
+
+#+BEGIN_SRC python
+  for n in range(2, 10):
+      for x in range(2, n):
+          if n % x == 0:
+              print(n, 'equals ', x, '*', n//x)
+              break
+      else:
+          print(n, 'is a prime')
+#+END_SRC
+
+continue 与其他语言一样.
+
+** pass
+该语句什么都不做,当语法上需要一个语句,但程序不要动作时,就可以使用它
+
+#+BEGIN_SRC python
+  while True:
+      pass # 忙等待键盘中断 (ctrl+c)
+
+  class MyEmptyClass:
+      pass  # 创建最小类
+
+  def initlog(*args):
+      pass # TODO 等待实现,
+#+END_SRC
+
+** 定义函式
+打印斐波那契数列
+#+BEGIN_SRC python
+  #! /usr/bin/env python3.4
+  def fib(n):
+      a, b = 0, 1
+      while a < n:
+          print(a, end=' ')  # 仅适用于python3 以上
+          a, b = b, a+b
+      print()
+
+
+  fib(20)
+#+END_SRC
+
+def 关键字引入一个函式定义
+函式体的第一个语句可以是字串,即函式的文档字符串--docstring ,这些字符串
+日后可以转化为在线文档
+
+执行函式会引入新的符号表用于该函式的局部变量.
+变量的引用的查找顺序为
+1. 局部符号表
+2. 闭包函式的局部符号表
+3. 全局变量
+4. 内建名字表
+
+因此, *函式中可以引用全局变量,却不能直接赋值* (会被覆盖,除非使用global
+语句)
+
+*函式的参数按值传递,即该对象所指向的引用*
+
+函数本身可以被引用,如
+# f = fib
+# f(100)
+
+函式即使没有return,也会有返回值--None
+
+*方法* 是属于一个对象并且被命名为 obj.methodname 的函式
+
+** 深入函式定义
+
+*** 默认参数
+# t=1
+# def fun(a, b=1, c='abc', d=t):
+
+调用的时候则可以不给,或只给部分参数.
+
+*默认参数只会被求值一次*, 如果该参数是一个可变对象的引用,则会有累积效
+果
+#+BEGIN_SRC python
+  def f(a, L=[]):
+      L.append(a)
+      return L
+  print(f(1))
+  print(f(2))
+  print(f(3))
+
+  # 会输出
+  # [1]
+  # [1,2]
+  # [1,2,3]
+
+  # 否则需要改成这样
+  def f(a, L=None):
+      if L is None:
+          L = []
+      L.append(a)
+      returnL
+#+END_SRC
+
+*** 关键字参数
+函式也可以通过variable=value的形式来调用, 但其必须位于正常参数后面
+
+#+BEGIN_SRC python
+  def fun(a,b=1,c=2)
+
+  fun('abc')
+  fun(b=2,a=1)
+  fun(1,c='3')
+  fun(1,2,3)
+
+  # 但下面的是错误的
+  fun()        # 缺少必要参数
+  fun(1,b=2,3) # 正常参数不能在关键字参数后面
+  fun(1, a=1)  # 重复给值
+  fun(1, t=1)     # 未知参数
+#+END_SRC
+
+如果最后个形参是 **name 这样的,则去除其他形参的值,它将以字典的形式包含
+所有剩余关键字参数. 可以与*name一直起用,但*name必须在前面,
+#+BEGIN_SRC python
+  def cheeseshop(kind, *arguments, **keywords):
+      print("-- Do you have any", kind, "?")
+      print("-- I'm sorry, we're all out of", kind)
+      for arg in arguments:
+          print(arg)
+      print("-" *40)
+      keys = sorted(keywords.keys())
+      for kw in keys:
+          print(kw, ":", keywords[kw])
+
+  cheeseshop("Limburger", "It's very runny, sir",
+             "It's really very, VERY runny, sir",
+             shopkeeper = "Michael Palin",
+             client = "John Cleese",
+             sketch = "Cheese Shop Sketch")
+#+END_SRC
+注意上面例子中对keys进行了排序,否则,其顺序是不确定的.
+
+*** 任意参数表
+可以使用*name来接受任意数量的参数,传递进来的参数会被包装进一个元组.
+该参数通常位于形参列表的最后,以便接收所有剩余参数,所有出现在它后面的只
+能是关键字参数
+# def concat(*args, sep="/"): return sep.join(args)
+# conat("earch", "mars", "venus")
+# concat("earth", "mars", "venus", sep=".")
+
+*** 释放参数列表
+也存在相反的情况,需要把列表或元组中的数据传给形参,则反过来,在调用的时
+候使用, * 和**
+#+BEGIN_SRC python
+  list(range(3, 6))
+  # [3, 4, 5]
+
+  args = [3, 6]
+  list(range(*args))
+  # [3 ,4 ,5]
+
+  def parrot(voltage, state='a stiff', action='voom')
+  d = {'voltage': 'four milloin', 'state': 'bleedin', 'action': 'VOOM'}
+  parrot(**d)
+#+END_SRC
+
+*** Lambda形式
+# lambda a, b: a+b
+
+*** 文档字符串
+第一行总应当是对该对象的目的进行简述.追求简短,大写字母开关,句号结束.
+如果不止一行,则第二行应该为空,其后接更详细的描述,如调用条件,边界效应
+
+
+#+BEGIN_SRC python
+  def my_function():
+      """Do nothing, but document it.
+
+      No, really, it doesn't do anything.
+      """
+      pass
+#+END_SRC
+
+** 代码风格
+- 使用4格缩进,且不制表符
+- 自动换行,使其不超过79个字符
+- 使用空行分隔函式和类,以及函式中的大的代码块
+- 尽可能令注释独占一行
+- 使用文档字符串
+- 操作符两边留空格,逗号后面空格,括号内部不空格
+- 保持类名与函式名的一致性.类名使用CamelCase格式,方法及函式名使用
+  lower_case_with_underscres格式.永远使用self作为方法的第一个参数名
+- 国际化使用UTF-8
+- 如果不使用其他语言,标识符里只使用ASCII字符.
