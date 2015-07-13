@@ -1,4 +1,66 @@
 * Index
+- [[* 构造过程抽象][构造过程抽象]]
+  - [[* 程序设计的基本元素][程序设计的基本元素]]
+    - [[* 表达式][表达式]]
+    - [[* 命名和环境][命名和环境]]
+    - [[* 组合式求值][组合式求值]]
+    - [[* 复合过程][复合过程]]
+    - [[* 过程应用的代换模型][过程应用的代换模型]]
+    - [[* 条件表达式和谓词][条件表达式和谓词]]
+    - [[* 函数与过程][函数与过程]]
+    - [[* 过程作为黑箱抽象][过程作为黑箱抽象]]
+      - [[* 过程参数][过程参数]]
+      - [[* 块结构][块结构]]
+  - [[* 过程与它们所产生的计算][过程与它们所产生的计算]]
+    - [[* 线性递归和迭代][线性递归和迭代]]
+    - [[* 树形递归][树形递归]]
+    - [[* 增长的阶][增长的阶]]
+    - [[* 求幂][求幂]]
+    - [[* 最大公约数][最大公约数]]
+    - [[* 素数检测][素数检测]]
+  - [[* 用高阶函数做抽象][用高阶函数做抽象]]
+    - [[* 过程作为参数][过程作为参数]]
+    - [[* 用lambda构造过程][用lambda构造过程]]
+      - [[* 用let创建局部变量][用let创建局部变量]]
+    - [[* 过程作为一般性的方法][过程作为一般性的方法]]
+      - [[* 通过区间折半寻找方程的根][通过区间折半寻找方程的根]]
+      - [[* 找出函数的不动点][找出函数的不动点]]
+    - [[* 过程作为返回值][过程作为返回值]]
+      - [[* 牛顿法][牛顿法]]
+      - [[* 抽象和第一级过程][抽象和第一级过程]]
+  - [[* 习题][习题]]
+- [[* 构造数据抽象][构造数据抽象]]
+  - [[* 数据抽象导引][数据抽象导引]]
+    - [[* 实例：有理数的算术运算][实例：有理数的算术运算]]
+      - [[* 序对][序对]]
+    - [[* 抽象屏障][抽象屏障]]
+    - [[* 数据意味着什么][数据意味着什么]]
+    - [[* 扩展练习：区间算术][扩展练习：区间算术]]
+  - [[* 层次性数据和闭包性质][层次性数据和闭包性质]]
+    - [[* 序列的表示][序列的表示]]
+      - [[* 表操作][表操作]]
+      - [[* 对表的映射][对表的映射]]
+    - [[* 层次性结构][层次性结构]]
+      - [[* 对树的映射][对树的映射]]
+    - [[* 序列作为一种约定的接口][序列作为一种约定的接口]]
+      - [[* 序列操作][序列操作]]
+      - [[* 嵌套映射][嵌套映射]]
+  - [[* 符号数据][符号数据]]
+    - [[* 引号][引号]]
+    - [[* 实例：符号求导][实例：符号求导]]
+      - [[* 对抽象数据的求导程序][对抽象数据的求导程序]]
+      - [[* 代数表达式的表示][代数表达式的表示]]
+    - [[* 实例：集合的表示][实例：集合的表示]]
+      - [[* 集合作为未排序的表][集合作为未排序的表]]
+      - [[* 有序表实现][有序表实现]]
+      - [[* 二叉树实现][二叉树实现]]
+      - [[* 实例：Huffman编码树][实例：Huffman编码树]]
+  - [[* 抽象数据的多重表示][抽象数据的多重表示]]
+  - [[* 带有通用型操作的系统][带有通用型操作的系统]]
+  - [[* 习题][习题]]
+- [[* Modularity, Objects, and State][Modularity, Objects, and State]]
+- [[* Metalinguistic Abstraction][Metalinguistic Abstraction]]
+- [[* Computing with Register Machines][Computing with Register Machines]]
 
 * 构造过程抽象
 
@@ -1204,12 +1266,15 @@ Lisp 的过程是完全的第一状态，这给有效实现提出了挑战，但
 #+END_SRC
 
 *** 抽象屏障
+上述的例子中，我们通过构造函数make-rat, 以及选择函数numer,denom
+就刻画出了有理数这种复合数据.
+
 一般而言，数据抽象的基本思想就是为每一类数据对象标识出一组操作，使得对
 这类数据对象的所有操作都可以基于它们表述，而且在操作这些数据对象时也只
-使用它们。
+使用它们。每一层暴露出来的接口都对上层形成了一种 *抽象屏障*
 
-*即隔离调用与实现，限制依赖* ，从而可以忽略低层实现直接根据接口设计高层，
-当低层的实现变化时，高层也不需要修改。
+通过 *隔离调用与实现，限制依赖性到少数的几个界面* ，我们可以在低层尚未
+实现时就直接根据接口设计高层，另外当低层的实现变化时，高层也不需要修改。
 
 *** 数据意味着什么
 并不是任意的构造函数及选择函数就可以构成数据抽象，它还必须具有一组
@@ -1549,6 +1614,259 @@ map是处理序列的一种强有力的抽象，与此类似，map与递归的�
 #+END_SRC
 
 ** 符号数据
+目前为止的所有复合数据都是基于数值的，为了扩充语文的表述能力，还可以将
+任意符号作为数据引进。
+
+*** 引号
+为了处理(a b c d)之类的包含符号的表，而避免其被看作表达式，例如，如果
+我们希望构造出表(a b), 不能单纯用(list a b)，因为lisp会去找a和b的值，
+而不是用它们本身。此时我们需要 *为数据对象加引号的能力*
+
+引号是很有威力的东西，它使我们可以 *构造起一种能操作其他表达式的表达式*
+但它也会损害语言 中根据简单词语做推理的能力，因为它破坏了对等的东西可
+以互换的观念。
+
+*可以在表和符号之前加引号 ’ 来表示其应该作为数据对象看待*
+
+这种写法违背了所有复合表达式都应该由括号限定，具有表的形式的普遍性原则，
+实际上'a可以看作是(quote a)的简写形式，从而维持了以下原则，
+*解释器看到的所有表达式都可以作为数据对象去操作*
+
+从而空表就可以由'()来表示，而不必用nil了。 eq?可以用来比较两个符号
+
+考虑定义memq，对输入的一个符号和一个表，判断符号在不在表里，不在返回假，
+否则返回由匹配项开始的子表
+#+BEGIN_SRC scheme
+  (define (memq str items)
+    (cond ((null? items) #f)
+          ((eq? str (car items)) items)
+          (else (memq str (cdr items)))))
+
+  (memq 'a '(1 2 a 2 3))
+#+END_SRC
+
+*** 实例：符号求导
+考虑设计一个执行代数表达式的符号求导过程，以一个代数表达式和一个变量为
+为输入，回返这个表达式相对于该变量的导数，
+
+**** 对抽象数据的求导程序
+先定义一个求导算法，令他在一些抽象对象上操作，如“和”，“乘积”，“变量”
+
+1. dc/dx=0
+2. dx/dx=1
+3. d(u+v)/dx = du/dx + dv/dx
+4. d(uv)/dx = u(dv/dx) + v(du/dx)
+
+3和4具有递归性质，对一个和式的导数，可以先坟出各项的导数，再将它们相加，
+而每个项又可以进一步分解。对此我们需要一个表示代数表达式的方式，可以判
+断其是否为，和式，变量，常数，乘式，并可以取出对应子项。
+#+BEGIN_SRC scheme
+  (define (deriv exp var)
+    (cond ((number? exp) 0)
+          ((variable? exp)
+           (if (same-variable? exp var) 1 0))
+          ((sum? exp)
+           (make-sum (deriv (addend exp) var)
+                     (deriv (augend exp) var)))
+          ((product? exp)
+           (make-sum (make-product (multiplier exp)
+                                   (deriv (multiplicand exp) var))
+                     (make-product (multiplicand exp)
+                                   (deriv (multiplier exp) var))))
+          ((exponentiation? exp)
+           (let ((u (base exp))
+                 (n (exponent exp)))
+             (make-product (make-product
+                            (make-exponention u
+                                              (- n 1))
+                            n)
+                           (deriv u var))))
+          (else (error "unknow expression type -- DERIV" exp))))
+#+END_SRC
+
+**** 代数表达式的表示
+我们可以直接采用lisp的前缀表达式。
+
+#+BEGIN_SRC scheme
+  (define (variable? x) (symbol? x))
+  (define (same-variable? v1 v2)
+    (and (variable? v1)
+         (variable? v2)
+         (eq? v1 v2)))
+
+  (define (sum? e)
+    (and (pair? e)
+         (eq? '+ (car e))))
+  (define (addend e)  (cadr e))
+  (define (augend e) (caddr e))
+  (define (make-sum a1 a2) (list '+ a1 a2))
+
+  (define (product? e)
+    (and (pair? e)
+         (eq? '* (car e))))
+  (define (multiplier e) (cadr e))
+  (define (multiplicand e) (caddr e))
+  (define (make-product m1 m2) (list '* m1 m2))
+#+END_SRC
+
+但上述过程求出的表达式是没化简的。我们可以通过make-sum和make-product来
+实现而不必修改deriv主体
+
+#+BEGIN_SRC scheme
+  (define (make-sum a1 a2)
+    (cond ((=number? a1 0) a2)
+          ((=number? a2 0) a1)
+          ((and (number? a1) (number? a2)) (+ a1 a2))
+          (else (list '+ a1 a2))))
+
+  (define (make-product m1 m2)
+    (cond ((or (=number? m2 0) (=number? m1 0)) 0)
+          ((=number? m1 1) m2)
+          ((=number? m2 1) m1)
+          ((and (number? m1) (number? m2)) (* m1 m2))
+          (else (list '* m1 m2))))
+
+  (define (=number? exp num)
+    (and (number? exp)
+         (= exp num)))
+#+END_SRC
+
+*** 实例：集合的表示
+我们可以根据以下操作来定义出集合这种数据，
+- union-set :: 两个集合的并集
+- intersection-set :: 两个集合的交集
+- element-of-set? :: 判断包含元素
+- adjoin-set :: 添加元素
+
+具体的实现可以是任意的，只要它们实现的上述几个操作确实地符合集合的要求
+
+**** 集合作为未排序的表
+#+BEGIN_SRC scheme
+  (define (element-of-set? x set)
+    (if (null? set) #f
+        (or (equal? x (car set))
+            (element-of-set? x (cdr set)))))
+
+  (define (adjoin-set x set)
+    (if (element-of-set? x set)
+        set
+        (cons x set)))
+
+  (define (intersection-set s1 s2)
+    (cond ((or (null? s1) (null? s2)) '())
+          ((element-of-set? (car s1) s2)
+           (cons (car s1)
+                 (intersection-set (cdr s1) s2)))
+          (else (intersection-set (cdr s1) s2))))
+
+  (element-of-set? '(a) '(1 2 (a) b))
+  (adjoin-set 'a '())
+  (intersection-set '(a 2 c) '(1 a 3 2))
+#+END_SRC
+设计一种表示形式时，一件必须关注的事情就是效率.
+上述实现的时空复杂度为O(n^2)
+
+**** 有序表实现
+可以在每次插入元素的时候进行排序.
+此时,intersection-set操作可以通过以下方式实现
+#+BEGIN_SRC scheme
+  (define (intersection-set s1 s2)
+    (cond ((or (null? s1) (null? s2)) '())
+          ((equal? (car s1) (car s2))
+           (cons (car s1) (intersection-set (cdr s1) (cdr s2))))
+          ((> (car s1) (car s2))
+           (intersection-set s1 (cdr s2)))
+          (else (intersection-set (cdr s1) s2))))
+#+END_SRC
+
+**** 二叉树实现
+通过平衡二叉树,可以实现O(logN)复杂度的查找.
+我们可以把结点表示为三个元素的表,该结点的值,左子树,右子树,空表表示没子
+树.
+#+BEGIN_SRC scheme
+  (define (element-of-set? x s)
+    (cond ((null? s) #f)
+          ((equal? x (entry s) ) #t)
+          ((< x (entry s)) (element-of-set? x (left-branch s)))
+          (else (element-of-set? x (right-branch s)))))
+
+  (element-of-set? '1 '(7 (5 (2 () ()) (6 () ())) (14 (10 ( ())))))
+
+  (define (adjoin-set x s)
+    (cond ((null? set) (make-tree x '() '()))
+          ((= x (entry set)) set)
+          ((< x (entry set))
+           (make-tree (entry set)
+                      (adjoin-set x (left-branch set))
+                      (right-branch ste)))
+          ((> x (entry set))
+           (make-tree (entry set)
+                      (left-branch set)
+                      (adjoin-set x (right-branch set))))))
+#+END_SRC
+
+上述操作的效率都通过树是平衡的来保证
+另外,注意上面将二叉树实现的抽象
+
+**** 实例：Huffman编码树
+构造变长编码，要求每个个体的编码都不会是其他编码的开头，我们可以利用
+Huffamn树来实现。每个个体具有一个权重，权重越高，层级越高，往左为0往右
+为1,则从根到叶子的路径即是编码
+
+#+BEGIN_SRC scheme
+  (define (make-leaf symbol weight)
+    (list 'leaf symbol weight))
+  (define (leaf? object) (eq? 'leaf (car object)))
+  (define (symbol-leaf x) (cadr x))
+  (define (weight-leaf x) (caddr x))
+
+  (define (make-code-tree left right)
+    (list left
+          right
+          (append (symbols left) (symbols right))
+          (+ (weight left) (weight right))))
+
+  (define (left-branch tree) (car tree))
+  (define (right-branch tree) (cadr tree))
+  (define (symbols tree)
+    (if (leaf? tree)
+        (list (symbol-leaf tree))
+        (caddr tree)))
+  (define (weight tree)
+    (if (leaf? tree)
+        (weight-leaf tree)
+        (cadddr tree)))
+
+  (define (decode bits tree)
+    (define (decode-iter bits current-branch)
+      (if (null? bits)
+          '()
+          (let ((next-branch
+                 (choose-branch (car bits) current-branch)))
+            (if (leaf? next-branch)
+                (cons (symbol-leaf next-branch)
+                      (decode-iter (cdr bits) tree))
+                (decode-iter (cdr bits) next-branch)))))
+    (decode-iter bits tree))
+
+  (define (choose-branch bit branch)
+    (cond ((= bit 0) (left-branch branch))
+          ((= bit 1) (right-branch branch))
+          (else (error "bad bit -- CHOOSE_BRANCH" bit))))
+
+  (define (adjoin-set x set) ;有序集合
+    (cond ((null? set) (list x))
+          ((< (weight x) (weight (car set))) (cons x set))
+          (else (cons (car set)
+                      (adjoin-set x (cdr set))))))
+  (define (make-leaf-set pairs)
+    (if (null? pairs)
+        '()
+        (let ((pair (car pairs)))
+          (adjoin-set (make-leaf (car pair)
+                                 (cadr pair))
+                      (make-leaf-set (cdr pairs))))))
+#+END_SRC
 
 ** 抽象数据的多重表示
 
@@ -1682,18 +2000,18 @@ map是处理序列的一种强有力的抽象，与此类似，map与递归的�
 - 2.35 :: 把count-leaves重新定义为累积过程
      [[file:sicp_scms/2.35.scm::(count-leaves%20(list%201%20(list%202%203%20(list%204))%20(list%205%206)))][3.35.scm]]
 
-- 3.36 :: 定义accumulate-n 过程处理序列的序列,将各子序列同位置的元素处
+- 2.36 :: 定义accumulate-n 过程处理序列的序列,将各子序列同位置的元素处
      理,并把结果组合为表
      [[file:sicp_scms/2.36.scm][file:~/Dropbox/notes/sicp_scms/2.36.scm]]
 
-- 3.37 :: 定义向量运算
+- 2.37 :: 定义向量运算
      (dot-product v w) 返回累积和E(i)(vi*wiv)
      (matrix-*-vector m v) 返回向量i
      (matrix-*-matrix m n) 返回矩阵p
      (transpose m)
      [[file:sicp_scms/2.37.scm][file:~/Dropbox/notes/sicp_scms/2.37.scm]]
 
-- 3.38 :: accumulate也叫fold-right,因为它将序列的第一个元素组合右边所
+- 2.38 :: accumulate也叫fold-right,因为它将序列的第一个元素组合右边所
      有的元素的组合结果上.考虑以下表达式的值
      =(fold-right / 1 (list 1 2 3))=
      =(fold-left / 1 (list 1 2 3))=
@@ -1708,19 +2026,196 @@ map是处理序列的一种强有力的抽象，与此类似，map与递归的�
      f满足结合律
 
 - 3.39 :: 基于fold-right和fold-left定义reverse
-     [[file:sicp_scms/3.39.scm][file:~/Dropbox/notes/sicp_scms/3.39.scm]]
+     [[file:sicp_scms/2.39.scm][file:~/Dropbox/notes/sicp_scms/2.39.scm]]
 
-- 3.40 :: 定义过程unique-pair，对给定的整数n，输出序对i，j，其中1<＝
+- 2.40 :: 定义过程unique-pair，对给定的整数n，输出序对i，j，其中1<＝
      i<j<=n,用这个过程去简化prime-sum-pairs的定义
      [[file:sicp_scms/2.40.scm][file:~/Dropbox/notes/sicp_scms/2.40.scm]]
 
-- 3.41 :: 八皇后问题
-     [[file:sicp_scms/3.41.scm][file:~/Dropbox/notes/sicp_scms/3.41.scm]]
+- 2.41 :: 八皇后问题
+     [[file:sicp_scms/2.41.scm][file:~/Dropbox/notes/sicp_scms/2.41.scm]]
 
-- 3.42 :: 把上述queens过程中的以下语句对调，耗时相比原来大多少？
+- 2.42 :: 把上述queens过程中的以下语句对调，耗时相比原来大多少？
      =(map (lambda (new-row)=
      =(lambda (rest-of-queens)=
-      
+
+- 2.54 :: 定义equal?过程，比较两个字符表
+     [[file:sicp_scms/2.54.scm][file:~/Dropbox/notes/sicp_scms/2.54.scm]]
+
+- 2.55 :: (car ''abc) 返回quote，为什么？
+     ''abc在求值时会被替换成 '(quote abc)的形式
+
+- 2.56 :: 扩充基本求导过程，利用
+     exponentiation?,base,exponent,make-exponention等过程，实现以下求
+     导规则
+     d(u^n)/dx=nu^(n-1)(du/dx)
+     [[file:sicp_scms/2.56.scm][file:~/Dropbox/notes/sicp_scms/2.56.scm]]
+
+- 2.57 :: 扩充求导过程，使其能处理任意项的和与乘积，即可以接受以下输入
+     =(deriv '(* x y (+ x 3)) 'x)=
+     [[file:sicp_scms/2.57.scm][file:~/Dropbox/notes/sicp_scms/257.scm]]
+
+- 2.58 :: 修改过程使其适用于以下表达式
+     =(x + 3 * (x + y + 2))=
+     [[file:sicp_scms/2.58.scm][file:~/Dropbox/notes/sicp_scms/2.58.scm]]
+
+- 2.59 :: 实现union-set
+     #+BEGIN_SRC scheme
+       (define (union-set set1 set2)
+         (cond ((null? set1) set2)
+               ((null? set2) set1)
+               (else (let ((left (union-set (cdr set1) set2))
+                           (ele (car set1)))
+                       (if (element-of-set? ele left)
+                           left
+                           (adjoin-set ele left))))))
+     #+END_SRC
+
+- 2.60 :: 如果不要求无重复，要怎么实现，效率怎么样
+     跟列表没区别，除了contain，其他操作都为O(1)
+
+- 2.61 :: 排序的adjoin-set的实现
+     另外也可以把x当作单元素的集合,使用union-set的实现
+     #+BEGIN_SRC scheme
+       (define (adjoin-set x s)
+         (cond ((null? s) (list x))
+               ((= x (car s)) s)
+               ((< x (car s))
+                (cons x s))
+               (else (cons (car s) (adjoin-set x (cdr s))))))
+     #+END_SRC
+
+
+- 2.62 :: 排序表的union-set的O(n)实现
+     #+BEGIN_SRC scheme
+       (define (union-set set1 set2)
+         (cond ((null? set1) set2)
+               ((null? set2) set1)
+               (else (let ((s1 (car set1))
+                           (s2 (car set2))
+                           (l1 (cdr set1))
+                           (l2 (cdr set2)))
+                       (cond ((equal? s1 s2)
+                              (cons s1 (union-set l1 l2)))
+                             ((> s1 s2)
+                              (cons s2 (union-set set1 l2)))
+                             ((< s1 s2)
+                              (cons s1 (union-set l1 set2))))))))
+     #+END_SRC
+
+- 2.63 :: 下面两个过程都能将树变换为表，有什么区别？
+     #+BEGIN_SRC scheme
+       (define (tree->list-1 tree)
+         (if (null? tree)
+             '()
+             (append (tree->list-1 (left-branch tree))
+                     (cons (entry tree)
+                           (tree->list-1 (right-branch tree))))))
+
+       (define (tree-list-2 tree)
+         (define (copy-to-list tree result-list)
+           (if (null? tree)
+               result-list
+               (copy-to-list (left-branch tree)
+                             (cons (entry tree)
+                                   (copy-to-list (right-branch tree)
+                                                 result-list))))))
+     #+END_SRC
+     第一个是递归计算过程，而另一个是迭代计算过程。它们对于同一棵树会
+     产生相同的中序列表.
+     但它们的复杂度不一样，第一个为O(nlogn),第二个为O(n).
+     [[http://www.geeksforgeeks.org/analysis-algorithm-set-4-master-method-solving-recurrences/][主定理推断复杂度]]
+
+
+- 2.64 :: 下面过程将一个有序表变换为一棵平衡二叉树,
+     复杂度为n
+     #+BEGIN_SRC scheme
+       (define (list->tree items)
+         (cond ((null? items) '())
+               ((= 1 (length items))
+                (make-tree (car items) '() '()))
+               (else (let ((index (quotient (length items) 2)))
+                       (make-tree (car (drop items index))
+                                  (list->tree (take items index))
+                                  (list->tree (cdr (drop items index))))))))
+
+       (list->tree '(1 2 3 4 5))
+
+       (define (list->tree elements)
+         (car (partial-tree elements (length elements))))
+
+       (define (partial-tree elts n)
+         (if (= n 0)
+             (cons '() elts)
+             (let ((left-size (quotient (- n 1) 2)))
+               (let ((left-result (partial-tree elts left-size)))
+                 (let ((left-tree (car left-result))
+                       (non-left-elts (cdr left-result))
+                       (right-size (- n (+ left-size 1))))
+                   (let ((this-entry (car non-left-elts))
+                         (right-result (partial-tree (cdr non-left-elts)
+                                                     right-size)))
+                     (let ((right-tree (car right-result))
+                           (remaining-elts (cdr right-result)))
+                       (cons (make-tree this-entry left-tree right-tree)
+                             remaining-elts))))))))
+     #+END_SRC
+
+- 2.65 :: 给出O(n)的二叉树实现的union-set,interaction-set，操作
+     因为其各个操作均为O(n），满足要求。
+     #+BEGIN_SRC scheme
+       (define (union-tree t1 t2)
+         (list->tree (union-set (tree->list t1)
+                                (tree->list t2))))
+     #+END_SRC
+
+- 2.66 :: 二叉树的element-of-set
+     #+BEGIN_SRC scheme
+       (define (element-of-set? x s)
+         (cond ((null? s) #f)
+               ((equal? x (entry s)) #t)
+               ((< x (entry s)) (element-of-set? x (left-branch s)))
+               (else (element-of-set? x (right-branch s)))))
+     #+END_SRC
+
+- 2.68 :: 请定义encode
+     #+BEGIN_SRC scheme
+       (define (encode message tree)
+         (map (lambda (x) (find-bit x tree)) message))
+
+       (define (find-bit ch tree)
+         (cond ((leaf? tree) '())
+               ((pair? (memq ch (symbols (left-branch tree))))
+                (cons '0 (find-bit ch (left-branch tree))))
+               ((pair? (memq ch (symbols (right-branch tree))))
+                (cons '1 (find-bit ch (right-branch tree))))
+               (else (error "tree did not contain ch" ch))))
+     #+END_SRC
+
+- 2.69 :: 定义(generate-huffman-tree pairs)
+     #+BEGIN_SRC scheme
+       (define (generate-huffman-tree pairs)
+         (successive-merge (make-leaf-set pairs)))
+
+       (define (successive-merge items)
+         (if (null? (cdr items))
+             (car items)
+             (successive-merge (adjoin-set (make-code-tree (car items)
+                                                           (cadr items))
+                                           (cddr items)))))
+     #+END_SRC
+
+- 2.71 :: 如果一个字符表中的权重为，1 2 4 。。。 2^(n-1).其生成的树是
+     怎么样的，权重最大的几位表示，最小的又几位。
+     归纳法可知，第n个的权重总大于其前面的字符的权重的总和
+     故生成的树总是只偏向一边。最短1位，第n个有n位
+
+- 2.72 :: 当字符表满足2.71时，2.68中的过程查找最大权重和最小的增长率分
+     别是多少？
+     O(n) ; O(n^2)
+     
+     
+
 * Modularity, Objects, and State
 * Metalinguistic Abstraction
 * Computing with Register Machines
