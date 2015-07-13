@@ -1,109 +1,123 @@
+* Index
+- [[* Shell][Shell]]
+  - [[* Random select item from list][Random select item from list]]
+  - [[* Array][Array]]
+  - [[* [[ (( {} ))][[[ (( {} ))]]
+    - [[* [][[]]
+    - [[* [[][[[]]
+  - [[* declare][declare]]
+  - [[* Shell Style Guide][Shell Style Guide]]
+    - [[* Background][Background]]
+      - [[* Which Shell to Use][Which Shell to Use]]
+      - [[* When to use Shell][When to use Shell]]
+      - [[* TODO what using "set" means?][TODO what using "set" means?]]
+    - [[* Shell Files and Interpreter Invocation][Shell Files and Interpreter Invocation]]
+      - [[* File Extensions][File Extensions]]
+      - [[* SUID/SGID][SUID/SGID]]
+    - [[* Environment][Environment]]
+      - [[* STDOUT vs STDERR][STDOUT vs STDERR]]
+    - [[* Comments][Comments]]
+      - [[* File Header][File Header]]
+      - [[* Function Comments][Function Comments]]
+      - [[* Implementation Comments][Implementation Comments]]
+      - [[* TODO Comments][TODO Comments]]
+    - [[* Formatting][Formatting]]
+      - [[* Indentation][Indentation]]
+      - [[* Line Length and Long String][Line Length and Long String]]
+      - [[* Pipelines][Pipelines]]
+      - [[* Loops][Loops]]
+      - [[* Case statement][Case statement]]
+      - [[* Variable expansion][Variable expansion]]
+      - [[* Quoting][Quoting]]
+    - [[* Features and Bugs][Features and Bugs]]
+      - [[* Command Substitution][Command Substitution]]
+      - [[* Test, [ and [[][Test, [ and [[]]
+      - [[* Testing Strings][Testing Strings]]
+      - [[* Wildcard Expansion of Filename][Wildcard Expansion of Filename]]
+      - [[* Eval][Eval]]
+      - [[* Pipes to While][Pipes to While]]
+    - [[* Naming Conventions][Naming Conventions]]
+      - [[* Function Names][Function Names]]
+      - [[* Variable Names][Variable Names]]
+      - [[* Constants and Environment Variable Names][Constants and Environment Variable Names]]
+      - [[* Source Filenames][Source Filenames]]
+      - [[* Read-only Variables][Read-only Variables]]
+      - [[* Use Local Variables][Use Local Variables]]
+      - [[* Function Location][Function Location]]
+      - [[* main][main]]
+    - [[* Calling Commands][Calling Commands]]
+      - [[* Checking Return Values][Checking Return Values]]
+      - [[* Builtin Commands vs. External Commands][Builtin Commands vs. External Commands]]
+  - [[* getopts][getopts]]
+  - [[* shift, select][shift, select]]
+  - [[* Define function][Define function]]
+  - [[* Avoid using which][Avoid using which]]
+  - [[* variable][variable]]
+  - [[* Case statement][Case statement]]
+- [[* Command][Command]]
+  - [[* Redirect][Redirect]]
+  - [[* Dump][Dump]]
+  - [[* find][find]]
+    - [[* filter path][filter path]]
+    - [[* exec][exec]]
+  - [[* awk][awk]]
+    - [[* 转置行列][转置行列]]
+    - [[* Invoke][Invoke]]
+    - [[* Variable][Variable]]
+      - [[* 传递][传递]]
+      - [[* 转换][转换]]
+    - [[* Array][Array]]
+    - [[* Function][Function]]
+    - [[* System Call][System Call]]
+    - [[* Debug][Debug]]
+  - [[* sort][sort]]
+  - [[* crontab][crontab]]
+  - [[* iptables][iptables]]
+- [[* Tools][Tools]]
+  - [[* LVM][LVM]]
+- [[* Configure][Configure]]
+- [[* Emacs][Emacs]]
+  - [[* ibuffer][ibuffer]]
+  - [[* ido][ido]]
+  - [[* toggle white space highlight][toggle white space highlight]]
+  - [[* Register][Register]]
+  - [[* XML][XML]]
+    - [[* validate][validate]]
+    - [[* outline][outline]]
+  - [[* Helm][Helm]]
+- [[* Utility script][Utility script]]
+  - [[* calculate ic host][calculate ic host]]
+  - [[* Filter out ERROR log][Filter out ERROR log]]
+  - [[* Count Fglam][Count Fglam]]
+  - [[* Calculate database size from sql][Calculate database size from sql]]
+  - [[* sort latency for a given address list][sort latency for a given address list]]
+  - [[* Filter result of countertyep][Filter result of countertyep]]
+- [[* Others][Others]]
+  - [[* Copy partition][Copy partition]]
+  - [[* Mount a vdi file][Mount a vdi file]]
+  - [[* route particular package to different interface][route particular package to different interface]]
+- [[* Java][Java]]
+  - [[* Log4j][Log4j]]
+    - [[* Architecture][Architecture]]
+    - [[* Configuration][Configuration]]
+      - [[* 读取文件][读取文件]]
+      - [[* 配置继承][配置继承]]
+      - [[* 自动读新配置][自动读新配置]]
+      - [[* Advertising appender][Advertising appender]]
+      - [[* 配置logger][配置logger]]
+    - [[* Web 应用][Web 应用]]
+    - [[* Lookups][Lookups]]
+    - [[* Filters][Filters]]
+    - [[* Appenders][Appenders]]
+    - [[* Layouts][Layouts]]
+    - [[* JMX][JMX]]
+
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 * Shell
 ** Random select item from list
 
 #+BEGIN_SRC sh
   a=(Python Java C++ QBasic); echo ${a[((RANDOM % ${#a[*]}))]}
-#+END_SRC
-
-** how to debug shell
-https://www.ibm.com/developerworks/cn/linux/l-cn-shell-debug/
-http://coolshell.cn/articles/1379.html
-
-*** è¾åºè°è¯ä¿¡æ¯
-1. ä½¿ç¨ =trap= å½ä»¤
-
-  =trap 'command' singal=
-   - command :: æ¯ææå°ä¿¡å·ä¹åè¦æ§è¡çå½ä»¤
-   - singal :: ä½¿ç¨ =kill -l= å¯ä»¥ååºå¨é¨å¯ç¨çä¿¡å·åã
-
-  æ§è¡shellæ¶ï¼ä¼äº§çä¸ä¸ªä¼ªä¿¡å·ï¼ä½¿ç¨trapææå®ä»¬æå©äºè°è¯
-
-   - EXIT :: ä»ä¸ä¸ªå½æ°ä¸­éåºææ´ä¸ªèæ¬æ§è¡å®æ¯ï¼ä¹å¯ä»¥ç¨0ä»£æ¿ã
-
-   - ERR  :: å½ä¸æ¡å½ä»¤è¿åéé¶ç¶ææ¶
-
-   - DEBUG :: èæ¬ä¸­æ¯ä¸æ¡å½ä»¤æ§è¡ä¹å
-
-   $LINENO æ¯ä¸ä¸ªåç½®åéï¼è¡¨ç¤ºå½åè¡å·
-
-   Example:
-
-   #+BEGIN_SRC sh
-   #!/bin/bash
-   trap 'echo âbefore execute line:$LINENO, a=$a,b=$b,c=$câ' DEBUG
-   a=1
-   if [ "$a" -eq 1 ]
-   then
-   b=2
-   else
-   b=1
-   fi
-   c=3
-   echo "end"
-   #+END_SRC
-
-2. ä½¿ç¨ =tee= å½ä»¤
-   ç¨äºè°è¯ç®¡éç»åçå½ä»¤ãteeä¼ä»æ åè¾å¥è¯»åæ°æ®ï¼å°åå®¹è¾åºå°æ åè¾
-   åºå¹¶ä¸æåå®¹ä¿å­ææä»¶ã
-
-3. è°è¯é©å­
-
-   #+BEGIN_SRC sh
-     DEBUG()
-     {
-         if [ "$DEBUG" = "true" ]; then
-             $@ãã
-         fi
-     }
-
-     a=1
-     DEBUG echo "a=$a"
-
-     if [ "$a" -eq 1 ]
-     then
-         b=2
-     else
-         b=1
-     fi
-
-     DEBUG echo "b=$b"
-     c=3
-     DEBUG echo "c=$c"
-   #+END_SRC
-
-4. ä½¿ç¨shellæ§è¡éé¡¹
-   - -n :: åªæ£æ¥è¯­æ³ï¼èä¸æ§è¡
-
-   - -x :: è¿å¥è·è¸ªæ¨¡å¼ï¼æ¾ç¤ºææ§è¡çæ¯ä¸æ¡å½ä»¤ï¼åé¢ä¼å¸¦ä¸ä¸ª+å·ï¼ãé
-           åtrap debugåå¯ä»¥æ¾ç¤ºï¼æ§è¡çæ¯ä¸ªå½ä»¤åå®¹ä»¥åæ§è¡ä¹åçç¶
-           æã
-
-   - -c :: ä¸´æ¶æ§è¡èæ¬èä¸å¿å»ºç«shæä»¶
-
-*** å¯¹ +x çå¢å¼º
-- $LINENO :: å½åè¡å·
-
-- $FUNCNAME :: å½æ°åæ°ç»åéï¼åå«æ´ä¸ªè°ç¨é¾ä¸ææçå½æ°çåå­ãä¾
-               å¦ï¼${FUNCNAME[0]} è¡¨ç¤ºå½åæ­£å¨æ§è¡çå½æ°çåå­ï¼è1
-               è¡¨ç¤ºè°ç¨äºæ­¤å½æ°çå½æ°åå­ã
-
-- $BASH_SOURCE :: æä»¶åï¼
-
-- $PS4 :: ç¨äº-xè¾åºæ¶çæç¤ºç¬¦ãä¾å¦å¯ä»¥
-          export SP4='+{$LINENO:${FUNCNAME[0]}}'
-          ç¶ååç¨-xè°è¯ã
-
-*** æ¥å¿è¾åº
-
-#+BEGIN_SRC sh
-  _log() {
-      if [ "$_DEBUG" == "true" ]; then
-          echo 1>&2 "$@"
-      fi
-  }
-
-DEBUG=true ./example_script.sh
 #+END_SRC
 
 ** Array

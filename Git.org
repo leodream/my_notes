@@ -1,3 +1,71 @@
+* Index
+- [[* Basic Concept][Basic Concept]]
+  - [[* Ojbectives][Ojbectives]]
+  - [[* Contents][Contents]]
+    - [[* evoltion history][evoltion history]]
+    - [[* AIMs][AIMs]]
+    - [[* Git Basic][Git Basic]]
+      - [[* Three Main States][Three Main States]]
+    - [[* Git setup][Git setup]]
+- [[* Basic Usage][Basic Usage]]
+  - [[* Gitting a Git Repository][Gitting a Git Repository]]
+    - [[* Initializing a Repository in an Existing Direcotry][Initializing a Repository in an Existing Direcotry]]
+    - [[* Cloning an Existing Repository][Cloning an Existing Repository]]
+  - [[* Recording changes to the Repository][Recording changes to the Repository]]
+    - [[* Stage][Stage]]
+    - [[* Ignore][Ignore]]
+    - [[* Diff][Diff]]
+    - [[* Commit][Commit]]
+    - [[* Remove file][Remove file]]
+    - [[* Moveing file][Moveing file]]
+  - [[* Viewing the Commit History][Viewing the Commit History]]
+    - [[* Show branch tree][Show branch tree]]
+  - [[* Undoing things][Undoing things]]
+    - [[* Changing Your Last Commit][Changing Your Last Commit]]
+    - [[* Unstaging a Staged File][Unstaging a Staged File]]
+  - [[* Working with Remotes][Working with Remotes]]
+  - [[* Tagging][Tagging]]
+  - [[* Tips and Tricks][Tips and Tricks]]
+- [[* Branching Model][Branching Model]]
+  - [[* What a Branch Is][What a Branch Is]]
+  - [[* Branch Management][Branch Management]]
+  - [[* Branching Workflows][Branching Workflows]]
+    - [[* Long-Running Branches][Long-Running Branches]]
+    - [[* Topic Branches][Topic Branches]]
+  - [[* Remote Branches][Remote Branches]]
+    - [[* Pushing][Pushing]]
+    - [[* Tracking Branches][Tracking Branches]]
+  - [[* Rebasing][Rebasing]]
+- [[* Git on the Server][Git on the Server]]
+  - [[* Local Protocol][Local Protocol]]
+  - [[* SSH Protocol][SSH Protocol]]
+  - [[* the Git Protocol][the Git Protocol]]
+- [[* Distributed Git][Distributed Git]]
+  - [[* Distributed Workflows][Distributed Workflows]]
+  - [[* Contributing to a Project][Contributing to a Project]]
+  - [[* Maintaining a Project][Maintaining a Project]]
+- [[* Advanced Git Commands][Advanced Git Commands]]
+  - [[* Delete commit that isn't the last one][Delete commit that isn't the last one]]
+  - [[* Change commit isn't the most recent one][Change commit isn't the most recent one]]
+- [[* Custom Git Environment][Custom Git Environment]]
+- [[* Deals with Git and other VCSs][Deals with Git and other VCSs]]
+  - [[* Git and SVN][Git and SVN]]
+    - [[* Getting Started][Getting Started]]
+    - [[* Committing Back to Subversion][Committing Back to Subversion]]
+    - [[* Pulling in New Changes][Pulling in New Changes]]
+    - [[* Git-SVN Branching][Git-SVN Branching]]
+    - [[* Ignoring What SVN ignores][Ignoring What SVN ignores]]
+- [[* Git Internals][Git Internals]]
+- [[* Question][Question]]
+- [[* Troubleshooting][Troubleshooting]]
+- [[* Best Practice][Best Practice]]
+  - [[* Clean history][Clean history]]
+  - [[* Merging too much vs too little][Merging too much vs too little]]
+  - [[* When use rebase][When use rebase]]
+  - [[* How to maintain a clean history][How to maintain a clean history]]
+    - [[* Rules][Rules]]
+    - [[* Then how to pull][Then how to pull]]
+
 * Basic Concept
 ** Ojbectives
 Why Git exists and why we use it
@@ -31,7 +99,7 @@ Every action you make to git is adding data to its database. It's hard to make i
 information stored /etc/gitconfig  ~/.gitconfig $GIT_HOME/config
 *git config* to customise your git.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 git config --global user.name "..."
 git config --global user.email "..."
 
@@ -48,7 +116,7 @@ git help <verb>
 Cover every basic command. configure and initialize a repository, begin and stop tracking files, stage and commit changes.
 ** Gitting a Git Repository
 *** Initializing a Repository in an Existing Direcotry
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 $ git init   # This command create ".git" sub directory -- a Git repository skeleton.
 $ git add *.c
 $ git add README
@@ -56,7 +124,7 @@ $ git commit -m 'initial project version'
 #+END_SRC
 
 *** Cloning an Existing Repository
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git clone git://xxxx.git mygit
 #+END_SRC
 http(0):// or user@server:/path.git use SSH.
@@ -65,7 +133,7 @@ http(0):// or user@server:/path.git use SSH.
 Only staged files will be commited. All the temp files will no be commited with mistake.
 
 *** Stage
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git status    # display branch, modified files, and so on.
   
   $ git add [filename]/[dirname]  # add a new file to git or toggle a file as staged.
@@ -76,7 +144,7 @@ Git stages a file exactly as it is when you run the git add command. If you modi
 *** Ignore
 If you do want git to display the untracked fiels, go seting up a *ignoring files*.
 Remember that this is *not* the regex pattern.
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ cat .gitignore
   *.[oa]
   *~
@@ -90,7 +158,7 @@ Remember that this is *not* the regex pattern.
 
 *** Diff
 To exactly display what you changed -- *git diff*.
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git diff                      # what you've changed but not yet staged.
   $ git diff --staged ( --cache)  # what you've staged that will go into your next commit.
 #+END_SRC
@@ -105,7 +173,7 @@ Then you can type your commit comment.
 
 *** Remove file
 If you want to remove a modified file, add *-f* options.
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 #Simply remove a file from working dir will match as Changed but not updated
   $ rm filename
 
@@ -128,7 +196,7 @@ If you rename a file, no metadata is stored in Git that tells it your
 renamed the file. But usually,Git is smart about figuring that out.
 
 Here is the command to rename a file in Git
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git mv file_from file_to
 
 # command is equivalent. Git figures out that it's a rename implilcitly.
@@ -138,7 +206,7 @@ Here is the command to rename a file in Git
 #+END_SRC
 
 ** Viewing the Commit History
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git log -p  # show the diff introduced in each commit.
   $ git log -2  # display last 2 entries.
 
@@ -225,7 +293,7 @@ I use it by including these aliases in my ~/.gitconfig file:
 This command takes your staging area and uses it for the commit. When you forget to add some files, or mess up your commit message, then you want to commit again.
 
 *** Unstaging a Staged File
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git reset HEAD <file>                 # to unstage files
 
   # command below are dangous as they will override working dir.
@@ -239,7 +307,7 @@ However, anything you lose that was never committed is likely never to be seen a
 ** Working with Remotes
 /Remote repositories/ are versions of your project that are hosted on the Internet or network somewhere.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 # will list the shortnames of each remote handle you've specified. Adding "-v" to display the URL instead on only the shortname.  
   $ git remote -v  
   $ git remote add [shortname] [url]    # Then you can use the name to reference the URL
@@ -256,14 +324,14 @@ However, anything you lose that was never committed is likely never to be seen a
 #+END_SRC
 
 ** Tagging
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git tag                             # List teh available tags
   $ git tag -l v1.4.2.*                 # List only the 1.4.2 series.
 #+END_SRC
 - Lightweight tag :: is very much like a branch that doesn't change.
 - Annotated tag :: Stored as full objects in the Git database. They're check-summed; contain the tagger name, e-mail, and date;have a tagging message and can be signed and verified with GNU Privacy Guard.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git tag -a v1.4 -m "tagging message"
   $ git tag -a v1.4 [checksum]          # tagging later
   $ git show v1.4
@@ -274,7 +342,7 @@ However, anything you lose that was never committed is likely never to be seen a
 #+END_SRC
 
 ** Tips and Tricks
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ source ~/.git-completion.bash       # auto-Completion. Or copy it into /etc/bash_completion.d/
 
   $ git config --global alias.co checkout
@@ -293,7 +361,7 @@ When you commit, Git stores a commit object that comtains apointer to the snapsh
 When committing, Git checksums each subdirectory and stores those three objects in the Git repository. Then create a commit object that has the metadata and a pointer to the root project tree. One /blob/ for the  contents of each of your files and tree object for specifying which file names are stored as awhich blobs.
 
 ** Branch Management
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git branch testing              # Create a new pointer at the same commit you're currently on.
   $ git checkout testing            # switch to testing branch.
 
@@ -337,7 +405,7 @@ Remote branches act as bookmarks to remind you where the branches on your remote
 *** Pushing
 When you want to share a branch with the world, you need to push it up to a remote that you have write access to explicitly.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git push origin serverfix[:aliasName]
 
   $ git push origin  :serverfix                    # delete the serverfix branch from the server. Empty local-branch indicates to delete.
@@ -468,7 +536,7 @@ A remote repository is generally a bare repository���a Git repository that
 ** Local Protocol
 In this protocol, the remote repository is in another directory on disk. This is often used if everyone on your team has acces to a share filesystem such as an NFS mount.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git clone /opt/git/project.git
   $ git clone file:///opt/git/project.git                    # less efficient
 #+END_SRC
@@ -479,7 +547,7 @@ most common.
 
 SSH is also the only network-based protocol that you can easily read from and write to. The other two network protocols (HTTP and Git) are generally *read-only*, so even if you have them available for the unwashed masses, you still need SSH for your own write commands.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 $ git clone ssh: //user@ server:project.git
 $ git clone user@server:project.git.    #it is OK to not specify the protocol
 #+END_SRC
@@ -549,7 +617,7 @@ Incidentally, =$parent_of_flawed_commit= is equivalent to =$flawed_commit^=
 Although you can easily do local branching and merging, it's generally best to keep your history as linear as possible by rebasing your work and avoiding doing things like simultaneously interacting with a Git remote repository.
 
 *** Getting Started
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git svn clone file:///tmp/test-svn -T trunk -b branches -t tags  # Import svn Repository
   $ git svn clone file:///tmp/test-svn -s                            # equivalent command
 
@@ -566,7 +634,7 @@ Tags are added as remote branches, not as real Git tags. Your Subversion import 
 If you edit one of the files and commit it, you have a commit that exists in Git locally that doesn't exist on the Subversion server.
 You need to push your changes upstream.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git svn dcommit        # If any other push conflict, your commit will be rejected until you merge in their work.
 #+END_SRC
 /dcommit/ takes all the commits you've made on top of the Subversion server code, does a Subversion commit for each, and rewrites your local git commit to include a unique identifier.
@@ -576,7 +644,7 @@ As the checksums will change, it's not a good idea to use git and subversion ser
 It's important to remember that unlike Git, which requires you to merge upstream work you don't yet have locally before you can push, git svn makes you do that only if the changes conflict.
 
 *** Pulling in New Changes
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git svn rebase         # now that all your work is on top of what is on the Subversion server
 #+END_SRC
 Running git svn rebase every once in a while makes sure your code is always up to date. You need to be sure your working directory is clean when you run this, though. If you have local changes, you must either stash your work or temporarily commit it before running git svn rebase���otherwise, the command will stop if it sees that the rebase will result in a merge conflict.
@@ -584,7 +652,7 @@ Running git svn rebase every once in a while makes sure your code is always up t
 *** Git-SVN Branching
 The reason to prefer rebasing is that *Subversion has a linear history* and doesn't deal with merges like Git does, so git svn follows only the first parent when converting the snapshots into Subversion commits.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   $ git svn branch opera                  # create new branch
   $ svn copy trunk branches/opera         # equivalent
 

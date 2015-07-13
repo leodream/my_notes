@@ -1,3 +1,200 @@
+* Index
+- [[* Book Notes][Book Notes]]
+  - [[* 1.Meet Hadoop][1.Meet Hadoop]]
+    - [[* Comparison][Comparison]]
+    - [[* Hadoop Releases][Hadoop Releases]]
+    - [[* Hadoop features][Hadoop features]]
+      - [[* Analyze the whole dataset, hoc analysis.][Analyze the whole dataset, hoc analysis.]]
+      - [[* Semi-structured data.][Semi-structured data.]]
+      - [[* Normalization][Normalization]]
+      - [[* Linearly scalable programming model.][Linearly scalable programming model.]]
+      - [[* Data Locality][Data Locality]]
+      - [[* Used in higher-level.][Used in higher-level.]]
+      - [[* Auto reschedule tasks when encounter a failure.][Auto reschedule tasks when encounter a failure.]]
+      - [[* Restricive programming model.][Restricive programming model.]]
+    - [[* Apache Hadoop Project][Apache Hadoop Project]]
+      - [[* Core][Core]]
+      - [[* Avro][Avro]]
+      - [[* MapReduce][MapReduce]]
+      - [[* HDFS][HDFS]]
+      - [[* Pig][Pig]]
+      - [[* HBase][HBase]]
+      - [[* ZooKeeper][ZooKeeper]]
+      - [[* Hive][Hive]]
+      - [[* Chukwa][Chukwa]]
+  - [[* 2.MapReduce][2.MapReduce]]
+    - [[* Without Hadoop][Without Hadoop]]
+    - [[* With Hadoop][With Hadoop]]
+      - [[* Jobtracker and tasktrackers][Jobtracker and tasktrackers]]
+      - [[* Map tasks write their output to local disk,not to HDFS.][Map tasks write their output to local disk,not to HDFS.]]
+      - [[* Input splits][Input splits]]
+      - [[* Combiner][Combiner]]
+      - [[* Stream][Stream]]
+  - [[* 3.The Hadoop Distributed Filesystem][3.The Hadoop Distributed Filesystem]]
+    - [[* The Design of HDFS][The Design of HDFS]]
+      - [[* Aood at	  ][Aood at	  ]]
+        - [[* Very large file ][Very large file ]]
+        - [[* Streaming data access][Streaming data access]]
+        - [[* Commodity hardware][Commodity hardware]]
+      - [[* Not fit for][Not fit for]]
+        - [[* Low-latency data access][Low-latency data access]]
+        - [[* Losts of small files][Losts of small files]]
+        - [[* Multiple writers,arbitrary file modifications][Multiple writers,arbitrary file modifications]]
+    - [[* HDFS Concepts][HDFS Concepts]]
+      - [[* Blocks][Blocks]]
+        - [[* Benefits][Benefits]]
+      - [[* Namenodes and Datanodes][Namenodes and Datanodes]]
+        - [[* Client ][Client ]]
+        - [[* Datanode][Datanode]]
+        - [[* NameNode][NameNode]]
+    - [[* Command-Line Interface][Command-Line Interface]]
+      - [[* Setting Up HDFS][Setting Up HDFS]]
+      - [[* Basic Operations][Basic Operations]]
+    - [[* Hadoop Filesystems][Hadoop Filesystems]]
+      - [[* Interfaces][Interfaces]]
+    - [[* The Java Interface][The Java Interface]]
+      - [[* Reading Data from a Hadoop URL][Reading Data from a Hadoop URL]]
+      - [[* Reading Data Using the FileSystem API][Reading Data Using the FileSystem API]]
+        - [[* FSDataInputstream][FSDataInputstream]]
+      - [[* Writing Data][Writing Data]]
+        - [[* FSDataOutputStream][FSDataOutputStream]]
+      - [[* Directories][Directories]]
+      - [[* Querying the Filesystem][Querying the Filesystem]]
+        - [[* File metadata : FileStatus][File metadata : FileStatus]]
+        - [[* Listing files][Listing files]]
+        - [[* File Patterns][File Patterns]]
+        - [[* PathFilter][PathFilter]]
+      - [[* Deleting Data][Deleting Data]]
+    - [[* Data Flow][Data Flow]]
+      - [[* Anatomy of a File Read][Anatomy of a File Read]]
+        - [[* Exception][Exception]]
+        - [[* Network Topology and Hadoop][Network Topology and Hadoop]]
+      - [[* Anatomy of a File Write][Anatomy of a File Write]]
+        - [[* Exception][Exception]]
+        - [[* Replica Placement][Replica Placement]]
+      - [[* Coherency Model][Coherency Model]]
+    - [[* Parallel Copying with distcp][Parallel Copying with distcp]]
+      - [[* Keeping and HDFS Cluster Balanced][Keeping and HDFS Cluster Balanced]]
+    - [[* Hadoop Archives][Hadoop Archives]]
+      - [[* Using Hadoop Archives][Using Hadoop Archives]]
+      - [[* Limitations][Limitations]]
+  - [[* 4.Hadoop I/O][4.Hadoop I/O]]
+    - [[* Data Integrity][Data Integrity]]
+      - [[* Data Integrity in HDFS][Data Integrity in HDFS]]
+        - [[* Write][Write]]
+        - [[* Read][Read]]
+        - [[* Guard][Guard]]
+        - [[* Heal][Heal]]
+        - [[* Disable Checksum][Disable Checksum]]
+      - [[* LocalFileSystem][LocalFileSystem]]
+      - [[* ChecksumFIleSystem][ChecksumFIleSystem]]
+    - [[* Compression][Compression]]
+      - [[* Codecs][Codecs]]
+        - [[* Compressing and decompressing streams with CompressionCodec][Compressing and decompressing streams with CompressionCodec]]
+        - [[* Inferring CompressionCodecs using CompressionCodecFactory][Inferring CompressionCodecs using CompressionCodecFactory]]
+        - [[* Native libraries][Native libraries]]
+      - [[* Compression and Input Splits][Compression and Input Splits]]
+        - [[* Which Compression Format][Which Compression Format]]
+      - [[* Using Compression in MapReduce][Using Compression in MapReduce]]
+        - [[* Compressing map output][Compressing map output]]
+    - [[* Serialization][Serialization]]
+      - [[* The Writable Interface][The Writable Interface]]
+        - [[* WritableComparable and comparatiors][WritableComparable and comparatiors]]
+      - [[* Writable Classes][Writable Classes]]
+        - [[* Writable wrappers for Java primitives][Writable wrappers for Java primitives]]
+        - [[* Text][Text]]
+        - [[* NullWritable][NullWritable]]
+        - [[* ObjectWritable and GenericWritable][ObjectWritable and GenericWritable]]
+        - [[* Writable collections][Writable collections]]
+      - [[* Implementing a Custom Writable][Implementing a Custom Writable]]
+        - [[* Implementing a RawComparator for speed][Implementing a RawComparator for speed]]
+        - [[* Custom comparators][Custom comparators]]
+      - [[* Serialization Frameworks][Serialization Frameworks]]
+        - [[* Serialization IDL][Serialization IDL]]
+    - [[* Avro][Avro]]
+      - [[* Avro datatypes and schemas][Avro datatypes and schemas]]
+      - [[* Serialization and Deserialization in memory][Serialization and Deserialization in memory]]
+      - [[* Avro Data Files][Avro Data Files]]
+      - [[* Interoperability][Interoperability]]
+      - [[* Schema Parsing ][Schema Parsing ]]
+      - [[* Sorting][Sorting]]
+      - [[* Avro MapReduce][Avro MapReduce]]
+    - [[* File-Based Data Structures][File-Based Data Structures]]
+      - [[* SequenceFile][SequenceFile]]
+        - [[* Writing a SequenceFile][Writing a SequenceFile]]
+        - [[* Reading a SequenceFile][Reading a SequenceFile]]
+        - [[* Displaying a SequenceFile with the command-line interface][Displaying a SequenceFile with the command-line interface]]
+        - [[* Sorting and merging SequenceFiles][Sorting and merging SequenceFiles]]
+        - [[* The SequenceFile Format][The SequenceFile Format]]
+      - [[* MapFile][MapFile]]
+        - [[* Writing a MapFile][Writing a MapFile]]
+        - [[* Reading a MapFile][Reading a MapFile]]
+        - [[* Converting a SequenceFile][Converting a SequenceFile]]
+  - [[* 5.Developing a MapReduce Application][5.Developing a MapReduce Application]]
+    - [[* The Configuration API][The Configuration API]]
+      - [[* Combining Resources][Combining Resources]]
+      - [[* Variable Expansion][Variable Expansion]]
+    - [[* Configuring the Development Environment][Configuring the Development Environment]]
+      - [[* Managing Configuring][Managing Configuring]]
+      - [[* GenericOptionsparser, Tool, and ToolRunner][GenericOptionsparser, Tool, and ToolRunner]]
+    - [[* Writting a Unit Test with MRUnit][Writting a Unit Test with MRUnit]]
+      - [[* Mapper][Mapper]]
+      - [[* Reducer][Reducer]]
+    - [[* Running locally on Test Data][Running locally on Test Data]]
+      - [[* Running a Job in a Local Job Runner][Running a Job in a Local Job Runner]]
+        - [[* Fixing the mapper][Fixing the mapper]]
+      - [[* Testing the Driver][Testing the Driver]]
+    - [[* Running on a Cluster][Running on a Cluster]]
+      - [[* Packaging a Job][Packaging a Job]]
+        - [[* The client classpath][The client classpath]]
+        - [[* The task classpath][The task classpath]]
+        - [[* Packaging dependencies][Packaging dependencies]]
+        - [[* Task classpath precedence][Task classpath precedence]]
+      - [[* Launching a Job][Launching a Job]]
+      - [[* The MapReduce Web UI][The MapReduce Web UI]]
+        - [[* The jobstracker page][The jobstracker page]]
+          - [[* JobHistory][JobHistory]]
+        - [[* The job page][The job page]]
+      - [[* Retrieving the Results][Retrieving the Results]]
+      - [[* Debugging a Job][Debugging a Job]]
+        - [[* The tasks page][The tasks page]]
+        - [[* The task details page][The task details page]]
+        - [[* Handling malformed data][Handling malformed data]]
+      - [[* Hadoop Logs][Hadoop Logs]]
+      - [[* Remote Debugging][Remote Debugging]]
+    - [[* Tuning a Job][Tuning a Job]]
+      - [[* Profiling Tasks][Profiling Tasks]]
+        - [[* The HPROF profiler][The HPROF profiler]]
+        - [[* Other profilers][Other profilers]]
+    - [[* MapReduce Workflows][MapReduce Workflows]]
+      - [[* Decomposing a Problem into MapReduce Jobs][Decomposing a Problem into MapReduce Jobs]]
+      - [[* JobControl][JobControl]]
+      - [[* Apache Oozie][Apache Oozie]]
+        - [[* Defining an Oozie workflow][Defining an Oozie workflow]]
+        - [[* Packaging and deploying an Oozie workflow application][Packaging and deploying an Oozie workflow application]]
+        - [[* Running an Oozie workflow job][Running an Oozie workflow job]]
+  - [[* 6.How MapReduce Works][6.How MapReduce Works]]
+    - [[* Anatomy of a MapReduce Job Run][Anatomy of a MapReduce Job Run]]
+      - [[* Class MapReduce (MapReduce 1)][Class MapReduce (MapReduce 1)]]
+        - [[* Job submission][Job submission]]
+  - [[* 7.MapReduce Tyeps and Formats][7.MapReduce Tyeps and Formats]]
+    - [[* MapReduce Types][MapReduce Types]]
+  - [[* 8.MapReduce Features][8.MapReduce Features]]
+  - [[* 9.Setting Up a Hadoop Cluster][9.Setting Up a Hadoop Cluster]]
+  - [[* 10.Administering Hadoop][10.Administering Hadoop]]
+  - [[* 11.Pig][11.Pig]]
+  - [[* 12.HBase][12.HBase]]
+  - [[* 13.ZooKeepe][13.ZooKeepe]]
+  - [[* 14.Case Studies][14.Case Studies]]
+  - [[* Installing Apache Hadoop][Installing Apache Hadoop]]
+    - [[* Configuration][Configuration]]
+      - [[* Pseudo-Distributed Mode][Pseudo-Distributed Mode]]
+        - [[* Configuring SSH][Configuring SSH]]
+        - [[* Formatting the HDFS filesystem][Formatting the HDFS filesystem]]
+        - [[* Starting and stopping the daemons][Starting and stopping the daemons]]
+  - [[* Cloudera's Distribution for Hadoop][Cloudera's Distribution for Hadoop]]
+  - [[* Preparing the NCDC Weather Data][Preparing the NCDC Weather Data]]
+
 * Book Notes
 http://hadoop.apache.org/.
 Hadoop's Java API documentation.
@@ -312,7 +509,7 @@ using data stored on the local filesystem.
 One of the simplest ways to read a file from a Hadoop filesystem is by
 using a java.net.URL object to open a stream to read the data from.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 InputStream in = null;
 try {
   in = new URL("hdfs://host/path").openStream();
@@ -329,7 +526,7 @@ FsUrlStreamHandlerFactory.
 This method can only be called once per JVM,it better to executed in a
 static block while it may be conflict with some third-party component.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public class URLCat {
   static {
     URL.setURLStreamHandlerFactory(new FsUrlStreamHandlerFactory());
@@ -355,7 +552,7 @@ object.You can think of a Path as a Hadoop filesystem URI.
 
 Configuration object represents the configuration files such as core-site.xml.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public class FileSystemCat {
 
   public static void main(String[] args) throws Exception {
@@ -394,7 +591,7 @@ the file and are thread-safe.
 
 **** Writing Data
 Simplest to create a file:
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   public FSDataOutStream create (Path f) throw IOException
 #+END_SRC
   
@@ -406,7 +603,7 @@ interface, =Progressable=,which will be invoken when data written to
 the datanode.
 
 Appending to an existing file.
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   public FSDataOutStream append (Path f) throw IOException
 #+END_SRC
   
@@ -414,7 +611,7 @@ It can be used to create unbounded files ,such as logfile, can write
 to an existing file after a restart.
 
 /Copying a local file to a Hadoop filesystem, and show proress/
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public class FileCopyWithProgress {
   public static void main(String[] args) throws Exception {
     String localSrc = args[0];
@@ -442,7 +639,7 @@ a file.
 
 **** Directories
 Create a directory:
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   public boolean mkdirs (Path f) throws IOException
 #+END_SRC
 This method creates all of the parent dir if they don't exist just
@@ -456,7 +653,7 @@ dirs,including /file length/ , /block size/ , /replication/ , /modification
 time/ , /ownership/ , and /permission information/.
 
 FileSystem's getFileStatus() method.
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public class ShowFileStatusTest {
   private MiniDFSCluster cluster; // use an in-process HDFS cluster for testing
   private FileSystem fs;
@@ -504,7 +701,7 @@ public class ShowFileStatusTest {
 #+END_SRC
 
 ***** Listing files
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public FileStatus[] listStatus(Path f) throws IOException
 public FileStatus[] listStatus(Path f, PathFilter filter) throws IOException
 public FileStatus[] listStatus(Path[] files) throws IOException
@@ -514,7 +711,7 @@ public FileStatus[] listStatus(Path[] files, PathFilter filter) throws IOExcepti
 Depending on what you pass into (file or dir),method return one or
 more FileStatus instances.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
     public class ListStatus {
 	public static void main(String[] args) throws Exception {
 	    String uri = args[0];
@@ -535,7 +732,7 @@ more FileStatus instances.
 
 ***** File Patterns
 Using wildcard to match a set of files:
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public FileStatus[] globStatus(Path pathPattern) throws IOException
 public FileStatus[] globStatus(Path pathPattern, PathFilter filter) throws IOException
 #+END_SRC
@@ -545,7 +742,7 @@ Just like is works in Unix bash.
 To make listStatus() and globStatus() more powerfull you can
 implements your PathFilter.
 There's method in this interface:
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   boolean accept(Path path);
 #+END_SRC
 But filters can only act on a file's name.
@@ -826,7 +1023,7 @@ detected, LocalFileSystem throws a ChecksumException.
 Checksums are fairly cheap, but you may want to disable it when the
 underlying filesystem support checksums natively.This is accomplished
 by using *RawLocalFileSystem* in place of *LocalFileSystem*.
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 Configuring conf = ...
 FileSystem fs = new RawLocalFileSystem();
 fs.initialize(nullm, conf);
@@ -890,7 +1087,7 @@ compressor.
 
 /Compress data read from standard input and write it to standard
 output/
-#+BEGIN_SRC
+#+BEGIN_SRC sh
   public static void main(String[] args) throws Exception {
     String codecClassname = args[0];
     Class<?> codecClass = Class.forName(codecClassname);
@@ -909,7 +1106,7 @@ CompressionCodecFactory provides a way of mapping a filename extension
 to a CompressionCodec using its *getCodec()* method, which takes a Path
 object for the file in question.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public static void main(String[] args) throws Exception {
   String uri = args[0];
   Configuration conf = new Configuration();
@@ -960,7 +1157,7 @@ Setting the property hadoop.native.lib to false will ensure that the
 built-in Java equivalents will be used (if they are available).
 
 *CodecPool* allow you to reuse (de)compressors.
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 Class<?> codecClass = Class.forName(codecClassname);
 Configuration conf = new Configuration();
 CompressionCodec codec = (CompressionCodec)
@@ -1002,7 +1199,7 @@ un-splitable.
 **** Using Compression in MapReduce
 /Application to run the maximum temperature job producing compressed
 output/
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public class MaxTemperatureWithCompression {
   public static void main(String[] args) throws IOException {
     if (args.length != 2) {
@@ -1065,7 +1262,7 @@ Hadoop's own serialization format,which is certainly compact and fast
 
 This interface defines two methodss:
 *write* and *readFields*
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 package org.apache.hadoop.io;
 
 import java.io.DataOutput;
@@ -1079,7 +1276,7 @@ public interface Writable {
 #+END_SRC
 
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 IntWritable writable = new IntWritable();
 writable.set(163);
 
@@ -1159,7 +1356,7 @@ the *Wriable* equivalent of *java.lang.String*.
   Indexing for the Text class is in terms of position in the encoded
   byte sequence, not the Unicode character in the string.
 
-  #+BEGIN_SRC
+  #+BEGIN_SRC sh
     Text t = new Text("hadoop");
     assertThat(t.getLength(), is(6));
     assertThat(t.getBytes().length, is(6));
@@ -1176,7 +1373,7 @@ the *Wriable* equivalent of *java.lang.String*.
   
 + Iteration ::
   /Iterating over the characters in a Text object/
-  #+BEGIN_SRC
+  #+BEGIN_SRC sh
    public class TextIterator {
      public static void main(String[] args) {
        Text t = new Text("\u0041\u00DF\u6771\uD801\uDC00");
@@ -1192,7 +1389,7 @@ the *Wriable* equivalent of *java.lang.String*.
 
 + Mutalibity ::
   You can reuse a Text instance by calling one of the *set()* methods.
-  #+BEGIN_SRC
+  #+BEGIN_SRC sh
   Text t = new Text("hadoop");
   t.set(new Text("pig"));
   assertThat(t.getLength(), is(3));
@@ -1205,7 +1402,7 @@ the *Wriable* equivalent of *java.lang.String*.
 + BytesWritable ::
   This is a wrapper for an array of binary data.
   Consist of One integer for length and bytes.
-  #+BEGIN_SRC
+  #+BEGIN_SRC sh
   BytesWritable b = new BytesWritable(new byte[] { 3, 5 });
   byte[] bytes = serialize(b);
   assertThat(StringUtils.byteToHexString(bytes), is("000000020305"));
@@ -1241,7 +1438,7 @@ ArrayWritable and TwoDArrayWritable have *set(), get(), toArray()* methods.
 *MapWritable and SortedMapWritable* are implementations of
 java.util.Map (SortedMap) <Writable, Writable>.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 MapWritable src = new MapWritable();
 src.put(new IntWritable(1), new Text("cat"));
 src.put(new VIntWritable(2), new LongWritable(163));
@@ -1264,7 +1461,7 @@ For more elaborate structures, it's often better to create a new
 Writable type, rather than compose the stock types.
 
 /A writable implementation that stores a pair of Text objects/
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 import java.io.*;
 import org.apache.hadoop.io.*;
 
@@ -1336,7 +1533,7 @@ methods.
 Compare two TextPair Objects just by looking at their serialized
 representation.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public static class Comparator extends WritableComparator {
     private static final Text.Comparator TEXT_COMPARATOR = new Text.Comparator();
     public Comparator() {
@@ -1452,7 +1649,7 @@ Once you have a SequenceFile.Writer, you then write key-value pairs,
 using the *append()* method and finish with calling *close()* method.
 
 /Simple/
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public class SequenceFileWriteDemo {
     private static final String[] DATA = {
 	"One, two, buckle my shoe",
@@ -1504,7 +1701,7 @@ calls to *getKeyClass()* and *getValueClass()*, then ReflectionUtils
 is used to create an instance for the key and value.
 
 /Reading a SequenceFile/
-#+BEGIN_SRC
+#+BEGIN_SRC sh
     public static void run(String args) throws IOException {
 	String uri = args;
 	Configuration conf = new Configuration();
@@ -1540,7 +1737,7 @@ is used to create an instance for the key and value.
 There are two ways to seek to a given position in a sequence file.
 
 + seek() :: 
-          #+BEGIN_SRC
+          #+BEGIN_SRC sh
 	    reader.seek(359); 
 	    assertThat(reader.next(key, value), is(true));
 	    /*throw IOException if position out of boundary*/
@@ -1548,7 +1745,7 @@ There are two ways to seek to a given position in a sequence file.
           #+END_SRC
 
 + sync() :: positions the reader at the next sync point after position.
-          #+BEGIN_SRC
+          #+BEGIN_SRC sh
 	    reader.sync(360);
 	    assertThat( reader.getPosition(), is(2021L));
 	    assertThat(reader.next(key, value), is(true));
@@ -1597,7 +1794,7 @@ A MapFile is a sorted SequenceFile with an index to permit lookups by key.
 Writing a *MapFile* is similar to writing a SequenceFile.
 Except that keys must be instances of WritableComparable and vlues
 must be Writable.
-#+BEGIN_SRC
+#+BEGIN_SRC sh
     public static void run(String args) throws IOException {
 	String uri = args;
 	Configuration conf = new Configuration();
@@ -1648,7 +1845,7 @@ taking too much menory.
 getClosest() returns the "closest" match to the specified key.
 
 ***** Converting a SequenceFile
-#+BEGIN_SRC
+#+BEGIN_SRC sh
     public static void run(String args) throws IOException {
 	String mapUri = args;
 	Configuration conf = new Configuration();
@@ -1692,7 +1889,7 @@ cluster -> more test case -> IsolationRunner debug -> task profiling
 An instance of the Configuration class represents a collection of
 configuration properyies and their values. XML files.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 Configuration conf = new Configuration();
 conf.addResource("configuration-1.xml");
 assertThat(conf.get("color"), is("yellow"));
@@ -1704,7 +1901,7 @@ Notes: type information is not stored in the XML file, which means
 properties can be interpreted as a given type when they are read.
 
 **** Combining Resources
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 Configuration conf = new Configuration();
 conf.addResource("configuration-1.xml");
 conf.addResource("configuration-2.xml");
@@ -1743,7 +1940,7 @@ GenericOptionsParser directly, as it’s more con- venient to
 implement the *Tool* interface and run your application with the
 *ToolRunner*, which uses GenericOptionsParser internally:
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public class ConfigurationPrinter extends Configured implements Tool {
   static {
     Configuration.addDefaultResource("hdfs-default.xml");
@@ -1792,7 +1989,7 @@ Just like JUnit.
 
 **** Mapper
 /Unit test for MaxTemperatureMaper/
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 import java.io.IOException;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mrunit.mapreduce.MapDriver;
@@ -1820,7 +2017,7 @@ output is the year and temperature reading.
 *Test-Driven*
 1.
   /First version of a Mapper that passes MaxTemperatureMapperTest/
-  #+BEGIN_SRC
+  #+BEGIN_SRC sh
 public class MaxTemperatureMapper
   extends Mapper<LongWritable, Text, Text, IntWritable> {
   
@@ -1841,7 +2038,7 @@ public class MaxTemperatureMapper
 **** Reducer
 The reducer has to find the maximum value for a given key.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 @Test
   public void returnsMaximumIntegerInValues() throws IOException,
       InterruptedException {
@@ -1855,7 +2052,7 @@ The reducer has to find the maximum value for a given key.
 #+END_SRC
 
 /source/
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public class MaxTemperatureReducer
   extends Reducer<Text, IntWritable, Text, IntWritable> {
   @Override
@@ -1880,7 +2077,7 @@ driver and run it on some test data on a development machine.
 It's easy to write one using the *Tool* interface.
 
 /Application to find the maximum temperature/
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public class MaxTemperatureDriver extends Configured implements Tool {
   @Override
   public int run(String[] args) throws Exception {
@@ -1931,7 +2128,7 @@ address of the jobstracker, but when it has the special value of local
 (which is the defualt), the job is run in-process without a accessing
 an external jobtracker.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 % mvn compile
 % export HADOOP_CLASSPATH=target/classes/
 % hadoop v2.MaxTemperatureDriver -conf conf/hadoop-local.xml \
@@ -1953,7 +2150,7 @@ Two approaches.
 
 + First ::
   Test driver using a local, in-process job runner/
-  #+BEGIN_SRC
+  #+BEGIN_SRC sh
  @Test
   public void test() throws Exception {
     Configuration conf = new Configuration();
@@ -2021,7 +2218,7 @@ To launch the job, we need to run the driver, specifying the cluster
 that we want to run the job on with the -conf option (or use -fs and
 -jt option).
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 % unset HADOOP_CLASSPATH
 % hadoop jar jarname.jar v3.MaxTemperatureDriver \
   -conf conf/hadoop-cluster.xml input/ncdc/all max-temp
@@ -2105,7 +2302,7 @@ aggregation by the reduce.
 There is a better way that you can write a program (in MapReduce) to
 analyse the logs.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public class MaxTemperatureMapper
   extends Mapper<LongWritable, Text, Text, IntWritable> {
   enum Temperature {
@@ -2176,7 +2373,7 @@ the task attempt, located in a directory named by the task attempt.
 In Java, you can write to the task’s syslog file if you wish by using
 the Apache Commons Logging API.
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -2257,7 +2454,7 @@ more complex directed acyclic graph (DAG) of jobs.
 + Linear chain :: Simplest approach is to run each job one after
 		  another, waiting until a job completes successfully.
 
-		  #+BEGIN_SRC
+		  #+BEGIN_SRC sh
 		  JobClient.runJob(conf1);
 		  JobClient.runJob(conf2);
 		  #+END_SRC
@@ -2300,7 +2497,7 @@ receive callbacks every time the workflow enters or exits an action
 node.
 
 ***** Defining an Oozie workflow
-#+BEGIN_SRC
+#+BEGIN_SRC xml
 <workflow-app xmlns="uri:oozie:workflow:0.1" name="max-temp-workflow">
   <start to="max-temp-mr"/>
   <action name="max-temp-mr">
@@ -2408,7 +2605,7 @@ About the MapReduce programming model, and the various data formats that MapRedu
 map: (K1, V1) -> list (K2, V2)
 reduce: (K2, list(V2)) -> list(K3, V3)
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
     public interface Mapper<K1, V1, K2, V2> extends JobConfigurable, Closeable {
       void map(K1 key, V1 value, OutputCollector<K2, V2> output, Reporter reporter)
         throws IOException;
@@ -2443,7 +2640,7 @@ The context objects are used for emitting key0value pairs, and so they
 are parameterized by the output types so that the signature of the
 *write()* method is :
 
-#+BEGIN_SRC
+#+BEGIN_SRC sh
 public void write(KEYOUT key, VALUEOUT value)
     throws IOException, InterruptedException
 #+END_SRC
