@@ -9,6 +9,7 @@
   - [[* 交互式启动文件][交互式启动文件]]
   - [[* 定制模块][定制模块]]
 - [[* 字符串][字符串]]
+- [[* 变量与对象][变量与对象]]
 - [[* 列表][列表]]
 - [[* 控制流][控制流]]
   - [[* if][if]]
@@ -25,6 +26,17 @@
     - [[* Lambda形式][Lambda形式]]
     - [[* 文档字符串][文档字符串]]
   - [[* 代码风格][代码风格]]
+- [[* 数据结构][数据结构]]
+  - [[* 深入列表][深入列表]]
+    - [[* 列表推导式][列表推导式]]
+    - [[* 嵌套列表推导式][嵌套列表推导式]]
+  - [[* del语句][del语句]]
+  - [[* 元组和序列][元组和序列]]
+  - [[* 集合][集合]]
+  - [[* 字典][字典]]
+  - [[* 遍历技巧][遍历技巧]]
+  - [[* 深入条件控制][深入条件控制]]
+  - [[* 序列与其它类型的比较][序列与其它类型的比较]]
 
 * 特点
 Python是可扩展的:
@@ -129,7 +141,26 @@ usercustomize之前被导入.
 - 对于Unicode字符, 'Hello\u0020World!' 则插入了0x0020序号值的字符.
   另外可以使用 "xxx".encode('utf-8')来转换得到字符串字节序列
 - 空串为假
+* 变量与对象
+*变量无类型,对象有类型*
 
+变量不须提前声明,只需在用的时候给它赋值,不能单独声明变量而不赋值
+
+变量纯粹只是引用内存中分配的各种对象,因此变量无类型,对象才有.
+*没有引用的对象会被回收*
+
+# a=[1,2,3]
+# b=[1,2,3]
+# a==b
+## True
+# a is b
+# False
+# a[1]=22
+# b 输出仍是[1,2,3]
+
+# a=b[:] #进行了复制
+# a=b.copy() # 类似
+另外,小数字及短字符串也是共用的,即 is 为True.
 
 * 列表
 # a = ['spam', 'eggs', 100, 1234]
@@ -238,7 +269,7 @@ def 关键字引入一个函式定义
 日后可以转化为在线文档
 
 执行函式会引入新的符号表用于该函式的局部变量.
-变量的引用的查找顺序为
+*变量的引用的查找顺序为*
 1. 局部符号表
 2. 闭包函式的局部符号表
 3. 全局变量
@@ -256,6 +287,8 @@ def 关键字引入一个函式定义
 函式即使没有return,也会有返回值--None
 
 *方法* 是属于一个对象并且被命名为 obj.methodname 的函式
+
+*Python中为对象编写接口,而不是数据类型*
 
 ** 深入函式定义
 
@@ -379,3 +412,208 @@ def 关键字引入一个函式定义
   lower_case_with_underscres格式.永远使用self作为方法的第一个参数名
 - 国际化使用UTF-8
 - 如果不使用其他语言,标识符里只使用ASCII字符.
+
+* 数据结构
+
+** 深入列表
+- list.append(x) :: a[len(a):]=[x]
+- list.extend(L) :: a[len(a):]=L
+- list.insert(i, x) :: a.insert(len(a),x ) = a.append(x)
+- list.remove(x) :: 移除第一个匹配项,如果没有会报错
+- list.pop([i]) :: 删除列表给定位置的项,并返回它.没有给定,则删除最后一个
+- list.index(x) :: 返回第一个匹配项的下标,没有则报错
+- list.count(x) :: x的出现次数
+- list.sort() :: 就地排序
+- list.reverse :: 就地反转
+
+1. 只使用 append 和 pop 可以把列表当作堆栈
+2. 只使用 append 和 popleft 可以把列表当作队列
+
+*** 列表推导式
+用于从序列中创建列表的简便途径
+在方括号里面先写一个表达式,然后接一个for子句,然后是零个或更多的for或if
+子句
+#+BEGIN_SRC python
+  vec = [2, 4, 6]
+  [[x, x**2] for x in vec]
+  # [[2, 4], [4, 16], [6, 36]
+
+  [3*x for x in vec if x > 3]
+  # [12, 18]
+
+  vec1 = [2, 4, 6]
+  vec2 = [4, 3, -9]
+  [x*y for x in vec1 for y in vec2]
+  #[8, 6, -18, 16, 12, -36, 24, 18, -54]
+
+  [str(round(356/113, i)) for i in range(1, 6)]
+  # ['3.1', '3.14', '3,142', '3,1416', 3.14159']
+#+END_SRC
+
+*** 嵌套列表推导式
+#+BEGIN_SRC python
+  mat = [
+      [1, 2, 3] ,
+      [4, 5, 6] ,
+      [7, 8, 9],
+      ]
+
+  print([[row[i] for row in mat] for i in [0, 1, 2]])
+  # [[1, 4, 7], [2, 5, 8], [3, 6, 9]]  可以考虑从右往左读
+
+  # 等价于
+  list(zip(*mat))
+#+END_SRC
+
+** del语句
+del 可以用来移除列表中的切片,或者清除整个列表
+#+BEGIN_SRC python
+  a = [-1, 1, 66.25, 333, 333, 1234.5]
+  del a[0]
+  # a= [1, 66.25, 333, 333, 1234.5]
+  del a[2:4]
+  # a= [1, 66.25, 1234.5]
+  del a[:]
+  # a = []
+  del a
+  # 引用a会错误
+#+END_SRC
+
+** 元组和序列
+列表和字符串都是序列数据类型的例子,因此他们有相似的索引和切片操作
+元组则是另一种标准的序列数据类型
+*元组由若干逗号分隔的值组成*
+
+#+BEGIN_SRC python
+  t = 12345, 54321, 'hello'
+  t[0]
+  # 12345
+  t
+  #(12345, 54321, 'hello')
+  u = t, (1, 2, 3, 4, 5)
+  u
+  # ((12345, 54321, 'hello'), (1, 2, 3, 4, 5))
+#+END_SRC
+
+元组在输出时会自动加入圆括号,而在输入时则可加可不加
+元组与字串一样, *都是不可变的* : 无法对元组指定项进行赋值,但可以通过切
+片连接来模拟,另外,元组中也可以包含可变对象,如列表.
+
+构造只包含一个或零个项的元组可以通过以下语法,
+#+BEGIN_SRC python
+  empty = ()
+  singleton = 'hello',
+  len(empty)
+  # 0
+  # singleton = ('hello',)
+#+END_SRC
+
+可以通过调转顺序来 *解包*
+# x, y, z = t
+必须保证变量个数与元组对得上.
+
+** 集合
+集合定义无序不重复元素集,支持合,交,差,和对称差操作
+空集合只能通过set()来定义,有元素的可以通过{1, 2}来定义
+#+BEGIN_SRC python
+  basket = {'apple', 'orange', 'apple', 'pear', 'orange' 'banana'}
+  print(basket)
+  # {'orange', 'apple', 'orangebanana', 'pear'}
+  'apple' in basket
+  # True
+  a = set('abracdabra')
+  b = set('alacazam')
+  # a ==> {'a', 'r', 'b', 'c', 'd'}
+  a - b
+  # {'r', 'b', 'd'}
+  a | b
+  # ['a', 'c', 'r', 'd', 'b', 'm', 'z', 'l'}
+  a & b
+  # {'a', 'c'}
+  a ^ b 
+  # {'r', 'd', 'b', 'm', 'z', 'l'} a或b中只有一个有的字母
+  a = {x for x in 'abracadabra' if x not in 'abc'}
+  # a ==> {'r', 'd'}
+#+END_SRC
+
+** 字典
+即关联数组,字典可以通过键来索引,并且键只能是任意不可变类型,故列表或是
+直接/间接包含可变的元组都不可以作为键
+
+字典可以看作是没有顺序的元素为 key:value 的集合
+对已存在的键存储会覆盖原来的值.del可以删除一个key:value对,提取一个不存
+在的key会报错,in可以用于检测某个键是否存在
+
+list(d.keys())会返回键的列表,其顺序不确定
+
+dict()可以从key value对序列里直接生成字典
+#+BEGIN_SRC python
+  tel = {'jack':4098, 'sape': 4139}
+  tel['guido'] = 4127 # 插入新对
+  tel['jack']
+  # 4098
+  del tel['sape']
+  tel['irv'] = 4127
+  # tel = {'jack':4098, 'irv': 4127, 'guido': 4127}
+  list(tel.keys())
+  # ['irv', 'guido', 'jack']
+  'guido' in tel
+  # True
+  'jack' not in tel
+  # False
+
+  dict(sape=4139, guido=4127, jack=4098)
+  dict([(x, x**2) for x in (2, 4, 6)])
+  # {2: 4, 4: 16, 6:36}
+#+END_SRC
+
+** 遍历技巧
+对字典遍历时,可以使用 items() 方法获取键值对
+enumerate() 则可以同时获取索引和值
+对两个或多个的序列进行遍历时可以使用zip进行组合
+sorted和reversed会返回新的序列
+
+#+BEGIN_SRC python
+  knights = {'gallahad': 'the pure', 'robin': 'the brave'}
+  for k, v in knights.items():
+      print(k, v)
+
+  for i, v in enumerate(['tic', 'tac', 'toe']):
+      print(i, v)
+  # 0 tic
+  # 1 tac
+  # 2 toe
+
+  a=[1,2,3]
+  b=[4,5,6]
+  for x, y in zip(a,b):
+      print('x is {0}, y is {1}'.format(x,y))
+  # x is 1, y is 4
+  # x is 2, y is 5
+  # x is 3, y is 6
+
+  sorted(a)
+  reversed(b)
+#+END_SRC
+
+** 深入条件控制
+- while和if中的条件可以包含任何操作符,而不仅仅是比较
+- in 和 not in 检查一个值是否在序列中
+- is 和 not is 检查两个对象是否为同一个,只对可变对象有用
+- 所有比较操作符具有相同的优先级,且低于数值操作
+- 比较符可以接连使用,如a<b==c测试a小于b且b等于c
+- not and or 优先级递减,且都小于比较符
+- and 和 or 不一定会计算右值
+  # non_null = string1 or string2 or string3
+- 赋值不可以出现在表达式内部, 避免 == 写错成 =
+
+** 序列与其它类型的比较
+- 顺序比较两个序列的项
+- 如果项也是序列,则递归比较
+- 所有项相等,则它们相等
+- 如果a是b的子序列,a<b
+
+如果比较的是两个不同的类型,且它们没有合适的比较方法,则会抛出TypeError
+异常.
+
+
