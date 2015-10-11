@@ -1,4 +1,80 @@
 * Index
+- [[* 构造过程抽象][构造过程抽象]]
+  - [[* 程序设计的基本元素][程序设计的基本元素]]
+    - [[* 表达式][表达式]]
+    - [[* 命名和环境][命名和环境]]
+    - [[* 组合式求值][组合式求值]]
+    - [[* 复合过程][复合过程]]
+    - [[* 过程应用的代换模型][过程应用的代换模型]]
+    - [[* 条件表达式和谓词][条件表达式和谓词]]
+    - [[* 函数与过程][函数与过程]]
+    - [[* 过程作为黑箱抽象][过程作为黑箱抽象]]
+      - [[* 过程参数][过程参数]]
+      - [[* 块结构][块结构]]
+  - [[* 过程与它们所产生的计算][过程与它们所产生的计算]]
+    - [[* 线性递归和迭代][线性递归和迭代]]
+    - [[* 树形递归][树形递归]]
+    - [[* 增长的阶][增长的阶]]
+    - [[* 求幂][求幂]]
+    - [[* 最大公约数][最大公约数]]
+    - [[* 素数检测][素数检测]]
+  - [[* 用高阶函数做抽象][用高阶函数做抽象]]
+    - [[* 过程作为参数][过程作为参数]]
+    - [[* 用lambda构造过程][用lambda构造过程]]
+      - [[* 用let创建局部变量][用let创建局部变量]]
+    - [[* 过程作为一般性的方法][过程作为一般性的方法]]
+      - [[* 通过区间折半寻找方程的根][通过区间折半寻找方程的根]]
+      - [[* 找出函数的不动点][找出函数的不动点]]
+    - [[* 过程作为返回值][过程作为返回值]]
+      - [[* 牛顿法][牛顿法]]
+      - [[* 抽象和第一级过程][抽象和第一级过程]]
+  - [[* 习题][习题]]
+- [[* 构造数据抽象][构造数据抽象]]
+  - [[* 数据抽象导引][数据抽象导引]]
+    - [[* 实例：有理数的算术运算][实例：有理数的算术运算]]
+      - [[* 序对][序对]]
+    - [[* 抽象屏障][抽象屏障]]
+    - [[* 数据意味着什么][数据意味着什么]]
+    - [[* 扩展练习：区间算术][扩展练习：区间算术]]
+  - [[* 层次性数据和闭包性质][层次性数据和闭包性质]]
+    - [[* 序列的表示][序列的表示]]
+      - [[* 表操作][表操作]]
+      - [[* 对表的映射][对表的映射]]
+    - [[* 层次性结构][层次性结构]]
+      - [[* 对树的映射][对树的映射]]
+    - [[* 序列作为一种约定的接口][序列作为一种约定的接口]]
+      - [[* 序列操作][序列操作]]
+      - [[* 嵌套映射][嵌套映射]]
+  - [[* 符号数据][符号数据]]
+    - [[* 引号][引号]]
+    - [[* 实例：符号求导][实例：符号求导]]
+      - [[* 对抽象数据的求导程序][对抽象数据的求导程序]]
+      - [[* 代数表达式的表示][代数表达式的表示]]
+    - [[* 实例：集合的表示][实例：集合的表示]]
+      - [[* 集合作为未排序的表][集合作为未排序的表]]
+      - [[* 有序表实现][有序表实现]]
+      - [[* 二叉树实现][二叉树实现]]
+      - [[* 实例：Huffman编码树][实例：Huffman编码树]]
+  - [[* 抽象数据的多重表示][抽象数据的多重表示]]
+    - [[* 复数的表示][复数的表示]]
+    - [[* 带标志的数据][带标志的数据]]
+    - [[* 数据导向的程序设计和可加性][数据导向的程序设计和可加性]]
+      - [[* 消息传递][消息传递]]
+  - [[* 带有通用型操作的系统][带有通用型操作的系统]]
+    - [[* 通用型算术运算][通用型算术运算]]
+    - [[* 不同类型数据的组合][不同类型数据的组合]]
+      - [[* 强制][强制]]
+      - [[* 类型的层次结构][类型的层次结构]]
+      - [[* 层次结构的不足][层次结构的不足]]
+    - [[* 实例：符号代数][实例：符号代数]]
+      - [[* 多项式算术][多项式算术]]
+      - [[* 项表的表示][项表的表示]]
+      - [[* 符号代数中类型的层次结构][符号代数中类型的层次结构]]
+      - [[* 扩充练习：有理函数][扩充练习：有理函数]]
+  - [[* 习题][习题]]
+- [[* Modularity, Objects, and State][Modularity, Objects, and State]]
+- [[* Metalinguistic Abstraction][Metalinguistic Abstraction]]
+- [[* Computing with Register Machines][Computing with Register Machines]]
 
 * 构造过程抽象
 
@@ -1831,9 +1907,6 @@ Huffamn树来实现。每个个体具有一个权重，权重越高，层级越�
 与此相关的还有 *数据导向* 的程序设计,这是一种用于构造采用了通用型操作
 的系统有力而且方便的技术.
 
-TODO 这时我们在抽象层次上看到的就是,与实现相关的接口会有两套,但是其上一层的
-接口
-
 *** 复数的表示
 很自然地,我们可以把一个复数通过有序对来表示.
   z=x+iy (i^2=-1) ==> (x, y)
@@ -2035,9 +2108,369 @@ make-from-real-imag产生的是一个内部过程，然后在 apply-generic反�
      例化才能使用新操作。
 
 ** 带有通用型操作的系统
+我们可以把有理数算术，复数算术以及常规算术合并起来，并只对外提供add等
+通用操作，使这一系统更具有可加性
+
+*** 通用型算术运算
+可以使用类似之前的数据导向的方法去定义通用型的算术过程
+#+BEGIN_SRC scheme
+  (define (add x y) (apply-generic 'add x y))
+  (define (sub x y) (apply-generic 'sub x y))
+  (define (mul x y) (apply-generic 'mul x y))
+  (define (div x y) (apply-generic 'div x y))
+
+  ;; 安装常规数，每个操作都有两个参数，所以用表(scheme-number scheme-number)
+  (define (install-scheme-number-package)
+    (define (tag x)
+      (attach-tag 'scheme-number x))
+    (put 'add '(scheme-number scheme-number)
+         (lambda (x y) (tag (+ x y))))
+    (put 'sub '(scheme-number scheme-number)
+         (lambda (x y) (tag (- x y))))
+    (put 'mul '(scheme-number scheme-number)
+         (lambda (x y) (tag (* x y))))
+    (put 'div '(scheme-number scheme-number)
+         (lambda (x y) (tag (/ x y))))
+    (put 'make 'scheme-number
+         (lambda (x) (tag x)))
+    'done)
+
+  (define (make-scheme-number n)
+    ((get 'make 'scheme-number) n))
 
 
+  ;; 安装有理数算术包
+  (define (install-retional-package)
+    (define (numer x) (car x))
+    (define (denom x) (cdr x))
+    (define (make-rat n d)
+      (let ((g (gcd n d)))
+        (cons (/ n g) (/ d g))))
+    (define (add-rat x y)
+      (make-rat (+ (* (numer x) (denom y))
+                   (* (numer y) (denom x)))
+                (* (denom x) (denom y))))
+    (define (sub-rat x y)
+      (make-rat (- (* (numer x) (denom y))
+                   (* (numer y) (denom x)))
+                (* (denom x) (denom y))))
+    (define (mul-rat x y)
+      (make-rat (* (numer x) (numer y))
+                (* (denom x) (denom y))))
+    (define (div-rat x y)
+      (make-rat (* (numer x) (denom y))
+                (* (denom x) (numer y))))
 
+    (define (tag x) (attach-tag 'retional x))
+    (put 'add '(rational rational)
+         (lambda (x y) (tag (add-rat x y))))
+    (put 'sub '(rational rational)
+         (lambda (x y) (tag (sub-rat x y))))
+    (put 'mul '(rational rational)
+         (lambda (x y) (tag (mul-rat x y))))
+    (put 'div '(rational rational)
+         (lambda (x y) (tag (div-rat x y))))
+
+    (put 'make 'rational
+         (lambda (n d) (tag (make-rat n d))))
+    'done)
+
+  (define (make-rational n d)
+    ((get 'make 'rational) n d))  
+
+  (define (install-rectangular-package)
+    (define (make-from-real-imag x y)
+      ((get 'make-from-real-imag 'rectangular) x y))
+    (define (make-from-mag-ang r a)
+      ((get 'make-from-mag-ang 'polar) r a))
+
+    ;; internal procefures
+    (define (add-complex z1 z2)
+      (make-from-real-imag (+ (real-part z1) (real-part z2))
+                           (+ (imag-part z1) (imag-part z2))))
+    (define (sub-complex z1 z2)
+      (make-from-real-imag (- (real-part z1) (real-part z2))
+                           (- (imag-part z1) (imag-part z2))))
+    (define (mul-complex z1 z2)
+      (make-from-mag-ang (* (magnitude z1) (magnitude z2))
+                         (+ (angle z1) (angle z2))))
+    (define (div-complex z1 z2)
+      (make-from-mag-ang (/ (magnitude z1) (magnitude z2))
+                         (- (angle z1) (angle z2))))
+
+    (define (tag x) (attach-tag 'complex x))
+    (put 'add '(complex complex)
+         (lambda (x y) (tag (add-complex x y))))
+    (put 'sub '(complex complex)
+         (lambda (x y) (tag (sub-complex x y))))
+    (put 'mul '(complex complex)
+         (lambda (x y) (tag (mul-complex x y))))
+    (put 'div '(complex complex)
+         (lambda (x y) (tag (div-complex x y))))
+    (put 'make-from-real-imag 'complex
+         (lambda (x y) (tag (make-from-real-imag x y))))
+    (put 'make-from-mag-ang 'complex
+         (lambda (x y) (tag (make-from-mag-ang x y))))
+  'done)
+
+  (define (make-complex-from-real-imag x y)
+    ((get 'make-from-real-imag 'complex) x y))
+  (define (make-complex-from-mag-ang r a)
+    ((get 'make-from-mag-ang 'complex) r a))
+#+END_SRC
+注意到复数系统具有两层标志 内层rectangular， 外层complex
+
+*** 不同类型数据的组合
+在之前的例子中，我们把不同类型的数据看作是完全互相分离的东西，但有时候
+我们需要对一个常规数加上一个有理数，即，存在 *需要跨越类型的操作* ,我
+们需要可控地去做这件事，在支持这种操作同时避免严重损害模块性。
+
+我们可以针对每种类型组合定义相应的操作（注意，此时标志顺序敏感），然后
+安装到表格里。
+#+BEGIN_SRC scheme
+  (define (add-complex-to-scheme z x)
+    (make-from-real-imag (+ (real-part z) x)
+                         (imag-part z)))
+
+  (put 'add '(complex scheme-number)
+       (lambda (z x) (tag (add-complex-to-scheme z x))))
+#+END_SRC
+
+但其缺点也很明显，
+1. 组合相当地多，每引入一个新类型，都要构造所有实现跨类型操作的过程
+2. 跨类型操作所需要的代码很容易就超过了定义类型本身所需要的那些操作
+3. 损害了独立开发模块的能力
+
+**** 强制
+如果需要处理针对一批完全无关的类型的一批完全无关的操作，直接实现跨类型
+操作也许就是最好的方式，并且我们可以一些技巧做一些简化。
+
+*强制* -- 如果一种类型的对象可以看作是另一个类型的对象，则我们可以定
+义一种过程，把一个类型的对象转换到另一类型的等价对象。例如，把常规数看
+作是特殊的有理数。但表格有一部分是可能为空的，因为不一定所有的类型组合
+操作都有意义。
+#+BEGIN_SRC scheme
+  (define (scheme-number->complex n)
+    (make-complex-from-real-imag (contents n) 0))
+
+  (put-corecion 'scheme-number 'complex scheme-number->complex)
+#+END_SRC
+
+存在一种转换过程之后，我们就可以在应用 apply-generic 过程时，自行判断
+该类型是否可以转换以便找到适用的操作。
+#+BEGIN_SRC scheme
+  (define (apply-generic op . args)
+    (let ((type-tags (map type-tag args)))
+      (let ((proc (get op type-tags)))
+        (if proc
+            (apply proc (map contents args))
+            (if (= (length args) 2)
+                (let ((type1 (car type-tags))
+                      (type2 (cadr type-tags))
+                      (a1 (car args))
+                      (a2 (cadr args)))
+                  (let ((t1->t2 (get-coercion type1 type2))
+                        (t2->t1 (get-coercion type2 type1)))
+                    (consd (t1->t2
+                            (apply-generic op (t1->t2 a1) a2))
+                           (t2->t1
+                            (apply-generic op a1 (t2->t1 a2)))
+                           (else
+                            (error "No method for these tyeps"
+                                   (list op type-tags))))))
+                (error "No method for these typesf"
+                       (list op type-tags)))))))
+#+END_SRC
+
+与显示定义跨类型操作相比，这种利用强制的方式仅需要为每一对类型写一个转
+换操作（有需要的话，甚至可以在系统中实现从类型图中寻找出转换链）。这存
+在一个提前， *类型间的转换只依赖于类型本身，与实际应用的操作无关*
+
+**** 类型的层次结构
+强制模式要求一对类型之间存在某种自然的关系，而实际中，还它们之间常常还
+存在着更“全局性”的结构。
+
+例如，在之前的系统中其实存在以下 *类型的层次结构* 
+  整数 => 有理数 => 实数 => 复数
+
+*超类型* 和 *子类型* 构成了一个类型树，此时，加入一个新类型就可以简化
+为 *刻画该类型如何嵌入它的超类型，以及如何作为下面一个类型的超类型*
+然后不同类型间的操作就都可以通过向上转换到相同的超类型来实现。
+
+类型树的另一个优点在于，我们很容易就实现出一种概念：
+*每一种类型都可以”继承“其超类型中定义的所有操作*
+我们可以把apply-generic改为，当所给类型没有定义对应的操作时，就把这种
+类型提升为它的超类型，直至找到定义或者到根报错。
+
+另外，我们也可以在适当时候把一个对象”下降“，使之达到最简形式。如2+3i和
+4-3i的加法，其结果可以下降为一个整数6
+
+**** 层次结构的不足
+有时候类型的关系不单单是一棵树，而是一个图，即一个类型可能存在多于一个
+的超类型。此时不存在一种唯一的方式去提升一个特定的类型。当我们需要将一
+个操作应用于一个对象时，为些而找出”正确“的超类型的工作(applyl-generic)
+可能就涉及了对整个类型网络的大范围搜索。
+处理大型系统时，处理好一大批相互有关的类型的同时又能保持模块性，这是一
+个非常困难的问题，也是一直以来的一个研究领域。
+
+
+*** 实例：符号代数
+一般来说，一个代数表达式可以看作是一种层次结构，它是将去运算符作用于一
+些运算对象而形成的一棵树
+
+**** 多项式算术
+为简单起见，把多项式限制为只有一个未定元的情况，而每个项的系数可以是另
+一个未定元的多项式。
+如 (y^2+1)x^3 + (2y)x +1 是x的一个多项式，而其参数又是y的多项式。根据
+数据抽象的方式开始设计这个系统
+#+BEGIN_SRC scheme
+  (define (install-polynomial-package)
+    ;; internal procedures
+    ;; representation of poly
+    (define (make-poly variable term-list)
+      (cons variable term-list))
+    (define (variable p) (car p))
+    (define (term-list p) (cdr p))
+    (define (variable? x) (symbol? x))
+    (define (same-variable? v1 v2)
+      (and (variable? v1)
+           (variable? v2)
+           (eq? v1 v2)))
+    (define (=number? exp num)
+      (and (number? exp)
+           (= exp num)))
+
+    ;; representation of terms and term lists
+    (define (add-poly p1 p2)
+      (if (same-variable? (variable p1) (variable p2))
+          (make-poly (variable p1)
+                     (add-term (term-list p1)
+                               (term-list p2)))
+          (error "Polys not in same var -- ADD-POLY"
+                 (list p1 p2))))
+
+    (define (mul-poly p1 p2)
+      (if (same-variable? (variable p1) (variable p2))
+          (make-poly (variable p1)
+                     (mul-term (term-list p1)
+                               (term-list p2)))
+          (error "Polys not in same var -- MUL-POLY"
+                 (list p1 p2))))
+
+    ;; interface to rest of the system
+    (define (tag p) (attach-tag 'polynomial p))
+    (put 'add '(polynomial polynomial)
+         (lambda (p1 p2) (tag (add-poly p1 p2))))
+    (put 'mul '(polynomial polynomial)
+         (lambda (p1 p2) (tag (mul-poly p1 p2))))
+    (put 'make 'polynomial
+         (lambda (var terms) (tag (make-poly var terms))))
+    'done)
+#+END_SRC
+
+为了处理表项（加法中需要把同次的项相加），我们还需要其他专门的过程。
+#+BEGIN_SRC scheme
+  ;; 通过以下操作把项和项表都看成数据抽象
+  ;; adjoin-term 把一个新项加入到一个项表里
+  ;; the-empty-termlist 返回空表项
+  ;; empty-termlist? 检查表项是否为空
+  ;; first-term 提取表项中的最高次的项
+  ;; rest-terms 返回除最高次项外的其他项表
+  ;; order 返回项的次数
+  ;; coeff 返回项的系数
+
+  (define (add-terms l1 l2)
+    (cond ((empty-termlist? l1) l2)
+          ((empty-termlist? l2) l1)
+          (else
+           (let ((t1 (first-term l1)) (t2 (first-term l2)))
+             (cond ((> (order t1) (order t2))
+                    (adjoin-term
+                     t1 (add-term (rest-terms l1) l2)))
+                   ((< (order t1) (order t2))
+                    (adjoin-term
+                     t2 (add-term l1 (rest-terms l2))))
+                   (else
+                    (adjoin-term
+                     (make-term (order t1)
+                                (add (coeff t1) (coeff t2)))
+                     (add-terms (rest-terms l1)
+                                (rest-terms l2)))))))))
+
+  (define (mul-terms l1 l2)
+    (if (empty-termlist? l1)
+        (the-empty-termlist)
+        (add-terms (mul-term-by-all-terms (first-term l1) l2)
+                   (mul-terms (rest-terms l1) l2))))
+
+  (define (mul-term-by-all-terms t1 l)
+    (if (empty-termlist? l)
+        (the-empty-termlist)
+        (let ((t2 (first-term l)))
+          (adjoin-term
+           (make-term (+ (order t1) (order t2))
+                      (mul (coeff t1) (coeff t2)))
+           (mul-term-by-all-terms t1 (rest-term l))))))
+#+END_SRC
+
+由于使用了通用的add和mul过程,如果我们还把之前的强制机制也包括进来,那么
+这里也就有了自动处理不同系数类型的多项式的能力.
+另外,由于多项式的add-poly和mul-poly安装进通用自算术系统的add和mul操作
+里,则得系统还可以处理以多项式为系数的多项式 (需要添加额外的强制--把2x
+看作是(2*y^0)x).
+
+**** 项表的表示
+最后我们需要为项表实现一种很好的表示形式. 从作用上可以看作是系数的集合.
+因此,我们可以用之前介绍的表示集合的方法.
+由于add-terms和mul-terms都以顺序的方式进行访问,最好 *采用某种有序表表
+示*.
+
+显然,对于稠密的项表而言,(1 2 0 3 -2 -5)之类方法可以很方便地表示--每项
+对应的次数为该项开始的子表的长度减一.但如果项表是稀疏的,则这种表示会包
+含太多没用的0,此时可以用((100 1) (2 2) (0 1))来表示,子表中的前一项为项
+数,后一项为系数
+#+BEGIN_SRC scheme
+  (define (adjoin-term term term-list)
+    (if (=zero? (coeff term)) ; 2-80 
+        term-list
+        (cons term term-list)))
+  ;; 虽然这里是用简单的cons连接项表.但只要所有调用adjoin-term的过程(如add-terms)
+  ;; 都保证term的次数大于表中所有项,则项表仍是有序的.
+
+  (define (the-empty-termlist) '())
+  (define (first-term term-list) (car term-list))
+  (define (rest-terms term-list) (cdr term-list))
+  (define (empty-termlist? term-list) (null? term-list))
+
+  (define (make-term order coeff) (list order coeff))
+  (define (order term) (car term))
+  (define (coeff term) (cdr term))
+
+  (define (make-polynomial var terms)
+    ((get 'make 'polynomial) var terms))
+#+END_SRC
+
+**** 符号代数中类型的层次结构
+我们的多项式系统显示出, 一种类型(多项式)的对象事实上可以是一个复杂的对
+象,又以许多不同类型的对象作为其组成部分
+利用 *通用型操作* 及 *数据导向* 的程序设计风格,我们可以看到多项式形成
+一类 *递归数据抽象* , 以较为简单的方式就处理好复杂性.
+
+但另一方面,注意到多项式并 *不能自然地安排到类型塔里* . 因为,一个多项式
+中可能混杂了多个变元.例如,有一个以x为变元的多项式(其系数为以y为变元的
+多项式),而另一个则刚好相反, 这时需要进行"转换"才能对它们进行相加.
+
+一种可能是,把其中一个多项式强制为另一个多项式
+另外就是,定义类型塔,总把多项式变换为以较高优先级的变元表示.
+
+无论哪种,都需要通过展开并重新安排多项式里的项,使其更难读,也可能操作起
+来的效率更低.
+
+当用户可以动态地通过已有类型的各种组合形式引进新类型时,类塔策略常常显
+得不太合适.
+
+**** 扩充练习：有理函数
+TODO
 ** 习题
 - 2.1 :: 写出更好的make-rat过程,使其可以正确处理正负数,负负应显示为正,
      仅一个正时,应显示在分子上.
@@ -2078,7 +2511,7 @@ make-from-real-imag产生的是一个内部过程，然后在 apply-generic反�
 
      递归时，cons总是推迟执行，所以是从最后一个开始组合，与迭代是相反
      的。如果交换cons参数，则表的各个元素的指针不对。
-
+          
 - 2.23 :: 过程for-each与map类似，它有一个过程和表参数，但返回的是将这
      一过程从左到右应用于各个元素，并将值都丢掉。用于执行动作的过程，
      如打印。请给出定义
@@ -2197,7 +2630,7 @@ make-from-real-imag产生的是一个内部过程，然后在 apply-generic反�
 - 2.40 :: 定义过程unique-pair，对给定的整数n，输出序对i，j，其中1<＝
      i<j<=n,用这个过程去简化prime-sum-pairs的定义
      [[file:sicp_scms/2.40.scm][file:~/Dropbox/notes/sicp_scms/2.40.scm]]
-
+          
 - 2.41 :: 八皇后问题
      [[file:sicp_scms/2.41.scm][file:~/Dropbox/notes/sicp_scms/2.41.scm]]
 
@@ -2415,7 +2848,357 @@ make-from-real-imag产生的是一个内部过程，然后在 apply-generic反�
   3. find-employee-record
   4. 如何增加新部门
 
+- 2.77 :: 此时直接求值(magnitude z)会报错，因为complex并没有相应的
+     magnitude操作。必须要执行语句 (put 'magnitude '(complex)
+     magnitude) 才能执行，求值过程。
+     #+BEGIN_SRC scheme
+       (magnitude z)                                                   ; 这个 magnitude 是最外层的通用操作
+       (apply-generic 'magnitude z)
+       (map type-tag (list z))                                         ; => '(complex)
+       (get 'magnitude '(complex))                                     ; => magnitude  ; 这个 magnitude 是定义于 complex 包中的 magnitude
+       (apply magnitude (map contents (list z)))                       ; =>  (apply magnitude '((rectangular 3 . 4)))
+       (magnitude '(rectangular 3 . 4))
+       (apply-generic 'magnitude '(rectangular 3 . 4))
+       (map type-tag (list '(rectangular 3 . 4)))                      ; => '(rectangular)
+       (get 'magnitude '(rectangular))                                 ; => magnitude  ; 这个 magnitude 是定义于 rectangular 包中的 magnitude
+       (apply magnitude (map contents (list '(rectangular 3 . 4))))    ; => (apply magnitude '((3 . 4)))
+       (magnitude '(3 . 4))
+       (sqrt (+ (square (real-part '(3 . 4)))
+                (square (imag-part '(3 . 4)))))
+       5
+     #+END_SRC
 
+- 2.78 :: scheme-number使用了自己的类型标志，而实际上，scheme已经有实
+     现标志了。symbol? 和number?等就用于确定某个数据对象是否具胡特定的
+     类型。请修改type-tag,contents,attach-tag过程，使常规数直接采用
+     scheme的形式，而不是表示为('scheme-number z)
+
+     #+BEGIN_SRC scheme
+       (define (contents datum)
+         (cond ((number? datum)
+                datum)
+               ((pair? datum)
+                (cdr datum))
+               (else
+                (error "Bad tagged datum -- CONTENT" datum))))
+       (define (type-tag datum)
+         (cond ((number? datum)
+                'scheme-number)
+               ((pair? datum)
+                (car datum))
+               (else
+                (error "Bad tagged datum -- TYPE-TAG" datum))))
+       (define (attach-tag type-tag contents)
+         (if (number? contents)
+             contents
+             (cons type-tag contents)))
+     #+END_SRC
+
+- 2.79 2.80 :: 定义一个通用型equ?判断给定的两个数是否相等,一个通用的谓词
+     =zero?检查参数是否为0
+     #+BEGIN_SRC scheme
+       (define (equ? z1 z2)
+         (apply-generic 'equ? z1 z2))
+       (define (=zero? x)
+         (apply-generic '=zero? x))
+
+       (define (install-scheme-number-package)
+         (put 'equ? '(scheme-number scheme-number)
+              (lambda (x y) (= x y)))
+         (put '=zero? '(scheme-number)
+              (lambda (x) (= 0)))
+         )
+
+       (define (install-rational-package)
+         (put 'equ? '(rational rational)
+              (lambda (x y) (and (= (numer x) (numer y))
+                                 (= (demon x) (demon y)))))
+         (put '=zero? '(rational)
+              (lambda (x) (= 0 (numer x))))
+         )
+
+       (define (install-complex-package)
+         (put 'equ? '(complex complex)
+              (lambda (x y) (and (= (real-part x) (real-part y))
+                                 (= (imag-part x) (imag-part y)))))
+         (put '=zero? '(complex)
+              (lambda (x) (= 0 (magnitude x))))
+         )
+     #+END_SRC
+
+- 2.82 :: 修改apply-generic过程，使其可以处理多个参数下的强制问题。一
+     种可能的策略是试着将所有参数都强制到第一个参数的类型，然后试第二
+     个，如此类推。但这种策略还不够一般，请给出一个例子。
+     [[file:sicp_scms/2.82.scm][file:~/Dropbox/notes/sicp_scms/2.82.scm]]
+
+- 2.83 :: 为符号树设计通用的raise操作.
+     #+BEGIN_SRC scheme
+       (define (raise x) (apply-generic 'raise x))
+
+       ;; add into scheme-number package 
+       (put 'raise '(integer)  
+            (lambda (x) (make-rational x 1))) 
+
+       ;; add into rational package 
+       (put 'raise '(rational) 
+            (lambda (x) (make-real (/ (numer x) (denom x))))) 
+
+       ;; add into real package 
+       (put 'raise '(real) 
+            (lambda (x) (make-from-real-imag x 0))) 
+     #+END_SRC
+
+- 2.84 :: 利用raise操作,修改apply-generic过程,使其可以通过逐层提升的方
+     式将参数强制到同样的类型
+     #+BEGIN_SRC scheme
+       (define (apply-generic op . args)
+         (let ((type-tags (map type-tag args)))
+           (let ((proc (get op type-tags)))
+             (if proc
+                 (apply proc (map contents args))
+                 (if (= (length args) 2)
+                     (let ((a1 (car args))
+                           (a2 (cadr args)))
+                       (apply apply-generic
+                              (append (list op)
+                                      (if (eq? (type-tag a1)
+                                               (type-tag a2))
+                                          (map raise args)
+                                          (raise-to-same a1 a2)))))
+                     (error "No method for these types"
+                            (list op type-tags)))))))
+
+       (define (raise-to-same a1 a2)
+         (let ((type1 (type-tag a1))
+               (type2 (type-tag a2)))
+           (if (eq? type1 type2)
+               (list a1 a2)
+               (cond ((is-super? a1 a2)
+                      (raise-to-same a1 (raise a2)))
+                     ((is-super? a2 a1)
+                      (raise-to-same (raise a1) a2))
+                     (else
+                      (error "No raise apply for"
+                             (list type1 type2)))))))
+
+       (define (is-super? super sub)
+         (memq (type-tag super) (type-inheritance sub)))
+
+       (define (type-inheritance a)
+         (let ((type (type-tag a)))
+           (if (get 'raise (list type))
+               (cons (type-tag a)
+                     (type-inheritance (raise a)))
+               (list type))))
+
+       ;; ------------------------
+       ;; apply-generic with all kind of arg number
+
+       (define (apply-generic op . args)
+         (let ((type-tags (map type-tag args)))
+           (let ((proc (get op type-tags)))
+             (if proc
+                 (apply proc (map contents args))
+                 (apply apply-generic
+                        (append (list op)
+                                (if (all-the-same? type-tags)
+                                    (map raise args)
+                                    (raise-to-same args))))))))
+
+       (define (all-the-same? items)
+         (every (lambda (x) (eq? x (car items)))
+                items))
+
+       (define (find-common-type args)
+         (list-ref (reverse (type-inheritance (car args)))
+                   (- (apply min
+                           (map (lambda (x)
+                                  (length (type-inheritance x)))
+                                args))
+                      1)))
+
+       (define (raise-to-same args)
+         (let ((type (find-common-type args)))
+           (map (lambda (x)
+                  (raise-into x type))
+                args)))
+
+       (raise-to-same (list (make-complex-from-mag-ang 4 0)
+                            (make-scheme-number 4)))
+
+       (define (raise-into obj type)
+         (cond ((eq? type (type-tag obj)) obj)
+               ((get 'raise (list (type-tag obj)))
+                (raise-into (raise obj) type))
+               (else (error "cannot raise" (list obj 'into type)))))
+
+       (equ? (make-complex-from-mag-ang 4 0)
+             (make-scheme-number 4))
+       (real-part (make-scheme-number 4))
+     #+END_SRC
+
+- 2.85 :: 设计一个drop过程，使其可以通过下降来”简化“一个数据对象.
+     我们可以通过先对一个对象project然后再raise它，看它的值是否跟原来
+     一致，从而判断其是否可以下降。
+     #+BEGIN_SRC scheme
+       (define (apply-generic op . args)
+         (let ((type-tags (map type-tag args)))
+           (let ((proc (get op type-tags)))
+             (if proc
+                 (let ((result (apply proc (map contents args))))
+                   (if (memq op '(raise)) ; 如果是有意提升，不要drop
+                       result
+                       (drop result)))
+                 (apply apply-generic
+                        (append (list op)
+                                (if (all-the-same? type-tags)
+                                    (map raise args)
+                                    (raise-to-same args))))))))
+       (define (project x) (apply-generic 'project x))
+       (define (drop x)
+         (if (and (pair? x) ; 仅当是特殊数据的时候才考虑drop
+                  (get 'project (list (type-tag x)))
+                  (equ? (raise (project x)) x))
+             (drop (project x))
+             x))
+
+       (add (make-complex-from-real-imag 4 0)
+            (make-rational 2 1))
+     #+END_SRC
+
+- 2.86 :: 假如定义复数的实部，虚部，角，幅都是由常规数或有理数或是其他
+     我们加入系统中的新类型组成的，我们应该如何修改。注意sine和cosine
+     一类计算也要定义成在这些类型上的通用计算
+     #+BEGIN_SRC scheme
+       (define (sine x) (apply-generic 'sine x)) 
+        (define (cosine x) (apply-generic 'cosine x)) 
+  
+        ;; add into scheme-number package 
+        (put 'sine 'scheme-number 
+             (lambda (x) (tag (sin x)))) 
+        (put 'cosine 'scheme-number 
+             (lambda (x) (tag (cos x)))) 
+  
+        ;; add into rational package 
+        (put 'sine 'rational 
+             (lambda (x) (tag (sin x)))) 
+        (put 'cosine 'rational 
+             (lambda (x) (tag (cos x)))) 
+  
+        ;; To accomodate generic number in the complex package,  
+        ;; we should replace operators such as + , * with theirs 
+        ;; generic counterparts add, mul. 
+
+     #+END_SRC
+
+
+- 2.87 :: 请在通用算术包中为多项式安装=zero?,这将使adjoin-term也能对系
+          数本身是多项式的多项式使用
+          [[file:SICP.org::*%E4%B9%A0%E9%A2%98][2.80]]
+          #+BEGIN_SRC scheme
+            (define (install-polynomial-package)
+              ;; ......
+              (put '=zero? 'polynomial
+                   (lambda (p)
+                     ;;  map a empty-term-list will return '(), every a '() will still return #t
+                     (every =zero? (map cdr (term-list p))))) ;; 仅能对parse的term-list使用
+              ;; ......
+              )
+
+            (define (=zero? x) (apply-generic '=zero? x))
+          #+END_SRC
+
+- 2.88 :: 扩充多项式系统,加上多项式的减法
+          #+BEGIN_SRC scheme
+            (define (install-polynomial-package)
+            ;; ......
+
+              (define (sub-poly p1 p2)
+                (add-poly p1 (minus p2)))
+
+              (define (minus p)
+                (map (lambda (term)
+                       (make-term (order term)
+                                  (let ((coe (coeff term)))
+                                    (if (poly? coe)
+                                        (minus coe)
+                                        (sub (make-scheme-number 0) coe)))))
+                     (term-list p)))
+
+              (define (poly? p)
+                (and (pair? p)
+                     (equal? 'polynomial
+                             (type-tag p))))
+
+              (put 'sub '(polynomial polynomial)
+                   (lambda (p1 p2) (tag (sub-poly p1 p2))))
+             ;; ......
+            )
+
+
+          #+END_SRC
+
+- 2.89 :: 定义一些过程使其适应稠密的多项式
+          #+BEGIN_SRC scheme
+            (define (adjoin-term term term-list) 
+              (let ((exponent (order term)) 
+                    (len (length term-list))) 
+                (define (iter-adjoin times terms) 
+                  (cond ((=zero? (coeff term)) 
+                         terms)) 
+                  ((= exponent times) 
+                   (cons (coeff term) terms)) 
+                  (else (iter-adjoin (+ times 1)  
+                                     (cons 0 terms)))) 
+                (iter-adjoin len term-list)))
+
+            (define (first-term term-list)
+              (cons (- (length term-list) 1)
+                    (car term-list)))
+          #+END_SRC
+
+- 2.90 :: 模仿复数的两种实现方式,使用两种方式来分别表示稠密和稀疏的多
+          项式.
+          [[file:sicp_scms/2.90.scm][2.90.scm]]
+
+- 2.91 :: 多项式的除法可以看作是,用被除式的最高次项除以除式的最高次项,
+          得到的则是商的每一项,而后用这个结果乘以除式,并从被除式中减去
+          这个乘积,剩下的工作就是用减后得到的差作为新的被除式,直到被除
+          式的最高次数低于除式的最高次.此时被除式就是余式.
+          #+BEGIN_SRC scheme
+            (define (div-terms l1 l2)
+              (if (empty-termlist? l1)
+                  (list (the-empty-termlist) (the-empty-termlist))
+                  (let ((t1 (first-term l1))
+                        (t2 (first-term l2)))
+                    (if (> (order t2) (order t1))
+                        (list (the-empty-termlist) l1)
+                        (let ((new-c (div (coeff t1) (coeff t2)))
+                              (new-o (- (order t1) (order t2))))
+                          (let ((rest-of-result
+                                 (div-terms (sub-terms l1
+                                                       (mul-terms l2
+                                                                  (make-parse-terms
+                                                                   (make-term new-o new-c))))
+                                            l2)
+                                 ))
+                            (list (adjoin-term (make-term new-o new-c)
+                                               (car rest-of-result))
+                                  (cdr rest-of-result))))))))
+          #+END_SRC
+
+
+
+
+   
+
+
+
+     
+
+     
+
+     
 * Modularity, Objects, and State
 * Metalinguistic Abstraction
 * Computing with Register Machines
