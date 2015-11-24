@@ -1,116 +1,128 @@
 * Index
-- [[* Shell][Shell]]
-  - [[* Random select item from list][Random select item from list]]
-  - [[* Array][Array]]
-  - [[* [[ (( {} ))][[[ (( {} ))]]
-    - [[* [][[]]
-    - [[* [[][[[]]
-  - [[* declare][declare]]
-  - [[* Shell Style Guide][Shell Style Guide]]
-    - [[* Background][Background]]
-      - [[* Which Shell to Use][Which Shell to Use]]
-      - [[* When to use Shell][When to use Shell]]
-      - [[* TODO what using "set" means?][TODO what using "set" means?]]
-    - [[* Shell Files and Interpreter Invocation][Shell Files and Interpreter Invocation]]
-      - [[* File Extensions][File Extensions]]
-      - [[* SUID/SGID][SUID/SGID]]
-    - [[* Environment][Environment]]
-      - [[* STDOUT vs STDERR][STDOUT vs STDERR]]
-    - [[* Comments][Comments]]
-      - [[* File Header][File Header]]
-      - [[* Function Comments][Function Comments]]
-      - [[* Implementation Comments][Implementation Comments]]
-      - [[* TODO Comments][TODO Comments]]
-    - [[* Formatting][Formatting]]
-      - [[* Indentation][Indentation]]
-      - [[* Line Length and Long String][Line Length and Long String]]
-      - [[* Pipelines][Pipelines]]
-      - [[* Loops][Loops]]
-      - [[* Case statement][Case statement]]
-      - [[* Variable expansion][Variable expansion]]
-      - [[* Quoting][Quoting]]
-    - [[* Features and Bugs][Features and Bugs]]
-      - [[* Command Substitution][Command Substitution]]
-      - [[* Test, [ and [[][Test, [ and [[]]
-      - [[* Testing Strings][Testing Strings]]
-      - [[* Wildcard Expansion of Filename][Wildcard Expansion of Filename]]
-      - [[* Eval][Eval]]
-      - [[* Pipes to While][Pipes to While]]
-    - [[* Naming Conventions][Naming Conventions]]
-      - [[* Function Names][Function Names]]
-      - [[* Variable Names][Variable Names]]
-      - [[* Constants and Environment Variable Names][Constants and Environment Variable Names]]
-      - [[* Source Filenames][Source Filenames]]
-      - [[* Read-only Variables][Read-only Variables]]
-      - [[* Use Local Variables][Use Local Variables]]
-      - [[* Function Location][Function Location]]
-      - [[* main][main]]
-    - [[* Calling Commands][Calling Commands]]
-      - [[* Checking Return Values][Checking Return Values]]
-      - [[* Builtin Commands vs. External Commands][Builtin Commands vs. External Commands]]
-  - [[* getopts][getopts]]
-  - [[* shift, select][shift, select]]
-  - [[* Define function][Define function]]
-  - [[* Avoid using which][Avoid using which]]
-  - [[* variable][variable]]
-  - [[* Case statement][Case statement]]
-- [[* Command][Command]]
-  - [[* Redirect][Redirect]]
-  - [[* Dump][Dump]]
-  - [[* find][find]]
-    - [[* filter path][filter path]]
-    - [[* exec][exec]]
-  - [[* awk][awk]]
-    - [[* 转置行列][转置行列]]
-    - [[* Invoke][Invoke]]
-    - [[* Variable][Variable]]
-      - [[* 传递][传递]]
-      - [[* 转换][转换]]
-    - [[* Array][Array]]
-    - [[* Function][Function]]
-    - [[* System Call][System Call]]
-    - [[* Debug][Debug]]
-  - [[* sort][sort]]
-  - [[* crontab][crontab]]
-  - [[* iptables][iptables]]
-- [[* Tools][Tools]]
-  - [[* LVM][LVM]]
-- [[* Configure][Configure]]
-- [[* Emacs][Emacs]]
-  - [[* ibuffer][ibuffer]]
-  - [[* ido][ido]]
-  - [[* toggle white space highlight][toggle white space highlight]]
-  - [[* Register][Register]]
-  - [[* XML][XML]]
-    - [[* validate][validate]]
-    - [[* outline][outline]]
-  - [[* Helm][Helm]]
-- [[* Utility script][Utility script]]
-  - [[* calculate ic host][calculate ic host]]
-  - [[* Filter out ERROR log][Filter out ERROR log]]
-  - [[* Count Fglam][Count Fglam]]
-  - [[* Calculate database size from sql][Calculate database size from sql]]
-  - [[* sort latency for a given address list][sort latency for a given address list]]
-  - [[* Filter result of countertyep][Filter result of countertyep]]
-- [[* Others][Others]]
-  - [[* Copy partition][Copy partition]]
-  - [[* Mount a vdi file][Mount a vdi file]]
-  - [[* route particular package to different interface][route particular package to different interface]]
-- [[* Java][Java]]
-  - [[* Log4j][Log4j]]
-    - [[* Architecture][Architecture]]
-    - [[* Configuration][Configuration]]
-      - [[* 读取文件][读取文件]]
-      - [[* 配置继承][配置继承]]
-      - [[* 自动读新配置][自动读新配置]]
-      - [[* Advertising appender][Advertising appender]]
-      - [[* 配置logger][配置logger]]
-    - [[* Web 应用][Web 应用]]
-    - [[* Lookups][Lookups]]
-    - [[* Filters][Filters]]
-    - [[* Appenders][Appenders]]
-    - [[* Layouts][Layouts]]
-    - [[* JMX][JMX]]
+- [[#Shell][Shell]]
+  - [[#Random select item from list][Random select item from list]]
+  - [[#map][map]]
+  - [[#Array][Array]]
+  - [[#[[ (( {} ))][[[ (( {} ))]]
+    - [[#[][[]]
+    - [[#[[][[[]]
+  - [[#declare][declare]]
+  - [[#Shell Style Guide][Shell Style Guide]]
+    - [[#Background][Background]]
+      - [[#Which Shell to Use][Which Shell to Use]]
+      - [[#When to use Shell][When to use Shell]]
+      - [[#TODO what using "set" means?][TODO what using "set" means?]]
+    - [[#Shell Files and Interpreter Invocation][Shell Files and Interpreter Invocation]]
+      - [[#File Extensions][File Extensions]]
+      - [[#SUID/SGID][SUID/SGID]]
+    - [[#Environment][Environment]]
+      - [[#STDOUT vs STDERR][STDOUT vs STDERR]]
+    - [[#Comments][Comments]]
+      - [[#File Header][File Header]]
+      - [[#Function Comments][Function Comments]]
+      - [[#Implementation Comments][Implementation Comments]]
+      - [[#TODO Comments][TODO Comments]]
+    - [[#Formatting][Formatting]]
+      - [[#Indentation][Indentation]]
+      - [[#Line Length and Long String][Line Length and Long String]]
+      - [[#Pipelines][Pipelines]]
+      - [[#Loops][Loops]]
+      - [[#Case statement][Case statement]]
+      - [[#Variable expansion][Variable expansion]]
+      - [[#Quoting][Quoting]]
+    - [[#Features and Bugs][Features and Bugs]]
+      - [[#Command Substitution][Command Substitution]]
+      - [[#Test, [ and [[][Test, [ and [[]]
+      - [[#Testing Strings][Testing Strings]]
+      - [[#Wildcard Expansion of Filename][Wildcard Expansion of Filename]]
+      - [[#Eval][Eval]]
+      - [[#Pipes to While][Pipes to While]]
+    - [[#Naming Conventions][Naming Conventions]]
+      - [[#Function Names][Function Names]]
+      - [[#Variable Names][Variable Names]]
+      - [[#Constants and Environment Variable Names][Constants and Environment Variable Names]]
+      - [[#Source Filenames][Source Filenames]]
+      - [[#Read-only Variables][Read-only Variables]]
+      - [[#Use Local Variables][Use Local Variables]]
+      - [[#Function Location][Function Location]]
+      - [[#main][main]]
+    - [[#Calling Commands][Calling Commands]]
+      - [[#Checking Return Values][Checking Return Values]]
+      - [[#Builtin Commands vs. External Commands][Builtin Commands vs. External Commands]]
+  - [[#getopts][getopts]]
+  - [[#shift, select][shift, select]]
+  - [[#Define function][Define function]]
+  - [[#Avoid using which][Avoid using which]]
+  - [[#variable][variable]]
+  - [[#Case statement][Case statement]]
+- [[#Command][Command]]
+  - [[#Redirect][Redirect]]
+  - [[#Dump][Dump]]
+  - [[#find][find]]
+    - [[#filter path][filter path]]
+    - [[#exec][exec]]
+  - [[#awk][awk]]
+    - [[#转置行列][转置行列]]
+    - [[#Invoke][Invoke]]
+    - [[#Variable][Variable]]
+      - [[#传递][传递]]
+      - [[#转换][转换]]
+    - [[#Array][Array]]
+    - [[#Function][Function]]
+    - [[#System Call][System Call]]
+    - [[#Debug][Debug]]
+  - [[#sort][sort]]
+  - [[#crontab][crontab]]
+  - [[#iptables][iptables]]
+- [[#Tools][Tools]]
+  - [[#LVM][LVM]]
+- [[#Configure][Configure]]
+- [[#Emacs][Emacs]]
+  - [[#ibuffer][ibuffer]]
+  - [[#ido][ido]]
+  - [[#toggle white space highlight][toggle white space highlight]]
+  - [[#Register][Register]]
+  - [[#XML][XML]]
+    - [[#validate][validate]]
+    - [[#outline][outline]]
+  - [[#Helm][Helm]]
+- [[#Utility script][Utility script]]
+  - [[#calculate ic host][calculate ic host]]
+  - [[#Filter out ERROR log][Filter out ERROR log]]
+  - [[#Count Fglam][Count Fglam]]
+  - [[#Calculate database size from sql][Calculate database size from sql]]
+  - [[#sort latency for a given address list][sort latency for a given address list]]
+  - [[#Filter result of countertyep][Filter result of countertyep]]
+- [[#Others][Others]]
+  - [[#Copy partition][Copy partition]]
+  - [[#Mount a vdi file][Mount a vdi file]]
+  - [[#route particular package to different interface][route particular package to different interface]]
+- [[#Java][Java]]
+  - [[#Log4j][Log4j]]
+    - [[#Architecture][Architecture]]
+    - [[#Configuration][Configuration]]
+      - [[#读取文件][读取文件]]
+      - [[#配置继承][配置继承]]
+      - [[#自动读新配置][自动读新配置]]
+      - [[#Advertising appender][Advertising appender]]
+      - [[#配置logger][配置logger]]
+    - [[#Web 应用][Web 应用]]
+    - [[#Lookups][Lookups]]
+    - [[#Filters][Filters]]
+    - [[#Appenders][Appenders]]
+    - [[#Layouts][Layouts]]
+    - [[#JMX][JMX]]
+- [[#OpenWRT][OpenWRT]]
+  - [[#分区][分区]]
+  - [[#备份][备份]]
+  - [[#挂载][挂载]]
+    - [[#fstab][fstab]]
+    - [[#USB][USB]]
+  - [[#扩容][扩容]]
+  - [[#自动翻墙][自动翻墙]]
+  - [[#编译][编译]]
+    - [[#交叉编译][交叉编译]]
+    - [[#编译wssh][编译wssh]]
 
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 * Shell
@@ -119,6 +131,9 @@
 #+BEGIN_SRC sh
   a=(Python Java C++ QBasic); echo ${a[((RANDOM % ${#a[*]}))]}
 #+END_SRC
+
+** map
+http://www.artificialworlds.net/blog/2012/10/17/bash-associative-array-examples/
 
 ** Array
 1. Defining
@@ -1582,3 +1597,177 @@ http://snikt.net/blog/2013/10/10/how-to-force-program-to-use-vpn-tunnel/
 *** Layouts
 
 *** JMX
+
+* OpenWRT
+
+** 分区
+[[https://wiki.openwrt.org/doc/uci/fstab][openwrt.org_link]]
+
+可以通过 =cat /proc/mtd= 来查看有什么分区, 并查找wiki上的对应路由器的
+flash layout来得知各个分区的具体内容.
+
+OpenWRT刷机的时候只会覆盖路由器的 *firmware* 分区. 且firmware分区下还
+是具体分为
+- /overlay :: 具体装的软件,配置都在这个分区. 恢复时,如果wrt固件的版本
+              不变,可以只恢复这个分区的内容. 该分区与rom组成 / 目录.
+- /rom :: 只包含最基本的必要文件,如busybox,iptables等. 这个分区下的文
+          件不可更改,在overlay里面创建同名的文件将会覆盖掉这个分区下的
+          文件.
+- kernel :: 本分区不挂载.启动的时候bootloader会把kernel加载到这个分区
+            下.
+** 备份
+[[https://wiki.openwrt.org/doc/howto/generic.backup][openwrt.org wiki]]
+
+可以使用这个脚本来备份各个分区
+[[file:/media/oldhome/leo/Program/linuxshell/backupwrt.sh::scp%20$USER@$ROUTER:/tmp/mtd*.backup%20$BACKUP_DIR][backupwrt.sh]]
+
+这是通过 dd if=/dev/mtdx of=/tmp/backup.bin 来实现的
+还原则可以使用以下命令
+=mtd -r write /tmp/firmware_backup.bin firmware=
+
+如果没有重刷固件,可以仅对/overlay打包并备份
+=tar -czvf /tmp/overlay_back.tar.gz /overlay=
+还原
+=rm -rvf /overlay/*=
+=cd / && tar -xzvf /tmp/overlay_bakcup.tar.gz=
+
+** 挂载
+
+*** fstab
+*** USB
+https://wiki.openwrt.org/doc/howto/usb.storage
+
+对于chaos calmer只需要安装
+kmod-storage
+kmod-fs-ext4
+
+插入U盘,然后就可以看见/dev/sda并挂载了.
+
+但是不知道为什么按照下面这个教程的顺序安装是不行的--看不见sda
+http://blog.csdn.net/u011641885/article/details/48130869
+
+- 速度比较
+  http://www.right.com.cn/forum/thread-119058-1-1.html
+  https://forum.openwrt.org/viewtopic.php?id=35902
+  https://forum.openwrt.org/viewtopic.php?id=27750
+
+- 带sync参数挂载可能会导致速度下降
+  https://forum.openwrt.org/viewtopic.php?id=27844 
+
+- 通过特别的格式分U盘可能可以提高速度
+  http://superuser.com/questions/602717/openwrt-usb-performance-on-tp-link-tl-wdr3500
+
+- lsusb可以看设备,dmesg可以查看系统日志
+
+- hdparm -Tt /dev/sda# 可以大概看速度
+
+- 如果使用transmission等软件,我们需要确保block-mount在这些进程启动之前
+  先完成. 可以通过以下脚本推迟其他进程的启动.
+  #+BEGIN_SRC sh
+    #!/bin/sh /etc/rc.common
+
+    START=41
+    TIMEOUT=60
+
+    start()
+    {
+            idx=0
+            res=`uci -q get fstab.@mount[$idx].enabled`
+            while [ $? -eq 0 ];
+            do
+                    if [ $res -ne 0 ]
+                    then
+                            res=`uci -q get fstab.@mount[$idx].wait4mounted`
+                            if [ $? -ne 0 ] || [ $res -ne 0 ]
+                            then
+                                    res=`uci -q get fstab.@mount[$idx].target`
+                                    mnt=$(printf '%s\n%s' $mnt $res)
+                            fi
+                    fi
+
+                    idx=$(($idx+1))
+                    res=`uci -q get fstab.@mount[$idx].enabled`
+            done
+
+            notReady="all"
+            timeout=$TIMEOUT
+
+            while [ -n "$notReady" ] && [ $timeout -gt 0 ];
+            do
+                    if [ "$notReady" != "all" ]
+                    then
+                            sleep 5
+                            timeout=$(($timeout-5))
+                    fi
+
+                    notReady=""
+
+                    for m in $mnt; do
+                            res=`mount | grep -iw $m`
+                            if [ -z "$res" ]
+                            then
+                                    notReady=$(printf '%s %s' $notReady $m)
+                            fi
+                    done
+            done
+
+            if [ -n "$notReady" ]
+            then
+                    echo "Following mount points were not ready during $TIMEOUT seconds: $notReady"
+                    exit 1
+            fi
+
+            exit 0
+    }
+  #+END_SRC
+  1. 复制到/etc/init.d/wait4mount
+  2. chmod 755
+  3. /etc/init.d/wait4mount enable
+  4. enabled=0 或者 wait4mount=0的分区都会被忽略
+
+** 扩容
+[[https://wiki.openwrt.org/doc/howto/extroot][openwrt.org wiki]]
+
+可以通过覆盖/overlay来扩充容量
+安装block-mount,并在/etc/config/fstab中声明要加载的U盘或额外的
+partition来重新挂载/overlay分区.
+
+通过以下命令复制当前/overlay内容到新分区
+=mount /dev/sda1 /mnt ; tar -C /overlay -cvf - . | tar -C /mnt -xf - ; umount /mnt=
+
+** 自动翻墙
+
+** 编译
+*** 交叉编译
+*** 编译wssh
+wssh依赖gevent-0.13.6和ws4py-0.2.4
+
+不知道为什么限制版本. 不清楚直接改setup.py里的install_requires会怎么样.
+
+pip也没有那个版本的ws4py, 需要到其他地方下载, [[https://github.com/progrium/wssh/issues/28][link]]
+pip install 'https://github.com/Lawouach/WebSocket-for-Python/archive/v0.2.4.zip#egg=ws4py-0.2.4'
+
+直接用pip安装gevent需要用到ccache_cc, 但在openwrt上没有这个命令 [[http://grokbase.com/t/zeromq/zeromq-dev/13c8zrnsjp/problem-installing-python-language-binding-on-openwrt][link]],
+因此需要自己交叉编译以下package
+   gevent -> greenlet -> libevent2,
+
+1. 自己编译一个对应自己路由器版本的Openwrt SDK, 并且需要预先把python相关
+的包编进SDK,
+1. 把 [[http://lesca.me/archives/compile-gevent-for-openwrt.html][这里]] 的Makefile添加到SDK的package目录下各自的子目录中
+2. 由于0.13.6的gevent有两个BUG会影响wssh运行,需要手动改代码,
+   1) 根据gevent的Makefile下载gevent的源码并解压
+   2) 根据https://github.com/mistio/mist.io/issues/434, 修改ssl.py
+   3) 根据https://github.com/gevent/gevent/issues/477, 修改ssl.py
+3. 重新压缩修改后的gevent为gevent-0.13.6.tar.gz
+4. 修改gevent的Makefile,使下载地址指向新生成的gz包(可以用
+   SimpleHTTPServer来做地址)
+5. 重新计算新gz包的md5值,替换掉gevent的Makefile里的旧值
+6. SDK根目录下执行make
+7. scp bin/xxx/base/xxx.ipk 到openwrt
+8. opkg install xxx.ipk
+9. python setup.py install 
+10. wssh wss://xxxxxxx
+
+
+
+
